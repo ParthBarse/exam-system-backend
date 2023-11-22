@@ -47,8 +47,9 @@ def home():
 @app.route("/getAllStudents", methods=["GET"])
 def getAllStudents():
     users = db["students_db"]
+    ans = []
     ans = users.find({},{'_id':0})
-    return ans
+    return jsonify({"students":ans})
 
 if __name__ == '__main__':
     app.run()
