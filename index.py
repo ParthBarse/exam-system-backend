@@ -48,7 +48,9 @@ def home():
 def getAllStudents():
     users = db["students_db"]
     ans = []
-    ans = users.find({},{'_id':0})
+    ans1 = users.find({},{'_id':0})
+    for data in ans1:
+        ans.append(data['name'])
     return jsonify({"students":ans})
 
 if __name__ == '__main__':
