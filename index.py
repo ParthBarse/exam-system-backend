@@ -220,21 +220,11 @@ def build_filter_query(params):
 
     return filter_query
 
-@app.route('/filterStudents', methods=['GET'])
+@app.route('/filterStudents', methods=['POST'])
 def filter_students():
     try:
         # Get filter parameters from request parameters
-        filter_params = {
-            'Name': request.args.get('Name'),
-            'name': request.args.get('name'),
-            'email': request.args.get('email'),
-            'city': request.args.get('city'),
-            'payment_mode': request.args.get('payment-mode'),
-            'cqy': request.args.get('cqy'),
-            'sid': request.args.get('sid'),
-            'pickup_point': request.args.get('pickup_point'),
-            'age-group': request.args.get('age-group')
-        }
+        filter_params = request.json
 
         # Build the filter query
         filter_query = build_filter_query(filter_params)
@@ -253,11 +243,6 @@ def filter_students():
 
 if __name__ == '__main__':
     app.run()
-
-
-
-
-
 
 
 
