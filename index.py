@@ -120,7 +120,7 @@ def register_student():
         return jsonify({"error": str(e)}), 500  # Internal Server Error
 
 
-@app.route('/updateStudent', methods=['POST'])
+@app.route('/updateStudent', methods=['PUT'])
 def update_student():
     try:
         data = request.form
