@@ -65,7 +65,7 @@ def calculate_age(dob):
 @app.route('/registerStudent', methods=['POST'])
 def register_student():
     try:
-        data = request.json
+        data = request.form
 
         # Validate required fields
         required_fields = ["first_name", "last_name", "email", "phn", "dob", "address", "fathers_occupation", "mothers_occupation", "how_you_got_to_know", "employee_who_reached_out_to_you", "district", "state", "pincode", "status"]
@@ -79,7 +79,6 @@ def register_student():
         # Calculate age based on the provided date of birth
         age = calculate_age(data["dob"])
 
-        # Construct the student document
         student = {
             "sid": sid,
             "first_name": data["first_name"],
@@ -109,10 +108,43 @@ def register_student():
         }
 
         # Store the student information in the MongoDB collection
-        students_db = db['students_db']
+        students_db = db["students_db"]
         students_db.insert_one(student)
 
         return jsonify({"message": "Student registered successfully", "sid": sid})
+
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400  # Bad Request
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+
+
+@app.route('/updateStudent', methods=['POST'])
+def update_student():
+    try:
+        data = request.form
+
+        # Check if uid is provided
+        if 'uid' not in data:
+            raise ValueError("Missing 'uid' in the request.")
+
+        # Find the student based on uid
+        students_db = db["students_db"]
+        student = students_db.find_one({"uid": data['uid']})
+
+        if not student:
+            return jsonify({"error": f"No student found with uid: {data['uid']}"}), 404  # Not Found
+
+        # Update the student information with the received data
+        for key, value in data.items():
+            if key != 'uid':
+                student[key] = value
+
+        # Update the student in the database
+        students_db.update_one({"uid": data['uid']}, {"$set": student})
+
+        return jsonify({"message": f"Student with uid {data['uid']} updated successfully"})
 
     except ValueError as ve:
         return jsonify({"error": str(ve)}), 400  # Bad Request
