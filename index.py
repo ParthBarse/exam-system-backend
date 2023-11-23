@@ -14,6 +14,7 @@ import pandas as pd
 from email.mime.text import MIMEText
 import smtplib
 import uuid
+import re
 
 app = Flask(__name__)
 CORS(app)
@@ -198,6 +199,54 @@ def get_student():
             return jsonify({"error": f"No student found with sid: {sid}"}), 404  # Not Found
 
         return jsonify({"student": student})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+
+def build_filter_query(params):
+    filter_query = {}
+
+    for key, value in params.items():
+        if value:
+            # For 'age-group', parse l_age and g_age and add to the filter query
+            if key == 'age-group':
+                l_age, g_age = value.split(',')
+                filter_query['age'] = {"$gte": int(l_age), "$lte": int(g_age)}
+
+            # For other parameters, use regex for partial matching
+            else:
+                filter_query[key] = re.compile(f".*{re.escape(value)}.*", re.IGNORECASE)
+
+    return filter_query
+
+@app.route('/filterStudents', methods=['GET'])
+def filter_students():
+    try:
+        # Get filter parameters from request parameters
+        filter_params = {
+            'Name': request.args.get('Name'),
+            'name': request.args.get('name'),
+            'email': request.args.get('email'),
+            'city': request.args.get('city'),
+            'payment_mode': request.args.get('payment-mode'),
+            'cqy': request.args.get('cqy'),
+            'sid': request.args.get('sid'),
+            'pickup_point': request.args.get('pickup_point'),
+            'age-group': request.args.get('age-group')
+        }
+
+        # Build the filter query
+        filter_query = build_filter_query(filter_params)
+
+        # Find students based on the filter query
+        students_db = db["students_db"]
+        students = students_db.find(filter_query, {"_id": 0})  # Exclude the _id field from the response
+
+        # Convert the cursor to a list of dictionaries for easier serialization
+        student_list = list(students)
+
+        return jsonify({"students": student_list})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
