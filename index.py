@@ -73,7 +73,18 @@ def register_student():
         #     if field not in data or not data[field]:
         #         raise ValueError(f"Missing or empty value for the required field: {field}")
 
-        # Generate a unique ID for the student using Usid
+        # Check if email and phn are not repeating
+        students_db = db["students_db"]
+        existing_student_email = students_db.find_one({"email": data["email"]})
+        existing_student_phn = students_db.find_one({"phn": data["phn"]})
+
+        if existing_student_email:
+            raise ValueError(f"Email '{data['email']}' is already registered.")
+
+        if existing_student_phn:
+            raise ValueError(f"Phone number '{data['phn']}' is already registered.")
+
+        # Generate a unique ID for the student using UUID
         sid = str(uuid.uuid4().hex)
 
         # Calculate age based on the provided date of birth
@@ -91,24 +102,18 @@ def register_student():
             "parents_email": data.get("parents_email", ""),
             "dob": data["dob"],
             "age": age,
-            "food_option": data.get("food_option", ""),
-            "dress_code": data.get("dress_code", ""),
             "address": data["address"],
-            "camp": data.get("camp", ""),
             "fathers_occupation": data["fathers_occupation"],
             "mothers_occupation": data["mothers_occupation"],
             "how_you_got_to_know": data["how_you_got_to_know"],
             "employee_who_reached_out_to_you": data["employee_who_reached_out_to_you"],
-            "landmark": data.get("landmark", ""),
-            "pick_up_point": data.get("pick_up_point", ""),
             "district": data["district"],
             "state": data["state"],
             "pincode": data["pincode"],
-            "status": data["status"]
+            "status": "Active"
         }
 
         # Store the student information in the MongoDB collection
-        students_db = db["students_db"]
         students_db.insert_one(student)
 
         return jsonify({"message": "Student registered successfully", "sid": sid})
