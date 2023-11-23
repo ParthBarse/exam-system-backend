@@ -151,6 +151,30 @@ def update_student():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+@app.route('/deleteStudent', methods=['DELETE'])
+def delete_student():
+    try:
+        students_db = db["students_db"]
+        # Get the sid from request parameters
+        sid = request.args.get('sid')
+
+        if not sid:
+            return jsonify({"error": "Missing 'sid' parameter in the request."}), 400  # Bad Request
+
+        # Find the student based on sid
+        student = students_db.find_one({"sid": sid})
+
+        if not student:
+            return jsonify({"error": f"No student found with sid: {sid}"}), 404  # Not Found
+
+        # Delete the student from the database
+        students_db.delete_one({"sid": sid})
+
+        return jsonify({"message": f"Student with sid {sid} deleted successfully"})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
 
 if __name__ == '__main__':
     app.run()
