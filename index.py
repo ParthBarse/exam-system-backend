@@ -73,7 +73,7 @@ def register_student():
             if field not in data or not data[field]:
                 raise ValueError(f"Missing or empty value for the required field: {field}")
 
-        # Generate a unique ID for the student using UUID
+        # Generate a unique ID for the student using Usid
         sid = str(uuid.uuid4().hex)
 
         # Calculate age based on the provided date of birth
@@ -125,26 +125,26 @@ def update_student():
     try:
         data = request.form
 
-        # Check if uid is provided
+        # Check if sid is provided
         if 'sid' not in data:
             raise ValueError("Missing 'sid' in the request.")
 
-        # Find the student based on uid
+        # Find the student based on sid
         students_db = db["students_db"]
         student = students_db.find_one({"sid": data['sid']})
 
         if not student:
-            return jsonify({"error": f"No student found with uid: {data['uid']}"}), 404  # Not Found
+            return jsonify({"error": f"No student found with sid: {data['sid']}"}), 404  # Not Found
 
         # Update the student information with the received data
         for key, value in data.items():
-            if key != 'uid':
+            if key != 'sid':
                 student[key] = value
 
         # Update the student in the database
-        students_db.update_one({"uid": data['uid']}, {"$set": student})
+        students_db.update_one({"sid": data['sid']}, {"$set": student})
 
-        return jsonify({"message": f"Student with uid {data['uid']} updated successfully"})
+        return jsonify({"message": f"Student with sid {data['sid']} updated successfully"})
 
     except ValueError as ve:
         return jsonify({"error": str(ve)}), 400  # Bad Request
