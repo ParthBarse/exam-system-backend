@@ -180,6 +180,27 @@ def delete_student():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+@app.route('/getStudent', methods=['GET'])
+def get_student():
+    try:
+        # Get the sid from request parameters
+        sid = request.args.get('sid')
+
+        if not sid:
+            return jsonify({"error": "Missing 'sid' parameter in the request."}), 400  # Bad Request
+
+        # Find the student based on sid
+        students_db = db["students_db"]
+        student = students_db.find_one({"sid": sid}, {"_id": 0})  # Exclude the _id field from the response
+
+        if not student:
+            return jsonify({"error": f"No student found with sid: {sid}"}), 404  # Not Found
+
+        return jsonify({"student": student})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
 
 if __name__ == '__main__':
     app.run()
