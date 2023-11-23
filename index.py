@@ -126,12 +126,12 @@ def update_student():
         data = request.form
 
         # Check if uid is provided
-        if 'uid' not in data:
-            raise ValueError("Missing 'uid' in the request.")
+        if 'sid' not in data:
+            raise ValueError("Missing 'sid' in the request.")
 
         # Find the student based on uid
         students_db = db["students_db"]
-        student = students_db.find_one({"uid": data['uid']})
+        student = students_db.find_one({"sid": data['sid']})
 
         if not student:
             return jsonify({"error": f"No student found with uid: {data['uid']}"}), 404  # Not Found
