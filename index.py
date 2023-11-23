@@ -68,10 +68,10 @@ def register_student():
         data = request.form
 
         # Validate required fields
-        required_fields = ["first_name", "last_name", "email", "phn", "dob", "address", "fathers_occupation", "mothers_occupation", "how_you_got_to_know", "employee_who_reached_out_to_you", "district", "state", "pincode", "status"]
-        for field in required_fields:
-            if field not in data or not data[field]:
-                raise ValueError(f"Missing or empty value for the required field: {field}")
+        # required_fields = ["first_name", "last_name", "email", "phn", "dob", "address", "fathers_occupation", "mothers_occupation", "how_you_got_to_know", "employee_who_reached_out_to_you", "district", "state", "pincode", "status"]
+        # for field in required_fields:
+        #     if field not in data or not data[field]:
+        #         raise ValueError(f"Missing or empty value for the required field: {field}")
 
         # Generate a unique ID for the student using Usid
         sid = str(uuid.uuid4().hex)
