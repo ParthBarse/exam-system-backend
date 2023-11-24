@@ -55,7 +55,7 @@ def getAllStudents():
     return jsonify({"students":ans})
 
 @app.route("/getInactiveStudents", methods=["GET"])
-def getAllStudents():
+def getInactiveStudents():
     users = db["students_db"]
     ans = []
     ans = list(users.find({"status":"inactive"},{'_id':0}))
