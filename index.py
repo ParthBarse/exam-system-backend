@@ -264,6 +264,7 @@ def add_camp():
             "camp_description": data["camp_description"],
             "fee_discount": float(data["fee_discount"]),  # assuming fee_discount is a float
             "discount_date": data["discount_date"],
+            "camp_status" : data["camp_status"],
             "final_fee": float(data["final_fee"])  # assuming final_fee is a float
         }
 
@@ -309,6 +310,65 @@ def update_camp():
 
     except ValueError as ve:
         return jsonify({"error": str(ve)}), 400  # Bad Request
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+@app.route('/getAllCamps', methods=['GET'])
+def get_all_camps():
+    try:
+        camps_db = db["camps_db"]
+        camps = camps_db.find({}, {"_id": 0})  # Exclude the _id field from the response
+
+        # Convert the cursor to a list of dictionaries for easier serialization
+        camp_list = list(camps)
+
+        return jsonify({"camps": camp_list})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+@app.route('/getCamp', methods=['GET'])
+def get_camp():
+    try:
+        # Get the camp_id from request parameters
+        camp_id = request.args.get('camp_id')
+
+        if not camp_id:
+            return jsonify({"error": "Missing 'camp_id' parameter in the request."}), 400  # Bad Request
+
+        # Find the camp based on camp_id
+        camps_db = db["camps_db"]
+        camp = camps_db.find_one({"camp_id": camp_id}, {"_id": 0})  # Exclude the _id field from the response
+
+        if not camp:
+            return jsonify({"error": f"No camp found with camp_id: {camp_id}"}), 404  # Not Found
+
+        return jsonify({"camp": camp})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+@app.route('/deleteCamp', methods=['DELETE'])
+def delete_camp():
+    try:
+        # Get the camp_id from request parameters
+        camp_id = request.args.get('camp_id')
+
+        if not camp_id:
+            return jsonify({"error": "Missing 'camp_id' parameter in the request."}), 400  # Bad Request
+
+        # Find the camp based on camp_id
+        camps_db = db["camps_db"]
+        camp = camps_db.find_one({"camp_id": camp_id})
+
+        if not camp:
+            return jsonify({"error": f"No camp found with camp_id: {camp_id}"}), 404  # Not Found
+
+        # Delete the camp from the database
+        camps_db.delete_one({"camp_id": camp_id})
+
+        return jsonify({"message": f"Camp with camp_id {camp_id} deleted successfully"})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
