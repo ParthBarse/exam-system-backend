@@ -54,6 +54,13 @@ def getAllStudents():
     ans = list(users.find({},{'_id':0}))
     return jsonify({"students":ans})
 
+@app.route("/getInactiveStudents", methods=["GET"])
+def getAllStudents():
+    users = db["students_db"]
+    ans = []
+    ans = list(users.find({"status":"inactive"},{'_id':0}))
+    return jsonify({"students":ans})
+
 def calculate_age(dob):
     try:
         birth_date = datetime.strptime(dob, "%d-%m-%Y")
