@@ -279,7 +279,7 @@ def add_camp():
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
     
-@app.route('/updateCamp', methods=['POST'])
+@app.route('/updateCamp', methods=['PUT'])
 def update_camp():
     try:
         data = request.form
