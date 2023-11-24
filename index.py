@@ -240,6 +240,78 @@ def filter_students():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+@app.route('/addCamp', methods=['POST'])
+def add_camp():
+    try:
+        data = request.form
+
+        # Validate required fields
+        # required_fields = ["camp_name", "chess_prefix", "camp_place", "camp_fee", "camp_description", "fee_discount", "discount_date", "final_fee"]
+        # for field in required_fields:
+        #     if field not in data or not data[field]:
+        #         raise ValueError(f"Missing or empty value for the required field: {field}")
+
+        # Generate a unique ID for the camp using UUID
+        camp_id = str(uuid.uuid4().hex)
+
+        camp = {
+            "camp_id": camp_id,
+            "camp_name": data["camp_name"],
+            "chess_prefix": data["chess_prefix"],
+            "camp_place": data["camp_place"],
+            "camp_fee": float(data["camp_fee"]),  # assuming camp_fee is a float
+            "camp_description": data["camp_description"],
+            "fee_discount": float(data["fee_discount"]),  # assuming fee_discount is a float
+            "discount_date": data["discount_date"],
+            "final_fee": float(data["final_fee"])  # assuming final_fee is a float
+        }
+
+        # Store the camp information in the MongoDB collection
+        camps_db = db["camps_db"]
+        camps_db.insert_one(camp)
+
+        return jsonify({"message": "Camp added successfully", "camp_id": camp_id})
+
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400  # Bad Request
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+@app.route('/updateCamp', methods=['POST'])
+def update_camp():
+    try:
+        data = request.form
+
+        # Check if camp_id is provided
+        if 'camp_id' not in data:
+            raise ValueError("Missing 'camp_id' in the request.")
+
+        # Find the camp based on camp_id
+        camps_db = db["camps_db"]
+        camp = camps_db.find_one({"camp_id": data['camp_id']})
+
+        if not camp:
+            return jsonify({"error": f"No camp found with camp_id: {data['camp_id']}"}), 404  # Not Found
+
+        # Update the camp information with the received data
+        for key, value in data.items():
+            if key != 'camp_id':
+                # If the value is provided, update the field; otherwise, keep the existing value
+                if value:
+                    camp[key] = float(value) if key.endswith('_fee') else value
+
+        # Update the camp in the database
+        camps_db.update_one({"camp_id": data['camp_id']}, {"$set": camp})
+
+        return jsonify({"message": f"Camp with camp_id {data['camp_id']} updated successfully"})
+
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400  # Bad Request
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
 
 if __name__ == '__main__':
     app.run()
