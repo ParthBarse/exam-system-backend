@@ -392,8 +392,8 @@ def add_batch():
                 raise ValueError(f"Missing or empty value for the required field: {field}")
 
         # Parse start_date and end_date to datetime objects
-        start_date = datetime.strptime(data["start_date"], "%d-%m-%Y")
-        end_date = datetime.strptime(data["end_date"], "%d-%m-%Y")
+        start_date = data["start_date"]
+        end_date = data["end_date"]
 
         # Generate a unique ID for the batch using UUID
         batch_id = str(uuid.uuid4().hex)
@@ -418,6 +418,106 @@ def add_batch():
 
     except ValueError as ve:
         return jsonify({"error": str(ve)}), 400  # Bad Request
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+
+@app.route('/updateBatch', methods=['POST'])
+def update_batch():
+    try:
+        data = request.form
+
+        # Check if batch_id is provided
+        if 'batch_id' not in data:
+            raise ValueError("Missing 'batch_id' in the request.")
+
+        # Find the batch based on batch_id
+        batches_db = db["batches_db"]
+        batch = batches_db.find_one({"batch_id": data['batch_id']})
+
+        if not batch:
+            return jsonify({"error": f"No batch found with batch_id: {data['batch_id']}"}), 404  # Not Found
+
+        # Update the batch information with the received data
+        for key, value in data.items():
+            if key != 'batch_id':
+                # If the value is provided, update the field; otherwise, keep the existing value
+                if value:
+                    batch[key] = int(value) if key == 'batch_intake' else value
+
+        # Update the batch in the database
+        batches_db.update_one({"batch_id": data['batch_id']}, {"$set": batch})
+
+        return jsonify({"message": f"Batch with batch_id {data['batch_id']} updated successfully"})
+
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400  # Bad Request
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+@app.route('/getBatches', methods=['GET'])
+def get_batches():
+    try:
+        # Get the camp_id from request parameters
+        camp_id = request.args.get('camp_id')
+
+        if not camp_id:
+            return jsonify({"error": "Missing 'camp_id' parameter in the request."}), 400  # Bad Request
+
+        # Find batches based on camp_id
+        batches_db = db["batches_db"]
+        batches = batches_db.find({"camp_id": camp_id}, {"_id": 0})  # Exclude the _id field from the response
+
+        # Convert the cursor to a list of dictionaries for easier serialization
+        batch_list = list(batches)
+
+        return jsonify({"batches": batch_list})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+@app.route('/getBatch', methods=['GET'])
+def get_batch():
+    try:
+        # Get the batch_id from request parameters
+        batch_id = request.args.get('batch_id')
+
+        if not batch_id:
+            return jsonify({"error": "Missing 'batch_id' parameter in the request."}), 400  # Bad Request
+
+        # Find the batch based on batch_id
+        batches_db = db["batches_db"]
+        batch = batches_db.find_one({"batch_id": batch_id}, {"_id": 0})  # Exclude the _id field from the response
+
+        if not batch:
+            return jsonify({"error": f"No batch found with batch_id: {batch_id}"}), 404  # Not Found
+
+        return jsonify({"batch": batch})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+@app.route('/deleteBatch', methods=['DELETE'])
+def delete_batch():
+    try:
+        # Get the batch_id from request parameters
+        batch_id = request.args.get('batch_id')
+
+        if not batch_id:
+            return jsonify({"error": "Missing 'batch_id' parameter in the request."}), 400  # Bad Request
+
+        # Find the batch based on batch_id
+        batches_db = db["batches_db"]
+        batch = batches_db.find_one({"batch_id": batch_id})
+
+        if not batch:
+            return jsonify({"error": f"No batch found with batch_id: {batch_id}"}), 404  # Not Found
+
+        # Delete the batch from the database
+        batches_db.delete_one({"batch_id": batch_id})
+
+        return jsonify({"message": f"Batch with batch_id {batch_id} deleted successfully"})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
