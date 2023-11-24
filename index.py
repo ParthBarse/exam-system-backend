@@ -379,6 +379,48 @@ def delete_camp():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+@app.route('/addBatch', methods=['POST'])
+def add_batch():
+    try:
+        data = request.form
+
+        # Validate required fields
+        required_fields = ["batch_name", "start_date", "end_date", "company", "duration", "batch_intake", "camp_id"]
+        for field in required_fields:
+            if field not in data or not data[field]:
+                raise ValueError(f"Missing or empty value for the required field: {field}")
+
+        # Parse start_date and end_date to datetime objects
+        start_date = datetime.strptime(data["start_date"], "%d-%m-%Y")
+        end_date = datetime.strptime(data["end_date"], "%d-%m-%Y")
+
+        # Generate a unique ID for the batch using UUID
+        batch_id = str(uuid.uuid4().hex)
+
+        batch = {
+            "batch_id": batch_id,
+            "batch_name": data["batch_name"],
+            "start_date": start_date,
+            "end_date": end_date,
+            "company": data["company"],
+            "duration": data["duration"],
+            "batch_intake": int(data["batch_intake"]),
+            "students_registered": 0,
+            "camp_id": data["camp_id"]
+        }
+
+        # Store the batch information in the MongoDB collection
+        batches_db = db["batches_db"]
+        batches_db.insert_one(batch)
+
+        return jsonify({"message": "Batch added successfully", "batch_id": batch_id})
+
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400  # Bad Request
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
 
 if __name__ == '__main__':
     app.run()
