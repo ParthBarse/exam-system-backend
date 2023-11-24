@@ -98,11 +98,11 @@ def register_student():
             "last_name": data["last_name"],
             "parents_name": data.get("parents_name", ""),
             "email": data["email"],
-            "phn": data["phn"],
+            "phn": str(data["phn"]),
             "parents_phn": data.get("parents_phn", ""),
             "parents_email": data.get("parents_email", ""),
             "dob": data["dob"],
-            "age": age,
+            "age": str(age),
             "address": data["address"],
             "fathers_occupation": data["fathers_occupation"],
             "mothers_occupation": data["mothers_occupation"],
@@ -110,7 +110,7 @@ def register_student():
             "employee_who_reached_out_to_you": data["employee_who_reached_out_to_you"],
             "district": data["district"],
             "state": data["state"],
-            "pincode": data["pincode"],
+            "pincode": str(data["pincode"]),
             "status": "Active"
         }
 
