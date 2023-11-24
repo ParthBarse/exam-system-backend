@@ -465,14 +465,14 @@ def update_batch():
 def get_batches():
     try:
         # Get the camp_id from request parameters
-        camp_name = request.args.get('camp_name')
+        camp_id = request.args.get('camp_id')
 
-        if not camp_name:
-            return jsonify({"error": "Missing 'camp_name' parameter in the request."}), 400  # Bad Request
+        if not camp_id:
+            return jsonify({"error": "Missing 'camp_id' parameter in the request."}), 400  # Bad Request
 
-        # Find batches based on camp_name
+        # Find batches based on camp_id
         batches_db = db["batches_db"]
-        batches = batches_db.find({"camp_name": camp_name}, {"_id": 0})  # Exclude the _id field from the response
+        batches = batches_db.find({"camp_id": camp_id}, {"_id": 0})  # Exclude the _id field from the response
 
         # Convert the cursor to a list of dictionaries for easier serialization
         batch_list = list(batches)
