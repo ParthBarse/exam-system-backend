@@ -75,12 +75,6 @@ def register_student():
     try:
         data = request.form
 
-        # Validate required fields
-        # required_fields = ["first_name", "last_name", "email", "phn", "dob", "address", "fathers_occupation", "mothers_occupation", "how_you_got_to_know", "employee_who_reached_out_to_you", "district", "state", "pincode", "status"]
-        # for field in required_fields:
-        #     if field not in data or not data[field]:
-        #         raise ValueError(f"Missing or empty value for the required field: {field}")
-
         # Check if email and phn are not repeating
         students_db = db["students_db"]
         existing_student_email = students_db.find_one({"email": data["email"]})
@@ -118,7 +112,18 @@ def register_student():
             "district": data["district"],
             "state": data["state"],
             "pincode": str(data["pincode"]),
-            "status": "Active"
+            "status": "Active",
+            "camp_id": data.get("camp_id", ""),
+            "camp_category": data.get("camp_category", ""),
+            "batch_id": data.get("batch_id", ""),
+            "food_option": data.get("food_option", ""),
+            "dress_code": data.get("dress_code", ""),
+            "pick_up_point": data.get("pick_up_point", ""),
+            "height": data.get("height", ""),
+            "weight": data.get("weight", ""),
+            "blood_group": data.get("blood_group", ""),
+            "payment_option": data.get("payment_option", ""),
+            "payment_status": data.get("payment_status", "")
         }
 
         # Store the student information in the MongoDB collection
@@ -460,14 +465,14 @@ def update_batch():
 def get_batches():
     try:
         # Get the camp_id from request parameters
-        camp_id = request.args.get('camp_id')
+        camp_name = request.args.get('camp_name')
 
-        if not camp_id:
-            return jsonify({"error": "Missing 'camp_id' parameter in the request."}), 400  # Bad Request
+        if not camp_name:
+            return jsonify({"error": "Missing 'camp_name' parameter in the request."}), 400  # Bad Request
 
-        # Find batches based on camp_id
+        # Find batches based on camp_name
         batches_db = db["batches_db"]
-        batches = batches_db.find({"camp_id": camp_id}, {"_id": 0})  # Exclude the _id field from the response
+        batches = batches_db.find({"camp_name": camp_name}, {"_id": 0})  # Exclude the _id field from the response
 
         # Convert the cursor to a list of dictionaries for easier serialization
         batch_list = list(batches)
