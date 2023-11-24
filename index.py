@@ -123,7 +123,7 @@ def register_student():
             "weight": data.get("weight", ""),
             "blood_group": data.get("blood_group", ""),
             "payment_option": data.get("payment_option", ""),
-            "payment_status": data.get("payment_status", "")
+            "payment_status": data.get("payment_status", "Pending")
         }
 
         # Store the student information in the MongoDB collection
@@ -210,7 +210,30 @@ def get_student():
         if not student:
             return jsonify({"error": f"No student found with sid: {sid}"}), 404  # Not Found
 
-        return jsonify({"student": student})
+        # If camp_id and batch_id are available in the student data, fetch additional information
+        camp_id = student.get("camp_id", "")
+        batch_id = student.get("batch_id", "")
+
+        # Fetch camp details if camp_id is present
+        camp_details = {}
+        if camp_id:
+            camps_db = db["camps_db"]
+            camp_details = camps_db.find_one({"camp_id": camp_id}, {"_id": 0})
+
+        # Fetch batch details if batch_id is present
+        batch_details = {}
+        if batch_id:
+            batches_db = db["batches_db"]
+            batch_details = batches_db.find_one({"batch_id": batch_id}, {"_id": 0})
+
+        # Combine student, camp, and batch details
+        response_data = {
+            "student": student,
+            "camp_details": camp_details,
+            "batch_details": batch_details
+        }
+
+        return jsonify(response_data)
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
