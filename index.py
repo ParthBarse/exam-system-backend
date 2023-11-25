@@ -131,9 +131,17 @@ def register_student():
         }
 
         # Store the student information in the MongoDB collection
-        students_db.insert_one(student)
+        batches_db = db["batches_db"]
+        batch = batches_db.find_one({"batch_id":data.get("batch_id")}, {"_id":0})
+        if batch:
+            if int(batch["students_registered"]) >= int(batch["batch_intake"]):
+                students_db.insert_one(student)
+                batches_db.update_one({"batch_id": data.get("batch_id")}, {"$set": {"students_registered":int(batch["students_registered"]+1)}})
+                return jsonify({"message": "Student registered successfully", "sid": sid})
+            else:
+                return jsonify({"message": "Batch is Already Full !"})
 
-        return jsonify({"message": "Student registered successfully", "sid": sid})
+        # return jsonify({"message": "Student registered successfully", "sid": sid})
 
     except ValueError as ve:
         return jsonify({"error": str(ve)}), 400  # Bad Request
@@ -164,9 +172,19 @@ def update_student():
                 student[key] = value
 
         # Update the student in the database
-        students_db.update_one({"sid": data['sid']}, {"$set": student})
-
-        return jsonify({"message": f"Student with sid {data['sid']} updated successfully"})
+        batches_db = db["batches_db"]
+        batch = batches_db.find_one({"batch_id":data.get("batch_id")}, {"_id":0})
+        if batch:
+            if int(batch["students_registered"]) >= int(batch["batch_intake"]):
+                students_db.update_one({"sid": data['sid']}, {"$set": student})
+                return jsonify({"message": f"Student with sid {data['sid']} updated successfully"})
+            else:
+                return jsonify({"message": "Batch is Already Full !"})
+        else:
+            return jsonify({"message": "Batch not Found !"})
+            
+        # students_db.update_one({"sid": data['sid']}, {"$set": student})
+        # return jsonify({"message": f"Student with sid {data['sid']} updated successfully"})
 
     except ValueError as ve:
         return jsonify({"error": str(ve)}), 400  # Bad Request
@@ -588,6 +606,63 @@ def activate_student():
         students_db.update_one({"sid": sid}, {"$set": {"status": "active"}})
 
         return jsonify({"message": f"Student with sid {sid} is now active."})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+@app.route('/generateReport', methods=['POST'])
+def generate_report():
+    try:
+        data = request.get_json()
+
+        # Get parameters from the JSON data
+        sid = data.get('sid')
+        rank = data.get('rank')
+        report_date = data.get('report_date')
+        report_camp_name = data.get('report_camp_name')
+        in_charge = data.get('in_charge')
+        cqy = data.get('cqy')
+        discipline = data.get('discipline')
+        physical_fitness = data.get('physical_fitness')
+        courage = data.get('courage')
+        leadership = data.get('leadership')
+        initiative = data.get('initiative')
+        interpersonal_relations = data.get('interpersonal_relations')
+        team_building = data.get('team_building')
+        training = data.get('training')
+
+        # Check if sid is provided
+        if not sid:
+            return jsonify({"error": "Missing 'sid' parameter in the request."}), 400  # Bad Request
+
+        # Find the student based on sid
+        students_db = db["students_db"]
+        student = students_db.find_one({"sid": sid}, {"_id": 0})
+
+        if not student:
+            return jsonify({"error": f"No student found with sid: {sid}"}), 404  # Not Found
+
+        # Update the student record with the report details
+        students_db.update_one(
+            {"sid": sid},
+            {"$set": {
+                "rank": rank,
+                "report_date": report_date,
+                "report_camp_name": report_camp_name,
+                "in_charge": in_charge,
+                "cqy": cqy,
+                "discipline": discipline,
+                "physical_fitness": physical_fitness,
+                "courage": courage,
+                "leadership": leadership,
+                "initiative": initiative,
+                "interpersonal_relations": interpersonal_relations,
+                "team_building": team_building,
+                "training": training
+            }}
+        )
+
+        return jsonify({"message": f"Report generated for student with sid {sid}."})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
