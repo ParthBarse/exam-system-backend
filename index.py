@@ -123,6 +123,10 @@ def register_student():
             "weight": data.get("weight", ""),
             "blood_group": data.get("blood_group", ""),
             "payment_option": data.get("payment_option", ""),
+            "payment_option": data.get("school_name", ""),
+            "payment_option": data.get("gender", ""),
+            "payment_option": data.get("standard", ""),
+            "payment_option": data.get("wp_no", ""),
             "payment_status": data.get("payment_status", "Pending")
         }
 
