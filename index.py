@@ -494,7 +494,7 @@ def update_batch():
         # Update the batch in the database
         batches_db.update_one({"batch_id": data['batch_id']}, {"$set": batch})
 
-        return jsonify({"message": f"Batch with batch_id {data['batch_id']} updated successfully"})
+        return jsonify({"message": f"Batch with batch_id {data['batch_id']} updated successfully", "camp_id":batch['camp_id']})
 
     except ValueError as ve:
         return jsonify({"error": str(ve)}), 400  # Bad Request
