@@ -549,6 +549,30 @@ def delete_batch():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+@app.route('/activateStudent', methods=['GET'])
+def activate_student():
+    try:
+        # Get the sid from request parameters
+        sid = request.args.get('sid')
+
+        if not sid:
+            return jsonify({"error": "Missing 'sid' parameter in the request."}), 400  # Bad Request
+
+        # Find the student based on sid
+        students_db = db["students_db"]
+        student = students_db.find_one({"sid": sid}, {"_id": 0})
+
+        if not student:
+            return jsonify({"error": f"No student found with sid: {sid}"}), 404  # Not Found
+
+        # Update the status to "Active"
+        students_db.update_one({"sid": sid}, {"$set": {"status": "active"}})
+
+        return jsonify({"message": f"Student with sid {sid} is now active."})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
 
 if __name__ == '__main__':
     app.run()
