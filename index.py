@@ -367,6 +367,20 @@ def get_all_camps():
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
     
+@app.route('/getAllBatches', methods=['GET'])
+def get_all_batches():
+    try:
+        batches_db = db["batches_db"]
+        batches = batches_db.find({}, {"_id": 0})  # Exclude the _id field from the response
+
+        # Convert the cursor to a list of dictionaries for easier serialization
+        batches_list = list(batches)
+
+        return jsonify({"camps": batches_list})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
 @app.route('/getCamp', methods=['GET'])
 def get_camp():
     try:
