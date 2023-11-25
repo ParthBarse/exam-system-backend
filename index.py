@@ -175,13 +175,13 @@ def update_student():
         batches_db = db["batches_db"]
         batch = batches_db.find_one({"batch_id":data.get("batch_id")}, {"_id":0})
         if batch:
-            if int(batch["students_registered"]) >= int(batch["batch_intake"]):
+            if int(batch["students_registered"]) <= int(batch["batch_intake"]):
                 students_db.update_one({"sid": data['sid']}, {"$set": student})
                 return jsonify({"message": f"Student with sid {data['sid']} updated successfully"})
             else:
-                return jsonify({"message": "Batch is Already Full !"})
+                return jsonify({"message": "Batch is Already Full !"},400)
         else:
-            return jsonify({"message": "Batch not Found !"})
+            return jsonify({"message": "Batch not Found !"},400)
             
         # students_db.update_one({"sid": data['sid']}, {"$set": student})
         # return jsonify({"message": f"Student with sid {data['sid']} updated successfully"})
