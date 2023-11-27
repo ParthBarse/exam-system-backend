@@ -666,6 +666,59 @@ def generate_report():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+from werkzeug.security import generate_password_hash, check_password_hash
+
+@app.route('/addAdmin', methods=['POST'])
+def add_admin():
+    try:
+        data = request.get_json()
+
+        # Get parameters from the JSON data
+        username = data.get('username')
+        password = data.get('password')
+        email = data.get('email')
+
+        # Check if username and password are provided
+        if not username or not password:
+            return jsonify({"error": "Username and password are required."}), 400  # Bad Request
+
+        # Hash the password before storing it
+        hashed_password = generate_password_hash(password, method='sha256')
+
+        # Store admin information in the MongoDB collection
+        admins_db = db['admins_db']
+        admins_db.insert_one({"username": username, "password": hashed_password, "email": email})
+
+        return jsonify({"message": "Admin added successfully."})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+
+@app.route('/loginAdmin', methods=['POST'])
+def login_admin():
+    try:
+        data = request.get_json()
+
+        # Get parameters from the JSON data
+        username = data.get('username')
+        password = data.get('password')
+
+        # Check if username and password are provided
+        if not username or not password:
+            return jsonify({"error": "Username and password are required."}), 400  # Bad Request
+
+        # Find the admin based on username
+        admins_db = db['admins_db']
+        admin = admins_db.find_one({"username": username}, {"_id": 0})
+
+        if not admin or not check_password_hash(admin.get("password", ""), password):
+            return jsonify({"error": "Invalid username or password."}), 401  # Unauthorized
+
+        return jsonify({"message": "Login successful."})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
 
 if __name__ == '__main__':
     app.run()
