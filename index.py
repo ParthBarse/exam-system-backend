@@ -675,9 +675,11 @@ def add_admin():
         data = request.get_json()
 
         # Get parameters from the JSON data
+        admins_db = db['admins_db']
         username = data.get('username')
         password = data.get('password')
         email = data.get('email')
+        admin_id = str(uuid.uuid4().hex)
         admin = admins_db.find_one({"username": username}, {"_id": 0})
         if admin:
             return jsonify({"success":False,"error":"Username Already Exist"})
@@ -691,7 +693,7 @@ def add_admin():
 
         # Store admin information in the MongoDB collection
         admins_db = db['admins_db']
-        admins_db.insert_one({"username": username, "password": hashed_password, "email": email})
+        admins_db.insert_one({"username": username, "password": hashed_password, "email": email, "admin_id":admin_id})
 
         return jsonify({"message": "Admin added successfully.","success":True})
 
@@ -718,7 +720,7 @@ def login_admin():
         if not admin or not check_password_hash(admin.get("password", ""), password):
             return jsonify({"error": "Invalid username or password."}), 401  # Unauthorized
 
-        return jsonify({"message": "Login successful.","success":True})
+        return jsonify({"message": "Login successful.","success":True,"admin_id":admin['admin_id']})
 
     except Exception as e:
         return jsonify({"error": str(e),"success":False}), 500  # Internal Server Error
