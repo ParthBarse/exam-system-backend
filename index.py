@@ -678,19 +678,22 @@ def add_admin():
         username = data.get('username')
         password = data.get('password')
         email = data.get('email')
+        admin = admins_db.find_one({"username": username}, {"_id": 0})
+        if admin:
+            return jsonify({"success":False,"error":"Username Already Exist"})
 
         # Check if username and password are provided
         if not username or not password:
             return jsonify({"error": "Username and password are required."}), 400  # Bad Request
 
         # Hash the password before storing it
-        hashed_password = generate_password_hash(password, method='sha256')
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
 
         # Store admin information in the MongoDB collection
         admins_db = db['admins_db']
         admins_db.insert_one({"username": username, "password": hashed_password, "email": email})
 
-        return jsonify({"message": "Admin added successfully."})
+        return jsonify({"message": "Admin added successfully.","success":True})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
@@ -706,7 +709,7 @@ def login_admin():
 
         # Check if username and password are provided
         if not username or not password:
-            return jsonify({"error": "Username and password are required."}), 400  # Bad Request
+            return jsonify({"error": "Username and password are required.","success":False}), 400  # Bad Request
 
         # Find the admin based on username
         admins_db = db['admins_db']
@@ -715,10 +718,10 @@ def login_admin():
         if not admin or not check_password_hash(admin.get("password", ""), password):
             return jsonify({"error": "Invalid username or password."}), 401  # Unauthorized
 
-        return jsonify({"message": "Login successful."})
+        return jsonify({"message": "Login successful.","success":True})
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500  # Internal Server Error
+        return jsonify({"error": str(e),"success":False}), 500  # Internal Server Error
 
 if __name__ == '__main__':
     app.run()
