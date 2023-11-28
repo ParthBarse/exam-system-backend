@@ -134,7 +134,7 @@ def register_student():
         batches_db = db["batches_db"]
         batch = batches_db.find_one({"batch_id":data.get("batch_id")}, {"_id":0})
         if batch:
-            if int(batch["students_registered"]) >= int(batch["batch_intake"]):
+            if int(batch["students_registered"]) <= int(batch["batch_intake"]):
                 students_db.insert_one(student)
                 batches_db.update_one({"batch_id": data.get("batch_id")}, {"$set": {"students_registered":int(batch["students_registered"]+1)}})
                 return jsonify({"message": "Student registered successfully", "sid": sid})
@@ -695,7 +695,7 @@ def add_admin():
         admins_db = db['admins_db']
         admins_db.insert_one({"username": username, "password": hashed_password, "email": email, "admin_id":admin_id})
 
-        return jsonify({"message": "Admin added successfully.","success":True})
+        return jsonify({"message": "Admin added successfully.","success":True, "admin_id":admin_id})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
