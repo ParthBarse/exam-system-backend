@@ -58,7 +58,7 @@ def getAllStudents():
 def getInactiveStudents():
     users = db["students_db"]
     ans = []
-    ans = list(users.find({"status":"inactive"},{'_id':0}))
+    ans = list(users.find({"status": {"$ne": "Active"}}, {"_id": 0}))
     return jsonify({"students":ans})
 
 def calculate_age(dob):
@@ -91,6 +91,19 @@ def register_student():
 
         # Calculate age based on the provided date of birth
         age = calculate_age(data["dob"])
+        if age>=7 and age<=11 and data.get("gender") == "male":
+            company = "ALPHA"
+        elif age>=12 and age<=16 and data.get("gender") == "male":
+            company = "BRAVO"
+        elif age>=17 and age<=21 and data.get("gender") == "male":
+            company = "DELTA"
+        elif age>=7 and age<=11 and data.get("gender") == "female":
+            company = "CHARLEY"
+        elif age>=12 and age<=16 and data.get("gender") == "female":
+            company = "ECO"
+        elif age>=17 and age<=21 and data.get("gender") == "female":
+            company = "FOXFORD"
+        
 
         student = {
             "sid": sid,
@@ -104,6 +117,7 @@ def register_student():
             "parents_email": data.get("parents_email", ""),
             "dob": data["dob"],
             "age": str(age),
+            "company":company,
             "address": data["address"],
             "fathers_occupation": data["fathers_occupation"],
             "mothers_occupation": data["mothers_occupation"],
@@ -603,9 +617,9 @@ def activate_student():
             return jsonify({"error": f"No student found with sid: {sid}"}), 404  # Not Found
 
         # Update the status to "Active"
-        students_db.update_one({"sid": sid}, {"$set": {"status": "active"}})
+        students_db.update_one({"sid": sid}, {"$set": {"status": "Active"}})
 
-        return jsonify({"message": f"Student with sid {sid} is now active."})
+        return jsonify({"message": f"Student with sid {sid} is now Active."})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
@@ -724,6 +738,111 @@ def login_admin():
 
     except Exception as e:
         return jsonify({"error": str(e),"success":False}), 500  # Internal Server Error
+    
+@app.route('/getAllAdmin', methods=['GET'])
+def get_all_admin():
+    try:
+        # Retrieve all admin records from the MongoDB collection
+        admins_db = db["admins_db"]
+        admins = list(admins_db.find({}, {"_id": 0}))
+
+        return jsonify({"admins": admins})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+@app.route('/getStudentCounts', methods=['GET'])
+def get_student_counts():
+    try:
+        # Retrieve count of canceled students
+        total_students_count = db["students_db"].count_documents({})
+
+        active_students_count = db["students_db"].count_documents({"status": "Active"})
+
+        canceled_students_count = db["students_db"].count_documents({"status": "Cancle"})
+
+        # Retrieve count of refunded students
+        refunded_students_count = db["students_db"].count_documents({"status": "Refund"})
+
+        # Retrieve count of extended students
+        extended_students_count = db["students_db"].count_documents({"status": "Extend"})
+
+        return jsonify({
+            "active_students_count": active_students_count,
+            "canceled_students_count": canceled_students_count,
+            "refunded_students_count": refunded_students_count,
+            "extended_students_count": extended_students_count,
+            "total_students_count": total_students_count
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+@app.route('/getCanceledStudents', methods=['GET'])
+def get_canceled_students():
+    try:
+
+        canceled_students_count = db["students_db"].find({"status": "Cancle"})
+
+        return jsonify({
+            "canceled_students_count": canceled_students_count
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+@app.route('/getRefundStudents', methods=['GET'])
+def get_refund_students():
+    try:
+        # Retrieve count of refunded students
+        refunded_students_count = db["students_db"].find({"status": "Refund"})
+        return jsonify({
+            "refunded_students_count": refunded_students_count
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+@app.route('/getExtendedStudents', methods=['GET'])
+def get_extended_students():
+    try:
+
+        # Retrieve count of extended students
+        extended_students_count = db["students_db"].find({"status": "Extend"})
+
+        return jsonify({
+            "extended_students_count": extended_students_count
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+@app.route('/changeStatus', methods=['PUT'])
+def change_student_status():
+    try:
+        data = request.get_json()
+
+        # Check if sid and new_status are provided
+        if 'sid' not in data or 'new_status' not in data:
+            return jsonify({"error": "Both 'sid' and 'new_status' are required."}), 400  # Bad Request
+
+        # Find the student based on sid
+        students_db = db["students_db"]
+        student = students_db.find_one({"sid": data['sid']})
+
+        if not student:
+            return jsonify({"error": f"No student found with sid: {data['sid']}"}), 404  # Not Found
+
+        # Update the status of the student
+        students_db.update_one({"sid": data['sid']}, {"$set": {"status": data['new_status']}})
+
+        return jsonify({"message": f"Status for student with sid {data['sid']} updated to {data['new_status']} successfully"})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+
+    
+
 
 if __name__ == '__main__':
     app.run()
