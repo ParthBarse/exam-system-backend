@@ -956,7 +956,7 @@ def check_discount_code():
         if discount:
             return jsonify({"message": "Valid code", "discount_amount": discount["discount_amount"],"success":True})
         else:
-            return jsonify({"message": "Invalid code","success":False}, 400)
+            return jsonify({"message": "Invalid code","success":False})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
