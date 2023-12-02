@@ -781,8 +781,7 @@ def get_student_counts():
 @app.route('/getCanceledStudents', methods=['GET'])
 def get_canceled_students():
     try:
-
-        canceled_students_count = db["students_db"].find({"status": "Cancle"})
+        canceled_students_count = db["students_db"].find({"status": "Cancle"},{"_id":0})
 
         return jsonify({
             "canceled_students_count": canceled_students_count
@@ -795,7 +794,7 @@ def get_canceled_students():
 def get_refund_students():
     try:
         # Retrieve count of refunded students
-        refunded_students_count = db["students_db"].find({"status": "Refund"})
+        refunded_students_count = db["students_db"].find({"status": "Refund"},{"_id":0})
         return jsonify({
             "refunded_students_count": refunded_students_count
         })
@@ -808,7 +807,7 @@ def get_extended_students():
     try:
 
         # Retrieve count of extended students
-        extended_students_count = db["students_db"].find({"status": "Extend"})
+        extended_students_count = db["students_db"].find({"status": "Extend"},{"_id":0})
 
         return jsonify({
             "extended_students_count": extended_students_count
