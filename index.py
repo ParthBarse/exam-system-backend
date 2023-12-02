@@ -954,9 +954,9 @@ def check_discount_code():
         discount = discount_codes_db.find_one({"discount_code": data['discount_code']}, {"_id": 0, "discount_amount": 1})
 
         if discount:
-            return jsonify({"message": "Valid code", "discount_amount": discount["discount_amount"]})
+            return jsonify({"message": "Valid code", "discount_amount": discount["discount_amount"],"success":True})
         else:
-            return jsonify({"message": "Invalid code"}, 400)
+            return jsonify({"message": "Invalid code","success":False}, 400)
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
