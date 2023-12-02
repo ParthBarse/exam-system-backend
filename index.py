@@ -840,6 +840,108 @@ def change_student_status():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+#-----------------------------------------------------------------------------------
+
+@app.route('/addDiscountCodes', methods=['POST'])
+def add_discount_codes():
+    try:
+        data = request.get_json()
+
+        # Check if discount_code and discount_amount are provided
+        if 'discount_code' not in data or 'discount_amount' not in data:
+            return jsonify({"error": "Both 'discount_code' and 'discount_amount' are required."}), 400  # Bad Request
+
+        # Generate a unique ID for the discount using UUID
+        discount_id = str(uuid.uuid4().hex)
+
+        # Store discount code information in the MongoDB collection
+        discount_codes_db = db["discount_codes_db"]
+        discount_codes_db.insert_one({
+            "discount_id": discount_id,
+            "discount_code": data['discount_code'],
+            "discount_amount": data['discount_amount']
+        })
+
+        return jsonify({"message": f"Discount code '{data['discount_code']}' added successfully.", "discount_id": discount_id})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+
+@app.route('/getAllDiscounts', methods=['GET'])
+def get_all_discounts():
+    try:
+        discount_codes_db = db["discount_codes_db"]
+        discounts = list(discount_codes_db.find({}, {"_id": 0}))
+
+        return jsonify({"discounts": discounts})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+
+@app.route('/getDiscount', methods=['GET'])
+def get_discount():
+    try:
+        discount_id = request.args.get('discount_id')
+        if not discount_id:
+            return jsonify({"error": "Missing 'discount_id' parameter in the request."}), 400  # Bad Request
+
+        discount_codes_db = db["discount_codes_db"]
+        discount = discount_codes_db.find_one({"discount_id": discount_id}, {"_id": 0})
+
+        if not discount:
+            return jsonify({"error": f"No discount found with discount_id: {discount_id}"}), 404  # Not Found
+
+        return jsonify({"discount": discount})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+
+
+@app.route('/updateDiscount', methods=['PUT'])
+def update_discount():
+    try:
+        data = request.get_json()
+
+        # Check if discount_id and new_discount_code are provided
+        if 'discount_id' not in data or 'new_discount_code' not in data or "discount_amount" not in data:
+            return jsonify({"error": "Both 'discount_id' and 'new_discount_code' and 'discount_amount' are required."}), 400  # Bad Request
+
+        discount_codes_db = db["discount_codes_db"]
+        discount = discount_codes_db.find_one({"discount_id": data['discount_id']})
+
+        if not discount:
+            return jsonify({"error": f"No discount found with discount_id: {data['discount_id']}"}), 404  # Not Found
+
+        # Update the discount_code of the discount
+        discount_codes_db.update_one({"discount_id": data['discount_id']}, {"$set": {"discount_code": data['new_discount_code']},"discount_amount":data["discount_amount"]})
+
+        return jsonify({"message": f"Discount with discount_id {data['discount_id']} updated successfully"})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+
+@app.route('/deleteDiscount', methods=['DELETE'])
+def delete_discount():
+    try:
+        discount_id = request.args.get('discount_id')
+        if not discount_id:
+            return jsonify({"error": "Missing 'discount_id' parameter in the request."}), 400  # Bad Request
+
+        discount_codes_db = db["discount_codes_db"]
+        discount = discount_codes_db.find_one({"discount_id": discount_id})
+
+        if not discount:
+            return jsonify({"error": f"No discount found with discount_id: {discount_id}"}), 404  # Not Found
+
+        # Delete the discount from the database
+        discount_codes_db.delete_one({"discount_id": discount_id})
+
+        return jsonify({"message": f"Discount with discount_id {discount_id} deleted successfully"})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+
 
     
 
