@@ -940,10 +940,26 @@ def delete_discount():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
-
-
     
+@app.route('/checkDiscountCode', methods=['POST'])
+def check_discount_code():
+    try:
+        data = request.get_json()
 
+        # Check if discount_code is provided
+        if 'discount_code' not in data:
+            return jsonify({"error": "Missing 'discount_code' parameter in the request."}), 400  # Bad Request
+
+        discount_codes_db = db["discount_codes_db"]
+        discount = discount_codes_db.find_one({"discount_code": data['discount_code']}, {"_id": 0, "discount_amount": 1})
+
+        if discount:
+            return jsonify({"message": "Valid code", "discount_amount": discount["discount_amount"]})
+        else:
+            return jsonify({"message": "Invalid code"}, 400)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
 
 if __name__ == '__main__':
     app.run()
