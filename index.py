@@ -644,6 +644,7 @@ def generate_report():
         interpersonal_relations = data.get('interpersonal_relations')
         team_building = data.get('team_building')
         training = data.get('training')
+        remark = data.get('remark')
 
         # Check if sid is provided
         if not sid:
@@ -672,7 +673,8 @@ def generate_report():
                 "initiative": initiative,
                 "interpersonal_relations": interpersonal_relations,
                 "team_building": team_building,
-                "training": training
+                "training": training,
+                "remark": remark
             }}
         )
 
@@ -714,6 +716,41 @@ def add_admin():
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
 
+# @app.route('/loginAdmin', methods=['POST'])
+# def login_admin():
+#     try:
+#         data = request.get_json()
+
+#         # Get parameters from the JSON data
+#         username = data.get('username')
+#         password = data.get('password')
+
+#         # Check if username and password are provided
+#         if not username or not password:
+#             return jsonify({"error": "Username and password are required.","success":False}), 400  # Bad Request
+
+#         # Find the admin based on username
+#         admins_db = db['admins_db']
+#         admin = admins_db.find_one({"username": username}, {"_id": 0})
+
+#         if not admin or not check_password_hash(admin.get("password", ""), password):
+#             return jsonify({"error": "Invalid username or password."}), 401  # Unauthorized
+
+#         return jsonify({"message": "Login successful.","success":True,"admin_id":admin['admin_id']})
+
+#     except Exception as e:
+#         return jsonify({"error": str(e),"success":False}), 500  # Internal Server Error
+
+# Function to create a JWT token
+import jwt
+def create_jwt_token(admin_id):
+    payload = {
+        'admin_id': admin_id,
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1)  # Token expiration time
+    }
+    token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
+    return token.decode('utf-8')
+
 @app.route('/loginAdmin', methods=['POST'])
 def login_admin():
     try:
@@ -725,19 +762,23 @@ def login_admin():
 
         # Check if username and password are provided
         if not username or not password:
-            return jsonify({"error": "Username and password are required.","success":False}), 400  # Bad Request
+            return jsonify({"error": "Username and password are required.", "success": False}), 400  # Bad Request
 
         # Find the admin based on username
-        admins_db = db['admins_db']
+        admins_db = db["admins_db"]
         admin = admins_db.find_one({"username": username}, {"_id": 0})
 
         if not admin or not check_password_hash(admin.get("password", ""), password):
-            return jsonify({"error": "Invalid username or password."}), 401  # Unauthorized
+            return jsonify({"error": "Invalid username or password.", "success": False}), 401  # Unauthorized
 
-        return jsonify({"message": "Login successful.","success":True,"admin_id":admin['admin_id']})
+        # Generate JWT token
+        token = create_jwt_token(admin['admin_id'])
+
+        return jsonify({"message": "Login successful.", "success": True, "admin_id": admin['admin_id'], "token": token})
 
     except Exception as e:
-        return jsonify({"error": str(e),"success":False}), 500  # Internal Server Error
+        return jsonify({"error": str(e), "success": False}), 500  # Internal Server Error
+
     
 @app.route('/getAllAdmin', methods=['GET'])
 def get_all_admin():
