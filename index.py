@@ -10,7 +10,6 @@ from flask_cors import CORS
 from datetime import datetime
 import random
 import json
-import pandas as pd
 from email.mime.text import MIMEText
 import smtplib
 import uuid
