@@ -750,7 +750,7 @@ def create_jwt_token(admin_id):
         'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1)  # Token expiration time
     }
     token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
-    return token.decode('utf-8')
+    return token
 
 @app.route('/loginAdmin', methods=['POST'])
 def login_admin():
