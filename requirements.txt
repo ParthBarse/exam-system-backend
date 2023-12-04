@@ -3,4 +3,4 @@ flask-bcrypt
 flask-login
 flask-cors
 pymongo
-jwt
+PyJWT
