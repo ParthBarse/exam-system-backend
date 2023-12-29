@@ -340,7 +340,6 @@ def add_camp():
         camp = {
             "camp_id": camp_id,
             "camp_name": data["camp_name"],
-            "chess_prefix": data["chess_prefix"],
             "camp_place": data["camp_place"],
             "camp_fee": float(data["camp_fee"]),  # assuming camp_fee is a float
             "camp_description": data["camp_description"],
