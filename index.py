@@ -755,6 +755,7 @@ def add_admin():
 # Function to create a JWT token
 import jwt
 def create_jwt_token(admin_id):
+    import datetime
     payload = {
         'admin_id': admin_id,
         'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1)  # Token expiration time
