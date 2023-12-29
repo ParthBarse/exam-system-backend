@@ -157,15 +157,15 @@ def register_student():
         }
 
         # Store the student information in the MongoDB collection
-        batches_db = db["batches_db"]
-        batch = batches_db.find_one({"batch_id":data.get("batch_id")}, {"_id":0})
-        if batch:
-            if int(batch["students_registered"]) <= int(batch["batch_intake"]):
-                students_db.insert_one(student)
-                batches_db.update_one({"batch_id": data.get("batch_id")}, {"$set": {"students_registered":int(batch["students_registered"]+1)}})
-                return jsonify({"message": "Student registered successfully", "sid": sid})
-            else:
-                return jsonify({"message": "Batch is Already Full !"})
+        # batches_db = db["batches_db"]
+        # batch = batches_db.find_one({"batch_id":data.get("batch_id")}, {"_id":0})
+        # if batch:
+        #     if int(batch["students_registered"]) <= int(batch["batch_intake"]):
+        #         students_db.insert_one(student)
+        #         batches_db.update_one({"batch_id": data.get("batch_id")}, {"$set": {"students_registered":int(batch["students_registered"]+1)}})
+        #         return jsonify({"message": "Student registered successfully", "sid": sid})
+        #     else:
+        #         return jsonify({"message": "Batch is Already Full !"})
 
         # return jsonify({"message": "Student registered successfully", "sid": sid})
 
