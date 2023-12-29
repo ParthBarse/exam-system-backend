@@ -475,7 +475,7 @@ def add_batch():
         data = request.form
 
         # Validate required fields
-        required_fields = ["batch_name", "start_date", "end_date", "company", "duration", "batch_intake", "camp_id"]
+        required_fields = ["batch_name", "start_date", "end_date", "duration", "batch_intake", "camp_id"]
         for field in required_fields:
             if field not in data or not data[field]:
                 raise ValueError(f"Missing or empty value for the required field: {field}")
