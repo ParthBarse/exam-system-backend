@@ -138,6 +138,7 @@ def register_student():
             "batch_id": data.get("batch_id", ""),
             "food_option": data.get("food_option", ""),
             "dress_code": data.get("dress_code", ""),
+            "pick_up_city": data.get("pick_up_city", ""),
             "pick_up_point": data.get("pick_up_point", ""),
             "height": data.get("height", ""),
             "weight": data.get("weight", ""),
@@ -150,24 +151,24 @@ def register_student():
             "medication_physical":data.get("medication_physical"),
             "other_problem":data.get("other_problem"),
             "physical_problem":data.get("physical_problem"),
-            "medication_allergy":data.get("medication_allegric"),
+            "medication_allergy":data.get("medication_allergy"),
             "medication_other":data.get("medication_other"),
             "allergy":data.get("allergy"),
             "payment_status": data.get("payment_status", "Pending")
         }
 
         # Store the student information in the MongoDB collection
-        # batches_db = db["batches_db"]
-        # batch = batches_db.find_one({"batch_id":data.get("batch_id")}, {"_id":0})
-        # if batch:
-        #     if int(batch["students_registered"]) <= int(batch["batch_intake"]):
-        #         students_db.insert_one(student)
-        #         batches_db.update_one({"batch_id": data.get("batch_id")}, {"$set": {"students_registered":int(batch["students_registered"]+1)}})
-        #         return jsonify({"message": "Student registered successfully", "sid": sid})
-        #     else:
-        #         return jsonify({"message": "Batch is Already Full !"})
+        batches_db = db["batches_db"]
+        batch = batches_db.find_one({"batch_id":data.get("batch_id")}, {"_id":0})
+        if batch:
+            if int(batch["students_registered"]) <= int(batch["batch_intake"]):
+                students_db.insert_one(student)
+                batches_db.update_one({"batch_id": data.get("batch_id")}, {"$set": {"students_registered":int(batch["students_registered"]+1)}})
+                return jsonify({"message": "Student registered successfully", "sid": sid})
+            else:
+                return jsonify({"message": "Batch is Already Full !"})
 
-        # return jsonify({"message": "Student registered successfully", "sid": sid})
+        return jsonify({"message": "Student registered successfully", "sid": sid})
 
     except ValueError as ve:
         return jsonify({"error": str(ve)}), 400  # Bad Request
