@@ -10,6 +10,7 @@ from flask_cors import CORS
 # from datetime import datetime
 # from datetime import datetime, timedelta
 import datetime
+from datetime import datetime
 import random
 import json
 from email.mime.text import MIMEText
@@ -1027,7 +1028,7 @@ def save_file(file, uid):
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         file.save(file_path)
 
-        return f'https://files.bnbdevelopers.in/{uid}/{filename}'
+        return f'https://files.bnbdevelopers.in/mcf_files/{uid}/{filename}'
     except Exception as e:
         raise e
     
