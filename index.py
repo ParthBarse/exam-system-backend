@@ -94,6 +94,7 @@ def register_student():
         # Generate a unique ID for the student using UUID
         sid = str(uuid.uuid4().hex)
 
+        company = ""
         # Calculate age based on the provided date of birth
         age = calculate_age(data["dob"])
         if age>=7 and age<=11 and data.get("gender") == "male":
