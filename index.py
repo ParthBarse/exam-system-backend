@@ -1012,6 +1012,8 @@ def check_discount_code():
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
     
+file_directory = '/var/www/html/mcf_files/'
+    
 def save_file(file, uid):
     try:
         # Get the file extension from the original filename
@@ -1028,8 +1030,6 @@ def save_file(file, uid):
         return f'https://files.bnbdevelopers.in/{uid}/{filename}'
     except Exception as e:
         raise e
-
-file_directory = '/var/www/html/mcf_files/'
     
 @app.route('/uploadFile', methods=['POST'])
 def upload_file():
