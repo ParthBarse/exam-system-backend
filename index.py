@@ -163,7 +163,7 @@ def register_student():
         if batch:
             if int(batch["students_registered"]) <= int(batch["batch_intake"]):
                 students_db.insert_one(student)
-                batches_db.update_one({"batch_id": data.get("batch_id")}, {"$set": {"students_registered":int(batch["students_registered"]+1)}})
+                batches_db.update_one({"batch_id": data.get("batch_id")}, {"$set": {"students_registered":int(int(batch["students_registered"])+1)}})
                 return jsonify({"message": "Student registered successfully", "sid": sid})
             else:
                 return jsonify({"message": "Batch is Already Full !"})
