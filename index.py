@@ -145,6 +145,12 @@ def register_student():
             "gender": data.get("gender", ""),
             "standard": data.get("standard", ""),
             "wp_no": data.get("wp_no", ""),
+            "medication_physical":data.get("medication_physical"),
+            "other_problem":data.get("other_problem"),
+            "physical_problem":data.get("physical_problem"),
+            "medication_allergy":data.get("medication_allegric"),
+            "medication_other":data.get("medication_other"),
+            "allergy":data.get("allergy"),
             "payment_status": data.get("payment_status", "Pending")
         }
 
