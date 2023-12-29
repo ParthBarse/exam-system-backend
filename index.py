@@ -16,6 +16,7 @@ from email.mime.text import MIMEText
 import smtplib
 import uuid
 import re
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -33,6 +34,8 @@ app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_USERNAME'] = "ic2023wallet@gmail.com"
 app.config['MAIL_PASSWORD'] = "irbnexpguzgxwdgx"
+
+host = ""
 
 
 @app.route('/')
@@ -1002,6 +1005,51 @@ def check_discount_code():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+def save_file(file, uid):
+    try:
+        # Get the file extension from the original filename
+        original_filename = file.filename
+        _, file_extension = os.path.splitext(original_filename)
+
+        # Generate a unique filename using UUID and append the original file extension
+        filename = str(uuid.uuid4()) + file_extension
+
+        file_path = os.path.join(file_directory, uid, filename)
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        file.save(file_path)
+
+        return f'https://files.bnbdevelopers.in/{uid}/{filename}'
+    except Exception as e:
+        raise e
+
+file_directory = '/var/www/html/mcf_files/'
+    
+@app.route('/uploadFile', methods=['POST'])
+def upload_file():
+    try:
+        # Check if 'file' and 'sid' parameters are present in the form data
+        if 'file' not in request.files:
+            return jsonify({'error': 'Missing parameters: file',"success":False}), 400
+
+        uploaded_file = request.files['file']
+        sid = "All_Files"
+
+        # Check if the file is an allowed type (e.g., image or pdf)
+        allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
+        if (
+            '.' in uploaded_file.filename
+            and uploaded_file.filename.rsplit('.', 1)[1].lower() not in allowed_extensions
+        ):
+            return jsonify({'error': 'Invalid file type. Only allowed: png, jpg, jpeg, gif, pdf.',"success":False}), 400
+
+        # Save the file and get the URL
+        file_url = save_file(uploaded_file, sid)
+
+        return jsonify({'message': 'File stored successfully.', 'file_url': file_url,"success":True}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e),"success":False}), 500
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0")
