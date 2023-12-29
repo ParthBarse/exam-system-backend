@@ -1012,7 +1012,7 @@ def check_discount_code():
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
     
-file_directory = '/var/www/html/mcf_files/'
+file_directory = '/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/'
     
 def save_file(file, uid):
     try:
