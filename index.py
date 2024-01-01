@@ -113,9 +113,9 @@ def register_student():
 
         student = {
             "sid": sid,
-            "first_name": data["first_name"],
-            "middle_name": data.get("middle_name", ""),
-            "last_name": data["last_name"],
+            "first_name": data["first_name"].upper(),
+            "middle_name": data.get("middle_name", "").upper(),
+            "last_name": data["last_name"].upper(),
             "email": data["email"],
             "phn": str(data["phn"]),
             "dob": data["dob"],
@@ -878,7 +878,7 @@ def change_student_status():
         data = request.get_json()
 
         # Check if sid and new_status are provided
-        if 'sid' not in data or 'new_status' not in data:
+        if 'sid' not in data or 'new_status' not in data or 'reason' not in data:
             return jsonify({"error": "Both 'sid' and 'new_status' are required."}), 400  # Bad Request
 
         # Find the student based on sid
@@ -889,7 +889,7 @@ def change_student_status():
             return jsonify({"error": f"No student found with sid: {data['sid']}"}), 404  # Not Found
 
         # Update the status of the student
-        students_db.update_one({"sid": data['sid']}, {"$set": {"status": data['new_status']}})
+        students_db.update_one({"sid": data['sid']}, {"$set": {"status": data['new_status'],"reason":data['reason']}})
 
         return jsonify({"message": f"Status for student with sid {data['sid']} updated to {data['new_status']} successfully"})
 
