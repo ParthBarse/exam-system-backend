@@ -57,14 +57,14 @@ def getAllStudents():
     users = db["students_db"]
     ans = []
     ans = list(users.find({},{'_id':0}))
-    return jsonify({"students":ans})
+    return jsonify({"students":ans[::-1]})
 
 @app.route("/getInactiveStudents", methods=["GET"])
 def getInactiveStudents():
     users = db["students_db"]
     ans = []
     ans = list(users.find({"status": {"$ne": "Active"}}, {"_id": 0}))
-    return jsonify({"students":ans})
+    return jsonify({"students":ans[::-1]})
 
 def calculate_age(dob):
     try:
