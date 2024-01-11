@@ -91,7 +91,7 @@ def find_and_replace_paragraph_med(paragraph, field_values):
         print(run.text)
         for field, value in field_values.items():
             run.text = run.text.replace(f"{field}", value)
-            set_font(run, 'Montserrat', 16)
+            set_font(run, 'Montserrat', 14)
 
 def replace_fields_in_document_med(doc_path, field_values):
     doc = Document(doc_path)
