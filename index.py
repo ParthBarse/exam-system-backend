@@ -74,6 +74,46 @@ def calculate_age(dob):
         return age
     except ValueError:
         raise ValueError("Invalid date of birth format. Please use 'dd-mm-yyyy'.")
+    
+
+from docx import Document
+from docx.shared import Pt
+from docx2pdf import convert
+
+def set_font(run, font_name, font_size):
+    font = run.font
+    font.name = font_name
+    font.size = Pt(font_size)
+    font.bold = True
+
+def find_and_replace_paragraph_med(paragraph, field_values):
+    for run in paragraph.runs:
+        print(run.text)
+        for field, value in field_values.items():
+            run.text = run.text.replace(f"{field}", value)
+            set_font(run, 'Montserrat', 16)
+
+def replace_fields_in_document_med(doc_path, field_values):
+    doc = Document(doc_path)
+    for paragraph in doc.paragraphs:
+        find_and_replace_paragraph_med(paragraph, field_values)
+    doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.docx")))
+
+    convert(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.pdf")))
+
+
+
+# field_values = {
+#     'CADET_NAME': 'Rutuja Katkar',
+#     'LOC': 'Pune',
+#     'DOB': '20/03/2004',
+#     '121212': 'D',
+#     'C_NAME': 'Adventure',
+#     'DATE': '10/01/2024',
+#     'BATCH': 'Batch 1'
+# }
+
+
 
 @app.route('/registerStudent', methods=['POST'])
 def register_student():
@@ -117,15 +157,32 @@ def register_student():
         camp_name = camp["camp_name"]
         camp_short = camp_name.split(" ")[-1].replace("(", "").replace(")", "")
         sid=""
+        medical_cert_url = ""
         if batch:
             if int(batch["students_registered"]) <= int(batch["batch_intake"]):
                 sr_no = int(int(batch["students_registered"])+1)
                 start_date = batch["start_date"]
                 year = start_date[-2:]
-                day = start_date[0:1]
+                day = start_date[0:2]
                 batch_name = batch["batch_name"].replace(" ", "")
 
                 sid = str(camp_short)+str(year)+str(day)+str(batch_name)+str(company)+str(sr_no)
+
+                document_med_path = 'medical_certificate.docx'
+
+                field_values = {
+                    'CADET_NAME': str(data["first_name"].upper()+" "+data["last_name"].upper()),
+                    'LOC':  str(data["district"]+", "+data["state"]),
+                    'DOB':  str(data["dob"]),
+                    '121212':  str("__________"),
+                    'C_NAME':  str(camp_name),
+                    'DATE':  str(start_date),
+                    'BATCH':  str(batch_name),
+                    'sid': sid
+                }
+
+                replace_fields_in_document_med(document_med_path, field_values)
+                medical_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_MEDICAL_CER.pdf"
 
             else:
                 return jsonify({"message": "Batch is Already Full !"})
@@ -171,7 +228,7 @@ def register_student():
             "medication_allergy":data.get("medication_allergy",""),
             "medication_other":data.get("medication_other",""),
             "allergy":data.get("allergy",""),
-            "medicalCertificate":data.get("medicalCertificate",""),
+            "medicalCertificate":medical_cert_url,
             "cadetPhoto":data.get("cadetPhoto",""),
             "cadetSign":data.get("cadetSign",""),
             "parentGurdianPhoto":data.get("parentGurdianPhoto",""),
