@@ -75,6 +75,23 @@ def calculate_age(dob):
     except ValueError:
         raise ValueError("Invalid date of birth format. Please use 'dd-mm-yyyy'.")
     
+from reportlab.pdfgen import canvas
+    
+def convert_docx_to_pdf(docx_path, pdf_path):
+    # Load the DOCX file
+    doc = Document(docx_path)
+
+    # Create a PDF file
+    pdf = canvas.Canvas(pdf_path)
+
+    # Loop through paragraphs in the DOCX file and write them to the PDF
+    for paragraph in doc.paragraphs:
+        pdf.drawString(10, 800, paragraph.text)
+        pdf.showPage()
+
+    # Save the PDF file
+    pdf.save()
+    
 
 from docx import Document
 from docx.shared import Pt
@@ -98,6 +115,8 @@ def replace_fields_in_document_med(doc_path, field_values):
     for paragraph in doc.paragraphs:
         find_and_replace_paragraph_med(paragraph, field_values)
     doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.docx")))
+
+    convert_docx_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.pdf")))
 
     # convert(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.pdf")))
 
@@ -182,7 +201,7 @@ def register_student():
                 }
 
                 replace_fields_in_document_med(document_med_path, field_values)
-                medical_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_MEDICAL_CER.docx"
+                medical_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_MEDICAL_CER.pdf"
 
             else:
                 return jsonify({"message": "Batch is Already Full !"})
