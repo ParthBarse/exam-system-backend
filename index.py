@@ -109,6 +109,26 @@ def register_student():
             company = "ECO"
         elif age>=17 and age<=21 and data.get("gender") == "female":
             company = "FOXFORD"
+
+        batches_db = db["batches_db"]
+        batch = batches_db.find_one({"batch_id":data.get("batch_id")}, {"_id":0})
+        camps_db = db["camps_db"]
+        camp = camps_db.find_one({"camp_id":data.get("camp_id")}, {"_id":0})
+        camp_name = camp["camp_name"]
+        camp_short = camp_name.split(" ")[-1].replace("(", "").replace(")", "")
+        sid=""
+        if batch:
+            if int(batch["students_registered"]) <= int(batch["batch_intake"]):
+                sr_no = int(int(batch["students_registered"])+1)
+                start_date = batch["start_date"]
+                year = start_date[-2:]
+                day = start_date[0:1]
+                batch_name = batch["batch_name"].replace(" ", "")
+
+                sid = camp_short+year+day+batch_name+company+sr_no
+
+            else:
+                return jsonify({"message": "Batch is Already Full !"})
         
 
         student = {
