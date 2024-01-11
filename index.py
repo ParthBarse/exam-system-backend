@@ -125,7 +125,7 @@ def register_student():
                 day = start_date[0:1]
                 batch_name = batch["batch_name"].replace(" ", "")
 
-                sid = camp_short+year+day+batch_name+company+sr_no
+                sid = str(camp_short)+str(year)+str(day)+str(batch_name)+str(company)+str(sr_no)
 
             else:
                 return jsonify({"message": "Batch is Already Full !"})
