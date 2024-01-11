@@ -78,7 +78,7 @@ def calculate_age(dob):
 
 from docx import Document
 from docx.shared import Pt
-from docx2pdf import convert
+# from docx2pdf import convert
 
 def set_font(run, font_name, font_size):
     font = run.font
@@ -99,7 +99,7 @@ def replace_fields_in_document_med(doc_path, field_values):
         find_and_replace_paragraph_med(paragraph, field_values)
     doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.docx")))
 
-    convert(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.pdf")))
+    # convert(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.pdf")))
 
 
 
@@ -182,7 +182,7 @@ def register_student():
                 }
 
                 replace_fields_in_document_med(document_med_path, field_values)
-                medical_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_MEDICAL_CER.pdf"
+                medical_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_MEDICAL_CER.docx"
 
             else:
                 return jsonify({"message": "Batch is Already Full !"})
