@@ -1232,6 +1232,67 @@ def upload_file():
 
     except Exception as e:
         return jsonify({'error': str(e),"success":False}), 500
+    
+# Endpoint for requesting password reset (for admin)
+@app.route("/sendEntranceCard", methods=["GET"])
+def send_entrance_card():
+    try:
+        # collection = db["students_db"]
+        sid = request.args.get('sid')
+        students_db = db["students_db"]
+        student_data = students_db.find_one({"sid":sid}, {"_id":0})
+        mailToSend = student_data['email']
+        # Send the password reset link via email
+        sender_email = "partbarse92@gmail.com"
+        smtp_server = smtplib.SMTP("smtp.gmail.com", 587)
+        smtp_server.ehlo()
+        smtp_server.starttls()
+        smtp_server.login("partbarse92@gmail.com", "xdfrjwaxctwqpzyg")
+
+        message_text = f"Hello {student_data['first_name']}, \n\n You can download your Entrance Card from below Link. \n {student_data['entrence_card']} \n\n You need to print the Entrance Card and Bring to camp in Hardcopy."
+        message = MIMEText(message_text)
+        message["Subject"] = "MCF Camp Entrance Card"
+        message["From"] = sender_email
+        message["To"] = mailToSend
+
+        smtp_server.sendmail(sender_email, mailToSend, message.as_string())
+        smtp_server.quit()
+
+        return jsonify({'success': True, 'msg': 'Mail Send'}), 200
+
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+    
+
+# Endpoint for requesting password reset (for admin)
+@app.route("/sendMedicalCertificate", methods=["GET"])
+def send_medical_certificate():
+    try:
+        # collection = db["students_db"]
+        sid = request.args.get('sid')
+        students_db = db["students_db"]
+        student_data = students_db.find_one({"sid":sid}, {"_id":0})
+        mailToSend = student_data['email']
+        # Send the password reset link via email
+        sender_email = "partbarse92@gmail.com"
+        smtp_server = smtplib.SMTP("smtp.gmail.com", 587)
+        smtp_server.ehlo()
+        smtp_server.starttls()
+        smtp_server.login("partbarse92@gmail.com", "xdfrjwaxctwqpzyg")
+
+        message_text = f"Hello {student_data['first_name']}, \n\n You can download your Medical Certificate from below Link. \n {student_data['medicalCertificate']} \n\n You need to print the Medical Certificate and Take a signature from your Doctor and Bring to camp in Hardcopy."
+        message = MIMEText(message_text)
+        message["Subject"] = "MCF Camp Entrance Card"
+        message["From"] = sender_email
+        message["To"] = mailToSend
+
+        smtp_server.sendmail(sender_email, mailToSend, message.as_string())
+        smtp_server.quit()
+
+        return jsonify({'success': True, 'msg': 'Mail Send'}), 200
+
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0")
