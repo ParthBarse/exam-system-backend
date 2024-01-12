@@ -97,6 +97,15 @@ from docx import Document
 from docx.shared import Pt
 # from docx2pdf import convert
 
+import subprocess
+
+def convert_to_pdf(docx_file, pdf_file):
+    try:
+        subprocess.run(['unoconv', '--output', pdf_file, '--format', 'pdf', docx_file], check=True)
+        print(f"Conversion successful: {docx_file} -> {pdf_file}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error during conversion: {e}")
+
 def set_font(run, font_name, font_size):
     font = run.font
     font.name = font_name
@@ -116,9 +125,11 @@ def replace_fields_in_document_med(doc_path, field_values):
         find_and_replace_paragraph_med(paragraph, field_values)
     doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.docx")))
 
-    import aspose.words as aw
-    doc = aw.Document(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.docx")))
-    doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.pdf")))
+    # import aspose.words as aw
+    # doc = aw.Document(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.docx")))
+    # doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.pdf")))
+
+    convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.docx")),str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.pdf")))
 
     # convert_docx_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.pdf")))
 
@@ -149,15 +160,6 @@ def find_and_replace_tables_entrance_card(tables, field, replacement):
             for cell in row.cells:
                 for paragraph in cell.paragraphs:
                     find_and_replace_paragraphs_entrance_card([paragraph], field, replacement)
-
-import subprocess
-
-def convert_to_pdf(docx_file, pdf_file):
-    try:
-        subprocess.run(['unoconv', '--output', pdf_file, '--format', 'pdf', docx_file], check=True)
-        print(f"Conversion successful: {docx_file} -> {pdf_file}")
-    except subprocess.CalledProcessError as e:
-        print(f"Error during conversion: {e}")
 
 
 @app.route('/registerStudent', methods=['POST'])
