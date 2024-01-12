@@ -570,6 +570,20 @@ def get_all_camps():
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
     
+@app.route('/getAllCampsActive', methods=['GET'])
+def get_all_camps_active():
+    try:
+        camps_db = db["camps_db"]
+        camps = camps_db.find({"camp_status":"Active"}, {"_id": 0})  # Exclude the _id field from the response
+
+        # Convert the cursor to a list of dictionaries for easier serialization
+        camp_list = list(camps)
+
+        return jsonify({"camps": camp_list})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
 @app.route('/getAllBatches', methods=['GET'])
 def get_all_batches():
     try:
@@ -972,7 +986,7 @@ def get_student_counts():
 
         active_students_count = db["students_db"].count_documents({"status": "Active"})
 
-        canceled_students_count = db["students_db"].count_documents({"status": "Cancle"})
+        canceled_students_count = db["students_db"].count_documents({"status": "Cancel"})
 
         # Retrieve count of refunded students
         refunded_students_count = db["students_db"].count_documents({"status": "Refund"})
@@ -994,7 +1008,7 @@ def get_student_counts():
 @app.route('/getCanceledStudents', methods=['GET'])
 def get_canceled_students():
     try:
-        canceled_students_count = db["students_db"].find({"status": "Cancle"},{"_id":0})
+        canceled_students_count = db["students_db"].find({"status": "Cancel"},{"_id":0})
 
         return jsonify({
             "canceled_students_count": canceled_students_count
