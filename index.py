@@ -150,6 +150,15 @@ def find_and_replace_tables_entrance_card(tables, field, replacement):
                 for paragraph in cell.paragraphs:
                     find_and_replace_paragraphs_entrance_card([paragraph], field, replacement)
 
+import subprocess
+
+def convert_to_pdf(docx_file, pdf_file):
+    try:
+        subprocess.run(['unoconv', '--output', pdf_file, '--format', 'pdf', docx_file], check=True)
+        print(f"Conversion successful: {docx_file} -> {pdf_file}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error during conversion: {e}")
+
 
 @app.route('/registerStudent', methods=['POST'])
 def register_student():
@@ -264,9 +273,11 @@ def register_student():
 
                 doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_entrance_card.docx"))
 
-                import aspose.words as aw
+                # import aspose.words as aw
                 doc = aw.Document(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_entrance_card.docx"))
                 doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_entrance_card.pdf"))
+
+                convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_entrance_card.pdf"))
 
                 entrance_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_entrance_card.pdf"
                 medical_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_MEDICAL_CER.pdf"
