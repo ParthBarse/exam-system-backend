@@ -77,20 +77,20 @@ def calculate_age(dob):
     
 from reportlab.pdfgen import canvas
     
-def convert_docx_to_pdf(docx_path, pdf_path):
-    # Load the DOCX file
-    doc = Document(docx_path)
+# def convert_docx_to_pdf(docx_path, pdf_path):
+#     # Load the DOCX file
+#     doc = Document(docx_path)
 
-    # Create a PDF file
-    pdf = canvas.Canvas(pdf_path)
+#     # Create a PDF file
+#     pdf = canvas.Canvas(pdf_path)
 
-    # Loop through paragraphs in the DOCX file and write them to the PDF
-    for paragraph in doc.paragraphs:
-        pdf.drawString(10, 800, paragraph.text)
-        pdf.showPage()
+#     # Loop through paragraphs in the DOCX file and write them to the PDF
+#     for paragraph in doc.paragraphs:
+#         pdf.drawString(10, 800, paragraph.text)
+#         pdf.showPage()
 
-    # Save the PDF file
-    pdf.save()
+#     # Save the PDF file
+#     pdf.save()
     
 
 from docx import Document
@@ -116,22 +116,35 @@ def replace_fields_in_document_med(doc_path, field_values):
         find_and_replace_paragraph_med(paragraph, field_values)
     doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.docx")))
 
-    convert_docx_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.pdf")))
+    # convert_docx_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.pdf")))
 
     # convert(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.pdf")))
 
 
+from docx import Document
+from docx.shared import Inches, Pt
+import requests
+from io import BytesIO
 
-# field_values = {
-#     'CADET_NAME': 'Rutuja Katkar',
-#     'LOC': 'Pune',
-#     'DOB': '20/03/2004',
-#     '121212': 'D',
-#     'C_NAME': 'Adventure',
-#     'DATE': '10/01/2024',
-#     'BATCH': 'Batch 1'
-# }
+def set_paragraph_font_entrace_card(paragraph, font_name, font_size, bold=False):
+    for run in paragraph.runs:
+        font = run.font
+        font.name = font_name
+        font.size = Pt(font_size)
+        font.bold = bold
 
+def find_and_replace_paragraphs_entrance_card(paragraphs, field, replacement):
+    for paragraph in paragraphs:
+        if field in paragraph.text:
+            paragraph.text = paragraph.text.replace(field, replacement)
+            set_paragraph_font_entrace_card(paragraph, 'Arial', 9, False)
+
+def find_and_replace_tables_entrance_card(tables, field, replacement):
+    for table in tables:
+        for row in table.rows:
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    find_and_replace_paragraphs_entrance_card([paragraph], field, replacement)
 
 
 @app.route('/registerStudent', methods=['POST'])
@@ -200,8 +213,55 @@ def register_student():
                     'sid': sid
                 }
 
+                student_data = {
+                    'CADET_NAME': str(data["first_name"].upper()+" "+data["last_name"].upper()),
+                    'REGNO': sid,
+                    'RANK': '-',
+                    'C_NAME': camp_name,
+                    'C_BATCH': batch_name,
+                    'C_DAYS': batch["duration"],
+                    'COMP_N': company,
+                    'C_DATE': start_date,
+                    'PICKPT': data["pick_up_point"],
+                    'PICK_TIME': '____________',
+                    'EMP_NAME':  data["employee_who_reached_out_to_you"],
+                    'GAR_NAME': "____________",
+                    'ADDRESS': data["address"],
+                    'CITY': data["pick_up_city"],
+                    'DISTRICT': data["district"],
+                    'STATE': data['state'],
+                    'PINCODE': data["pincode"],
+                    'EMAIL': data["email"],
+                    'C_NUM': str(data["phn"]),
+                    'WP_NUM': data.get("wp_no", ""),
+                    'FATHER_NUM': '-',
+                    'MOTHER_NUM': '-',
+                    'DOB': data["dob"],
+                    'BLOOD_GROUP':  data.get("blood_group", ""),
+                    'STD': data.get("standard", ""),
+                    'SCHOOL': data.get("school_name", ""),
+                    'FEE_PAID': '-',
+                    'BALANCE': '-',
+                    'RECEIPT_NUM': '-',
+                    'DATE': '-',
+                    'TIME': '-'
+                }
+                doc = Document('mcf_entrance_card.docx')
+
                 replace_fields_in_document_med(document_med_path, field_values)
-                medical_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_MEDICAL_CER.pdf"
+
+                # Replace text fields in paragraphs
+                find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD CADET_NAME}', student_data['CADET_NAME'])
+                find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD DATE}', student_data['DATE'])
+                find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD TIME}', student_data['TIME'])
+
+                for key, value in student_data.items():
+                        find_and_replace_tables_entrance_card(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+
+                doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_entrance_card.docx"))
+
+                entrance_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_entrance_card.docx"
+                medical_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_MEDICAL_CER.docx"
 
             else:
                 return jsonify({"message": "Batch is Already Full !"})
@@ -252,7 +312,8 @@ def register_student():
             "cadetSign":data.get("cadetSign",""),
             "parentGurdianPhoto":data.get("parentGurdianPhoto",""),
             "parentGurdianSign":data.get("parentGurdianSign",""),
-            "payment_status": data.get("payment_status", "Pending")
+            "payment_status": data.get("payment_status", "Pending"),
+            "entrence_card":entrance_cert_url
         }
 
         # Store the student information in the MongoDB collection
