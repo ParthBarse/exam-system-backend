@@ -312,10 +312,10 @@ def register_student():
                     paragraph = cell.add_paragraph()
                     run = paragraph.add_run()
                     cadet_photo_url = data["cadetPhoto"]
-                    cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/var/www/html")
+                    cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
                     run.add_picture(cadet_photo_path, width=Inches(0.9))
-                except:
-                    print("Error")
+                except Exception as e:
+                    print("Error : ",str(e))
 
                 doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_entrance_card.docx"))
 
