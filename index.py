@@ -161,6 +161,32 @@ def find_and_replace_tables_entrance_card(tables, field, replacement):
                 for paragraph in cell.paragraphs:
                     find_and_replace_paragraphs_entrance_card([paragraph], field, replacement)
 
+from docx import Document
+from docx.shared import Inches, Pt
+import requests
+from io import BytesIO
+
+def set_paragraph_font_visiting_card(paragraph, font_name, font_size, bold=False):
+    for run in paragraph.runs:
+        font = run.font
+        font.name = font_name
+        font.size = Pt(font_size)
+        font.bold = bold                    
+
+def find_and_replace_paragraphs_visiting_card(paragraphs, field, replacement):
+    for paragraph in paragraphs:
+        if field in paragraph.text:
+            paragraph.text = paragraph.text.replace(field, replacement)
+            set_paragraph_font_visiting_card(paragraph, 'Times New Roman', 16, False)
+
+def find_and_replace_tables_visiting_card(tables, field, replacement):
+    for table in tables:
+        for row in table.rows:
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    find_and_replace_paragraphs_visiting_card([paragraph], field, replacement)
+        
+
 
 @app.route('/registerStudent', methods=['POST'])
 def register_student():
@@ -231,16 +257,16 @@ def register_student():
                 student_data = {
                     'CADET_NAME': str(data["first_name"].upper()+" "+data["last_name"].upper()),
                     'REGNO': sid,
-                    'RANK': '-',
+                    'RANK': '',
                     'C_NAME': camp_name,
                     'C_BATCH': batch_name,
                     'C_DAYS': batch["duration"],
                     'COMP_N': company,
                     'C_DATE': start_date,
                     'PICKPT': data["pick_up_point"],
-                    'PICK_TIME': '____________',
+                    'PICK_TIME': '',
                     'EMP_NAME':  data["employee_who_reached_out_to_you"],
-                    'GAR_NAME': "____________",
+                    'GAR_NAME': "",
                     'ADDRESS': data["address"],
                     'CITY': data["pick_up_city"],
                     'DISTRICT': data["district"],
@@ -249,17 +275,17 @@ def register_student():
                     'EMAIL': data["email"],
                     'C_NUM': str(data["phn"]),
                     'WP_NUM': data.get("wp_no", ""),
-                    'FATHER_NUM': '-',
-                    'MOTHER_NUM': '-',
+                    'FATHER_NUM': '',
+                    'MOTHER_NUM': '',
                     'DOB': data["dob"],
                     'BLOOD_GROUP':  data.get("blood_group", ""),
                     'STD': data.get("standard", ""),
                     'SCHOOL': data.get("school_name", ""),
-                    'FEE_PAID': '-',
-                    'BALANCE': '-',
-                    'RECEIPT_NUM': '-',
-                    'DATE': '-',
-                    'TIME': '-'
+                    'FEE_PAID': '',
+                    'BALANCE': '',
+                    'RECEIPT_NUM': '',
+                    'DATE': '',
+                    'TIME': ''
                 }
                 doc = Document('mcf_entrance_card.docx')
 
@@ -273,6 +299,23 @@ def register_student():
                 for key, value in student_data.items():
                         find_and_replace_tables_entrance_card(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
 
+                try:
+                    table = doc.tables[0]  # Assuming the first table
+                    cell = table.cell(0, 3)  # Assuming the first cell in the third column
+
+                    # Clear the content of the cell by removing its paragraphs
+                    for paragraph in cell.paragraphs:
+                        paragraph.clear()
+
+                    # Add a new paragraph and insert the image
+                    paragraph = cell.add_paragraph()
+                    run = paragraph.add_run()
+                    cadet_photo_url = student_data["cadetPhoto"]
+                    cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/var/www/html")
+                    run.add_picture(cadet_photo_path, width=Inches(0.9))
+                except:
+                    print("Error")
+
                 doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_entrance_card.docx"))
 
                 # import aspose.words as aw
@@ -281,8 +324,29 @@ def register_student():
 
                 convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_entrance_card.pdf"))
 
+                # Load the document template
+                doc1 = Document('visit_card.docx')
+
+                # Sample student_data
+                student_data1 = {
+                    'CADET_NAME': str(data["first_name"].upper()+" "+data["last_name"].upper()),
+                    'C_NAME': camp_name,
+                    'C_BATCH': batch_name,
+                    'ADDRESS': data["address"],
+                    'C_NUM': data["phn"],
+                    'WP_NUM': data["wp_no"]
+                }
+
+                for key, value in student_data1.items():
+                        find_and_replace_tables_visiting_card(doc1.tables, f'{{MERGEFIELD {key}}}', str(value))
+
+                doc1.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_visit_card.docx"))
+
+                convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_visit_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_visit_card.docx"))
+
                 entrance_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_entrance_card.pdf"
                 medical_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_MEDICAL_CER.pdf"
+                visiting_card_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_visit_card.docx"
 
             else:
                 return jsonify({"message": "Batch is Already Full !"})
@@ -334,7 +398,8 @@ def register_student():
             "parentGurdianPhoto":data.get("parentGurdianPhoto",""),
             "parentGurdianSign":data.get("parentGurdianSign",""),
             "payment_status": data.get("payment_status", "Pending"),
-            "entrence_card":entrance_cert_url
+            "entrence_card":entrance_cert_url,
+            "visiting_card":visiting_card_url
         }
 
         # Store the student information in the MongoDB collection
@@ -1304,6 +1369,35 @@ def send_medical_certificate():
         message_text = f"Hello {student_data['first_name']}, \n\n You can download your Medical Certificate from below Link. \n {student_data['medicalCertificate']} \n\n You need to print the Medical Certificate and Take a signature from your Doctor and Bring to camp in Hardcopy."
         message = MIMEText(message_text)
         message["Subject"] = "MCF Camp Entrance Card"
+        message["From"] = sender_email
+        message["To"] = mailToSend
+
+        smtp_server.sendmail(sender_email, mailToSend, message.as_string())
+        smtp_server.quit()
+
+        return jsonify({'success': True, 'msg': 'Mail Send'}), 200
+
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+    
+@app.route("/sendVisitingCard", methods=["GET"])
+def send_visiting_card():
+    try:
+        # collection = db["students_db"]
+        sid = request.args.get('sid')
+        students_db = db["students_db"]
+        student_data = students_db.find_one({"sid":sid}, {"_id":0})
+        mailToSend = student_data['email']
+        # Send the password reset link via email
+        sender_email = "partbarse92@gmail.com"
+        smtp_server = smtplib.SMTP("smtp.gmail.com", 587)
+        smtp_server.ehlo()
+        smtp_server.starttls()
+        smtp_server.login("partbarse92@gmail.com", "xdfrjwaxctwqpzyg")
+
+        message_text = f"Hello {student_data['first_name']}, \n\n You can download your Visiting Card from below Link. \n {student_data['visiting_card']} \n\n You need to print the Visiting Card and bring to camp for parents to visit Student"
+        message = MIMEText(message_text)
+        message["Subject"] = "MCF Camp Visiting Card"
         message["From"] = sender_email
         message["To"] = mailToSend
 
