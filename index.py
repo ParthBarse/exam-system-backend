@@ -300,6 +300,7 @@ def register_student():
                         find_and_replace_tables_entrance_card(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
 
                 try:
+                    print("replacing image")
                     table = doc.tables[0]  # Assuming the first table
                     cell = table.cell(0, 3)  # Assuming the first cell in the third column
 
@@ -310,7 +311,7 @@ def register_student():
                     # Add a new paragraph and insert the image
                     paragraph = cell.add_paragraph()
                     run = paragraph.add_run()
-                    cadet_photo_url = student_data["cadetPhoto"]
+                    cadet_photo_url = data["cadetPhoto"]
                     cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/var/www/html")
                     run.add_picture(cadet_photo_path, width=Inches(0.9))
                 except:
