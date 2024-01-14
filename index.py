@@ -185,6 +185,38 @@ def find_and_replace_tables_visiting_card(tables, field, replacement):
             for cell in row.cells:
                 for paragraph in cell.paragraphs:
                     find_and_replace_paragraphs_visiting_card([paragraph], field, replacement)
+
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+
+def replace_image_in_cell(doc, table_index, row_index, column_index, image_path):
+    # Get the specified table
+    table = doc.tables[table_index]
+
+    # Get the specified cell
+    cell = table.cell(row_index, column_index)
+
+    # Clear the content of the cell by removing its paragraphs
+    for paragraph in cell.paragraphs:
+        paragraph.clear()
+
+    # Add a new paragraph and insert the image
+    paragraph = cell.add_paragraph()
+    run = paragraph.add_run()
+    run.add_picture(image_path, width=Inches(1.4))
+
+    # Align the paragraph to the center
+    paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+# image_path_father = 'img_rap.png'
+# image_path_mother = 'rutu.png'
+# image_path_cadet = 'aditi_pic.png'
+# image_path_guardian = 'sai_photo.jpeg'
+
+# replace_image_in_cell(doc, table_index=0, row_index=4, column_index=0, image_path=image_path_father)
+
+# replace_image_in_cell(doc, table_index=0, row_index=4, column_index=2, image_path=image_path_mother)
+# replace_image_in_cell(doc, table_index=0, row_index=4, column_index=6, image_path=image_path_cadet)
+# replace_image_in_cell(doc, table_index=0, row_index=4, column_index=8, image_path=image_path_guardian)
         
 
 
@@ -340,10 +372,30 @@ def register_student():
 
                 for key, value in student_data1.items():
                         find_and_replace_tables_visiting_card(doc1.tables, f'{{MERGEFIELD {key}}}', str(value))
+                
+                # image_path_father = 'img_rap.png'
+                # image_path_mother = 'rutu.png'
+                # image_path_cadet = 'aditi_pic.png'
+                # image_path_guardian = 'sai_photo.jpeg'
 
-                doc1.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_visit_card.docx"))
+                # replace_image_in_cell(doc1, table_index=0, row_index=4, column_index=0, image_path=image_path_father)
 
-                convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_visit_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_visit_card.docx"))
+                # replace_image_in_cell(doc1, table_index=0, row_index=4, column_index=2, image_path=image_path_mother)
+                try:
+                    cadet_photo_url = data["cadetPhoto"]
+                    cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
+
+                    image_url_guardian = data["parentGurdianPhoto"]
+                    image_path_guardian = image_url_guardian.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
+                    
+                    replace_image_in_cell(doc1, table_index=0, row_index=4, column_index=6, image_path=cadet_photo_path)
+                    replace_image_in_cell(doc1, table_index=0, row_index=4, column_index=8, image_path=image_path_guardian)
+
+                    doc1.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_visit_card.docx"))
+
+                    convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_visit_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_visit_card.docx"))
+                except Exception as e:
+                    print("Error : ", str(e))
 
                 entrance_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_entrance_card.pdf"
                 medical_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_MEDICAL_CER.pdf"
