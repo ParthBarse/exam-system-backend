@@ -393,13 +393,13 @@ def register_student():
 
                     doc1.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_visit_card.docx"))
 
-                    convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_visit_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_visit_card.docx"))
+                    convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_visit_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_visit_card.pdf"))
                 except Exception as e:
                     print("Error : ", str(e))
 
                 entrance_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_entrance_card.pdf"
                 medical_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_MEDICAL_CER.pdf"
-                visiting_card_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_visit_card.docx"
+                visiting_card_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_visit_card.pdf"
 
             else:
                 return jsonify({"message": "Batch is Already Full !"})
@@ -1421,7 +1421,7 @@ def send_medical_certificate():
 
         message_text = f"Hello {student_data['first_name']}, \n\n You can download your Medical Certificate from below Link. \n {student_data['medicalCertificate']} \n\n You need to print the Medical Certificate and Take a signature from your Doctor and Bring to camp in Hardcopy."
         message = MIMEText(message_text)
-        message["Subject"] = "MCF Camp Entrance Card"
+        message["Subject"] = "MCF Camp Medical Certificate"
         message["From"] = sender_email
         message["To"] = mailToSend
 
