@@ -627,6 +627,7 @@ def filter_students():
 def add_camp():
     try:
         data = request.form
+        print("Data Recieved : ",data)
 
         # Validate required fields
         # required_fields = ["camp_name", "chess_prefix", "camp_place", "camp_fee", "camp_description", "fee_discount", "discount_date", "final_fee"]
