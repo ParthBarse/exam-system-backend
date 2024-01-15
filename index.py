@@ -644,7 +644,7 @@ def add_camp():
             "camp_fee": float(data["camp_fee"]),  # assuming camp_fee is a float
             "camp_description": data["camp_description"],
             "fee_discount": float(data["fee_discount"]),  # assuming fee_discount is a float
-            "discount_date": data["discount_date"],
+            # "discount_date": data["discount_date"],
             "camp_status" : data["camp_status"],
             "final_fee": float(data["final_fee"])  # assuming final_fee is a float
         }

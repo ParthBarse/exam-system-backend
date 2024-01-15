@@ -2,12 +2,14 @@ import requests
 
 url = "http://msg.msgclub.net/rest/services/sendSMS/sendGroupSms"
 
-querystring = {"AUTH_KEY":"39e2807589f775338be0e2e6611d1f7d","message":"message","senderId":"DEMOOS","routeId":"1","mobileNos":"8793015610","smsContentType":"english"}
+querystring = {"AUTH_KEY":"YourAuthKey"}
 
+payload = "{\"smsContent\":\"Hello Test SMS\",\"groupId\":\"0\",\"routeId\":\"1\",\"mobileNumbers\":\"9999999999\",\"senderId\":\"DEMOOS\",\"signature\":\"signature\",\"smsContentType\":\"english\"}"
 headers = {
+    'Content-Type': "application/json",
     'Cache-Control': "no-cache"
     }
 
-response = requests.request("GET", url, headers=headers, params=querystring)
+response = requests.request("POST", url, data=payload, headers=headers, params=querystring)
 
 print(response.text)
