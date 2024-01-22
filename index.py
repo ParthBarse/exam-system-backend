@@ -504,9 +504,9 @@ def update_student():
                 students_db.update_one({"sid": data['sid']}, {"$set": student})
                 return jsonify({"message": f"Student with sid {data['sid']} updated successfully"})
             else:
-                return jsonify({"message": "Batch is Already Full !"},400)
+                return jsonify({"message": "Batch is Already Full !"}),400
         else:
-            return jsonify({"message": "Batch not Found !"},400)
+            return jsonify({"message": "Batch not Found !"}),400
             
         # students_db.update_one({"sid": data['sid']}, {"$set": student})
         # return jsonify({"message": f"Student with sid {data['sid']} updated successfully"})
