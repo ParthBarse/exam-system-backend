@@ -1535,13 +1535,14 @@ def send_medical_certificate_sms():
         if response.status_code == 200:
             json_data = response.json()
             medical_cert_srt = json_data['url']
+            print(medical_cert_srt)
         else:
             print("Error:", response.status_code)
-        msg = f"Hello, Download Link for your Medical Certificate is {medical_cert_srt} Team MCF CAMP"
+        msg = f"Hello, Download Link for your Medical Certificate is {medical_cert_srt} \n Team MCF CAMP"
         phn = student_data['phn']
-        sendSMS(msg,phn)
+        # sendSMS(msg,phn)
 
-        return jsonify({'success': True, 'msg': 'Mail Send'}), 200
+        return jsonify({'success': True, 'msg': 'SMS Send'}), 200
 
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
