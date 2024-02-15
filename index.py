@@ -1536,12 +1536,11 @@ def send_medical_certificate_sms():
             json_data = response.json()
             medical_cert_srt = json_data["short_url"]
             print(medical_cert_srt)
-            print(json_data)
         else:
             print("Error:", response.status_code)
         msg = f"Hello, Download Link for your Medical Certificate is {medical_cert_srt} \n Team MCF CAMP"
         phn = student_data['phn']
-        # sendSMS(msg,phn)
+        sendSMS(msg,phn)
 
         return jsonify({'success': True, 'msg': 'SMS Send'}), 200
 
