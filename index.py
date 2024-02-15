@@ -48,6 +48,19 @@ def hello_world():
 def home():
     return 'home page'
 
+def sendSMS(msg,phn):
+    if msg and phn:
+        url = "http://msg.msgclub.net/rest/services/sendSMS/sendGroupSms"
+        msg_text = msg
+        phn_no = phn
+        querystring = {"AUTH_KEY":"2b4186d8fc21f47949e7f5e92b56390","message":msg_text,"senderId":"MCFCMP","routeId":"1","mobileNos":phn_no,"smsContentType":"english"}
+        headers = {'Cache-Control': "no-cache"}
+        response = requests.request("GET", url, headers=headers, params=querystring)
+        print(response.text)
+        return 0
+    else:
+        return 1
+
 
 # ------------------------------------------------------------------------------------------------------------
 
@@ -465,6 +478,9 @@ def register_student():
                 return jsonify({"message": "Student registered successfully", "sid": sid})
             else:
                 return jsonify({"message": "Batch is Already Full !"})
+            
+        msg = "Dear Parent, Thank you for registering with MCF Camp, for any registration and payment-related query please visit us at www.mcfcamp.in. Or contact us at 9604087000/9604082000, or email us at mcfcamp@gmail.com MARSHAL CADEF"
+        sendSMS(msg,str(data["phn"]))
 
         return jsonify({"message": "Student registered successfully", "sid": sid})
 
@@ -1436,6 +1452,102 @@ def send_medical_certificate():
     
 @app.route("/sendVisitingCard", methods=["GET"])
 def send_visiting_card():
+    try:
+        # collection = db["students_db"]
+        sid = request.args.get('sid')
+        students_db = db["students_db"]
+        student_data = students_db.find_one({"sid":sid}, {"_id":0})
+        mailToSend = student_data['email']
+        # Send the password reset link via email
+        sender_email = "partbarse92@gmail.com"
+        smtp_server = smtplib.SMTP("smtp.gmail.com", 587)
+        smtp_server.ehlo()
+        smtp_server.starttls()
+        smtp_server.login("partbarse92@gmail.com", "xdfrjwaxctwqpzyg")
+
+        message_text = f"Hello {student_data['first_name']}, \n\n You can download your Visiting Card from below Link. \n {student_data['visiting_card']} \n\n You need to print the Visiting Card and bring to camp for parents to visit Student"
+        message = MIMEText(message_text)
+        message["Subject"] = "MCF Camp Visiting Card"
+        message["From"] = sender_email
+        message["To"] = mailToSend
+
+        smtp_server.sendmail(sender_email, mailToSend, message.as_string())
+        smtp_server.quit()
+
+        return jsonify({'success': True, 'msg': 'Mail Send'}), 200
+
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+    
+
+
+
+
+
+
+# Endpoint for requesting password reset (for admin)
+@app.route("/sendEntranceCard_sms", methods=["GET"])
+def send_entrance_card_sms():
+    try:
+        # collection = db["students_db"]
+        sid = request.args.get('sid')
+        students_db = db["students_db"]
+        student_data = students_db.find_one({"sid":sid}, {"_id":0})
+        mailToSend = student_data['email']
+        # Send the password reset link via email
+        sender_email = "partbarse92@gmail.com"
+        smtp_server = smtplib.SMTP("smtp.gmail.com", 587)
+        smtp_server.ehlo()
+        smtp_server.starttls()
+        smtp_server.login("partbarse92@gmail.com", "xdfrjwaxctwqpzyg")
+
+        message_text = f"Hello {student_data['first_name']}, \n\n You can download your Entrance Card from below Link. \n {student_data['entrence_card']} \n\n You need to print the Entrance Card and Bring to camp in Hardcopy."
+        message = MIMEText(message_text)
+        message["Subject"] = "MCF Camp Entrance Card"
+        message["From"] = sender_email
+        message["To"] = mailToSend
+
+        smtp_server.sendmail(sender_email, mailToSend, message.as_string())
+        smtp_server.quit()
+
+        return jsonify({'success': True, 'msg': 'Mail Send'}), 200
+
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+
+
+import requests
+# Endpoint for requesting password reset (for admin)
+@app.route("/sendMedicalCertificate_sms", methods=["GET"])
+def send_medical_certificate_sms():
+    try:
+        # collection = db["students_db"]
+        sid = request.args.get('sid')
+        students_db = db["students_db"]
+        student_data = students_db.find_one({"sid":sid}, {"_id":0})
+        medical_cert = student_data["medicalCertificate"]
+        medical_cert_srt = ''
+        url = "https://s.mcfcamp.in/shorten"
+        data = {
+            "url": medical_cert
+        }
+        response = requests.post(url, json=data)
+        if response.status_code == 200:
+            json_data = response.json()
+            medical_cert_srt = json_data['url']
+        else:
+            print("Error:", response.status_code)
+        msg = f"Hello, Download Link for your Medical Certificate is {medical_cert_srt} Team MCF CAMP"
+        phn = student_data['phn']
+        sendSMS(msg,phn)
+
+        return jsonify({'success': True, 'msg': 'Mail Send'}), 200
+
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+    
+@app.route("/sendVisitingCard_sms", methods=["GET"])
+def send_visiting_card_sms():
     try:
         # collection = db["students_db"]
         sid = request.args.get('sid')
