@@ -1534,8 +1534,8 @@ def send_medical_certificate_sms():
         response = requests.post(url, json=data)
         if response.status_code == 200:
             json_data = response.json()
-            # medical_cert_srt = json_data.get("url")
-            # print(medical_cert_srt)
+            medical_cert_srt = json_data["short_url"]
+            print(medical_cert_srt)
             print(json_data)
         else:
             print("Error:", response.status_code)
