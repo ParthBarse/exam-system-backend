@@ -60,6 +60,33 @@ def sendSMS(msg,phn):
         return 0
     else:
         return 1
+    
+def send_wp(sms_content, mobile_numbers):
+    api_url = "http://msg.msgclub.net/rest/services/sendSMS/sendGroupSms"
+    auth_key = "2b4186d8fc21f47949e7f5e92b56390"
+    route_id = "21"
+    sender_id = "8793015610"
+    sms_content_type = "english"
+    payload = {
+        "smsContent": sms_content,
+        "routeId": route_id,
+        "mobileNumbers": mobile_numbers,
+        "senderId": sender_id,
+        "smsContentType": sms_content_type
+    }
+    headers = {
+        "AUTH_KEY": auth_key,
+        "Content-Type": "application/json"
+    }
+    response = requests.post(api_url, json=payload, headers=headers)
+    if response.status_code == 200:
+        response_json = response.json()
+        if 'response' in response_json:
+            return 0
+        else:
+            return 1
+    else:
+        return 1
 
 
 # ------------------------------------------------------------------------------------------------------------
@@ -1575,6 +1602,44 @@ def send_visiting_card_sms():
 
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+
+
+
+
+
+
+
+
+@app.route("/sendMedicalCertificate_wp", methods=["GET"])
+def send_medical_certificate_sms():
+    try:
+        # collection = db["students_db"]
+        sid = request.args.get('sid')
+        students_db = db["students_db"]
+        student_data = students_db.find_one({"sid":sid}, {"_id":0})
+        medical_cert = student_data["medicalCertificate"]
+        medical_cert_srt = ''
+        url = "https://s.mcfcamp.in/shorten"
+        data = {
+            "url": medical_cert
+        }
+        response = requests.post(url, json=data)
+        if response.status_code == 200:
+            json_data = response.json()
+            medical_cert_srt = json_data["short_url"]
+            print(medical_cert_srt)
+        else:
+            print("Error:", response.status_code)
+        msg = f"Hello, Download Link for your Medical Certificate is {medical_cert_srt} \n Team MCF CAMP"
+        phn = student_data['phn']
+        send_wp(msg,phn)
+
+        return jsonify({'success': True, 'msg': 'SMS Send'}), 200
+
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+    
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0")
