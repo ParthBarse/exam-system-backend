@@ -1611,7 +1611,7 @@ def send_visiting_card_sms():
 
 
 @app.route("/sendMedicalCertificate_wp", methods=["GET"])
-def send_medical_certificate_sms():
+def send_medical_certificate_wp():
     try:
         # collection = db["students_db"]
         sid = request.args.get('sid')
