@@ -1520,24 +1520,24 @@ def send_entrance_card_sms():
         sid = request.args.get('sid')
         students_db = db["students_db"]
         student_data = students_db.find_one({"sid":sid}, {"_id":0})
-        mailToSend = student_data['email']
-        # Send the password reset link via email
-        sender_email = "partbarse92@gmail.com"
-        smtp_server = smtplib.SMTP("smtp.gmail.com", 587)
-        smtp_server.ehlo()
-        smtp_server.starttls()
-        smtp_server.login("partbarse92@gmail.com", "xdfrjwaxctwqpzyg")
+        entrence_card = student_data["entrence_card"]
+        entrence_card_srt = ''
+        url = "https://s.mcfcamp.in/shorten"
+        data = {
+            "url": entrence_card
+        }
+        response = requests.post(url, json=data)
+        if response.status_code == 200:
+            json_data = response.json()
+            entrence_card_srt = json_data["short_url"]
+            print(entrence_card_srt)
+        else:
+            print("Error:", response.status_code)
+        msg = f"Hello, Download Link for your Entrance Card is {entrence_card_srt} \n Team MCF CAMP"
+        phn = student_data['phn']
+        sendSMS(msg,phn)
 
-        message_text = f"Hello {student_data['first_name']}, \n\n You can download your Entrance Card from below Link. \n {student_data['entrence_card']} \n\n You need to print the Entrance Card and Bring to camp in Hardcopy."
-        message = MIMEText(message_text)
-        message["Subject"] = "MCF Camp Entrance Card"
-        message["From"] = sender_email
-        message["To"] = mailToSend
-
-        smtp_server.sendmail(sender_email, mailToSend, message.as_string())
-        smtp_server.quit()
-
-        return jsonify({'success': True, 'msg': 'Mail Send'}), 200
+        return jsonify({'success': True, 'msg': 'SMS Send'}), 200
 
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
@@ -1573,6 +1573,7 @@ def send_medical_certificate_sms():
 
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+        
     
 @app.route("/sendVisitingCard_sms", methods=["GET"])
 def send_visiting_card_sms():
@@ -1581,24 +1582,24 @@ def send_visiting_card_sms():
         sid = request.args.get('sid')
         students_db = db["students_db"]
         student_data = students_db.find_one({"sid":sid}, {"_id":0})
-        mailToSend = student_data['email']
-        # Send the password reset link via email
-        sender_email = "partbarse92@gmail.com"
-        smtp_server = smtplib.SMTP("smtp.gmail.com", 587)
-        smtp_server.ehlo()
-        smtp_server.starttls()
-        smtp_server.login("partbarse92@gmail.com", "xdfrjwaxctwqpzyg")
+        visiting_card = student_data["visiting_card"]
+        visiting_card_srt = ''
+        url = "https://s.mcfcamp.in/shorten"
+        data = {
+            "url": visiting_card
+        }
+        response = requests.post(url, json=data)
+        if response.status_code == 200:
+            json_data = response.json()
+            visiting_card_srt = json_data["short_url"]
+            print(visiting_card_srt)
+        else:
+            print("Error:", response.status_code)
+        msg = f"Hello, Download Link for your Visiting Card is {visiting_card_srt} \n Team MCF CAMP"
+        phn = student_data['phn']
+        sendSMS(msg,phn)
 
-        message_text = f"Hello {student_data['first_name']}, \n\n You can download your Visiting Card from below Link. \n {student_data['visiting_card']} \n\n You need to print the Visiting Card and bring to camp for parents to visit Student"
-        message = MIMEText(message_text)
-        message["Subject"] = "MCF Camp Visiting Card"
-        message["From"] = sender_email
-        message["To"] = mailToSend
-
-        smtp_server.sendmail(sender_email, mailToSend, message.as_string())
-        smtp_server.quit()
-
-        return jsonify({'success': True, 'msg': 'Mail Send'}), 200
+        return jsonify({'success': True, 'msg': 'SMS Send'}), 200
 
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
@@ -1609,6 +1610,37 @@ def send_visiting_card_sms():
 
 
 
+
+
+@app.route("/sendEntranceCard_wp", methods=["GET"])
+def send_entrance_card_wp():
+    try:
+        # collection = db["students_db"]
+        sid = request.args.get('sid')
+        students_db = db["students_db"]
+        student_data = students_db.find_one({"sid":sid}, {"_id":0})
+        entrence_card = student_data["entrence_card"]
+        entrence_card_srt = ''
+        url = "https://s.mcfcamp.in/shorten"
+        data = {
+            "url": entrence_card
+        }
+        response = requests.post(url, json=data)
+        if response.status_code == 200:
+            json_data = response.json()
+            entrence_card_srt = json_data["short_url"]
+            print(entrence_card_srt)
+        else:
+            print("Error:", response.status_code)
+        msg = f"Hello, Download Link for your Entrance Card is {entrence_card_srt} \n Team MCF CAMP"
+        phn = student_data['phn']
+        send_wp(msg,phn)
+
+        return jsonify({'success': True, 'msg': 'SMS Send'}), 200
+
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+    
 
 @app.route("/sendMedicalCertificate_wp", methods=["GET"])
 def send_medical_certificate_wp():
@@ -1631,6 +1663,36 @@ def send_medical_certificate_wp():
         else:
             print("Error:", response.status_code)
         msg = f"Hello, Download Link for your Medical Certificate is {medical_cert_srt} \n Team MCF CAMP"
+        phn = student_data['phn']
+        send_wp(msg,phn)
+
+        return jsonify({'success': True, 'msg': 'SMS Send'}), 200
+
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+    
+
+@app.route("/sendVisitingCard_wp", methods=["GET"])
+def send_visiting_card_sms():
+    try:
+        # collection = db["students_db"]
+        sid = request.args.get('sid')
+        students_db = db["students_db"]
+        student_data = students_db.find_one({"sid":sid}, {"_id":0})
+        visiting_card = student_data["visiting_card"]
+        visiting_card_srt = ''
+        url = "https://s.mcfcamp.in/shorten"
+        data = {
+            "url": visiting_card
+        }
+        response = requests.post(url, json=data)
+        if response.status_code == 200:
+            json_data = response.json()
+            visiting_card_srt = json_data["short_url"]
+            print(visiting_card_srt)
+        else:
+            print("Error:", response.status_code)
+        msg = f"Hello, Download Link for your Visiting Card is {visiting_card_srt} \n Team MCF CAMP"
         phn = student_data['phn']
         send_wp(msg,phn)
 
