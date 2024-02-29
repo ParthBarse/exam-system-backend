@@ -354,10 +354,14 @@ def register_student():
                     'STD': data.get("standard", ""),
                     'SCHOOL': data.get("school_name", ""),
                     'FEE_PAID': '',
-                    'BALANCE': '',
-                    'RECEIPT_NUM': '',
+                    'BALANCE': 0,
+                    # 'RECEIPT_NUM': '',
                     'DATE': '',
-                    'TIME': ''
+                    'TIME': '',
+                    'total_amount_payable':0,
+                    "total_amount_paid":0,
+                    "discount_code":"",
+                    "discount_amount":0,
                 }
                 doc = Document('mcf_entrance_card.docx')
 
@@ -1700,6 +1704,41 @@ def send_visiting_card_wp():
 
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+    
+
+
+@app.route('/createPayment', methods=['POST'])
+def createPayment():
+    try:
+        data = request.get_json()
+        if 'payment_option' not in data or 'payment_amount' not in data or 'sid' not in data:
+            return jsonify({"error": "Both 'payment_option' and 'payment_amount' and 'sid' are required."}), 400
+        payment_id = str(uuid.uuid4().hex)
+        receipt_no = str(uuid.uuid4().hex)
+        all_payments = db["all_payments"]
+        all_payments.insert_one({
+            "payment_id": payment_id,
+            "payment_option": data['payment_option'],
+            "payment_amount": data['payment_amount'],
+            "payment_date":data["payment_date"],
+            "transaction_id":data["transaction_id"],
+            "payment_mode":data["payment_mode"],
+            "sid":data['sid'],
+            "receipt_no":receipt_no
+        })
+        students_db = db['students_db']
+        student_data = students_db.find_one({"sid":data['sid']}, {"_id":0})
+        total_paid = student_data['total_amount_paid']
+        total_paid = int(total_paid) + int(data['payment_amount'])
+        student_data['total_amount_paid'] = total_paid
+        students_db.update_one({"sid": data['sid']}, {"$set": student_data})
+
+        return jsonify({"message": f"Payment added successfully.", "payment_id": payment_id})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+
+
     
 
 
