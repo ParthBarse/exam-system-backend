@@ -1743,7 +1743,7 @@ def createPayment():
         students_db = db['students_db']
         student_data = students_db.find_one({"sid":data['sid']}, {"_id":0})
         total_paid = student_data['total_amount_paid']
-        total_paid = int(total_paid) + int(data['payment_amount'])
+        total_paid = float(total_paid) + float(data['payment_amount'])
         student_data['total_amount_paid'] = total_paid
         students_db.update_one({"sid": data['sid']}, {"$set": student_data})
         # Load the document template
