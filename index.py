@@ -257,6 +257,30 @@ def replace_image_in_cell(doc, table_index, row_index, column_index, image_path)
 # replace_image_in_cell(doc, table_index=0, row_index=4, column_index=2, image_path=image_path_mother)
 # replace_image_in_cell(doc, table_index=0, row_index=4, column_index=6, image_path=image_path_cadet)
 # replace_image_in_cell(doc, table_index=0, row_index=4, column_index=8, image_path=image_path_guardian)
+    
+
+
+
+
+def set_paragraph_font_fee_receipt(paragraph, font_name, font_size, bold=False):
+    for run in paragraph.runs:
+        font = run.font
+        font.name = font_name
+        font.size = Pt(font_size)                   
+
+def find_and_replace_paragraphs_fee_receipt(paragraphs, field, replacement):
+    for paragraph in paragraphs:
+        if field in paragraph.text:
+            paragraph.text = paragraph.text.replace(field, replacement)
+            set_paragraph_font_fee_receipt(paragraph, 'Times New Roman', 11, False)
+
+def find_and_replace_tables_fee_receipt(tables, field, replacement):
+    for table in tables:
+        for row in table.rows:
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    find_and_replace_paragraphs_fee_receipt([paragraph], field, replacement)
+
         
 
 
@@ -1716,24 +1740,232 @@ def createPayment():
         payment_id = str(uuid.uuid4().hex)
         receipt_no = str(uuid.uuid4().hex)
         all_payments = db["all_payments"]
-        all_payments.insert_one({
-            "payment_id": payment_id,
-            "payment_option": data['payment_option'],
-            "payment_amount": data['payment_amount'],
-            "payment_date":data["payment_date"],
-            "transaction_id":data["transaction_id"],
-            "payment_mode":data["payment_mode"],
-            "sid":data['sid'],
-            "receipt_no":receipt_no
-        })
         students_db = db['students_db']
         student_data = students_db.find_one({"sid":data['sid']}, {"_id":0})
         total_paid = student_data['total_amount_paid']
         total_paid = int(total_paid) + int(data['payment_amount'])
         student_data['total_amount_paid'] = total_paid
         students_db.update_one({"sid": data['sid']}, {"$set": student_data})
+        # Load the document template
 
-        return jsonify({"message": f"Payment added successfully.", "payment_id": payment_id})
+        batch_id = student_data['batch_id']
+        batch_db = db["batches_db"]
+        batch_data = batch_db.find_one({"batch_id":batch_id}, {"_id":0})
+        batch_dur = batch_data['duration']
+
+        camp_id = student_data['camp_id']
+        camp_db = db["camps_db"]
+        camp_data = camp_db.find_one({"camp_id":camp_id}, {"_id":0})
+        
+
+        # all_payments.insert_one({
+        #         "payment_id": payment_id,
+        #         "payment_option": data['payment_option'],
+        #         "payment_amount": data['payment_amount'],
+        #         "payment_date":data["payment_date"],
+        #         "transaction_id":data["transaction_id"],
+        #         "payment_mode":data["payment_mode"],
+        #         "sid":data['sid'],
+        #         "receipt_no":receipt_no,
+        #         "receipt_url":f"https://files.bnbdevelopers.in/mcf_files/{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+        #     })
+
+        if "7" in batch_dur:
+            doc = Document('fee_receipt_7.docx')
+            final_data = {
+                "REG_NO": student_data['sid'],
+                "RECEIPT_NO": receipt_no,
+                "DATE":data["payment_date"],
+                "C_BATCH":batch_data['batch_name'],
+                "CADET_NAME": str(student_data['first_name']+" "+student_data['last_name']),
+                "ADDRESS": student_data['address'],
+                "CONTACT_NO": student_data['phn'],
+                "CAMP_NAME":camp_data['camp_name'],
+                "CAMP_DATE":batch_data['start_date'],
+                "TRANS_ID":data['transaction_id'],
+                "TRANS_AMT":data['payment_amount'],
+                "PAY_MODE":data["payment_mode"],
+                "AMOUNT":camp_data['Fees'],
+                "DISCOUNT":student_data['discount_amount'],
+                "PAYABLE_FEES":data['total_amount_payable'],
+                "NET_PAID":total_paid,
+                "BALANCE":float(data['total_amount_payable'])-float(total_paid),
+                "AMOUNT_INWORDS":"",
+                "1_INST_AMT":"-",
+                "1_INST_DT":"-",
+                "2_INST_AMT":"-",
+                "2_INST_DT":"-"
+                }
+            
+            if "totalPayment" in data['payment_option']:
+                for key, value in final_data.items():
+                        find_and_replace_tables_fee_receipt(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+                doc.save(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
+
+                convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
+
+
+                all_payments.insert_one({
+                "payment_id": payment_id,
+                "payment_option": data['payment_option'],
+                "payment_amount": data['payment_amount'],
+                "payment_date":data["payment_date"],
+                "transaction_id":data["transaction_id"],
+                "payment_mode":data["payment_mode"],
+                "sid":data['sid'],
+                "receipt_no":receipt_no,
+                "receipt_url":f"https://files.bnbdevelopers.in/mcf_files/{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+            })
+                
+            elif "1installment" in data['payment_option']:
+                final_data['1_INST_AMT'] = data['payment_amount']
+                final_data['1_INST_DT'] = data["payment_date"]
+                for key, value in final_data.items():
+                        find_and_replace_tables_fee_receipt(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+                doc.save(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
+
+                convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
+
+
+                all_payments.insert_one({
+                "payment_id": payment_id,
+                "payment_option": data['payment_option'],
+                "payment_amount": data['payment_amount'],
+                "payment_date":data["payment_date"],
+                "transaction_id":data["transaction_id"],
+                "payment_mode":data["payment_mode"],
+                "sid":data['sid'],
+                "receipt_no":receipt_no,
+                "receipt_url":f"https://files.bnbdevelopers.in/mcf_files/{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+            })
+                
+
+            elif '2installment' in data['payment_option']:
+                final_data['2_INST_AMT'] = data['payment_amount']
+                final_data['2_INST_DT'] = data["payment_date"]
+                for key, value in final_data.items():
+                        find_and_replace_tables_fee_receipt(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+                doc.save(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
+
+                convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
+
+
+                all_payments.insert_one({
+                "payment_id": payment_id,
+                "payment_option": data['payment_option'],
+                "payment_amount": data['payment_amount'],
+                "payment_date":data["payment_date"],
+                "transaction_id":data["transaction_id"],
+                "payment_mode":data["payment_mode"],
+                "sid":data['sid'],
+                "receipt_no":receipt_no,
+                "receipt_url":f"https://files.bnbdevelopers.in/mcf_files/{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+            })
+                
+
+            else:
+                return {"error":"Please Specify Payment Option"}
+
+            return jsonify({"message": f"Payment added successfully.", "payment_id": payment_id})
+        
+        elif "15" in batch_dur or "30" in batch_dur:
+            doc = Document('fee_receipt_15_30.docx')
+
+            final_data = {
+                "REG_NO": student_data['sid'],
+                "RECEIPT_NO": receipt_no,
+                "DATE":data["payment_date"],
+                "C_BATCH":batch_data['batch_name'],
+                "CADET_NAME": str(student_data['first_name']+" "+student_data['last_name']),
+                "ADDRESS": student_data['address'],
+                "CONTACT_NO": student_data['phn'],
+                "CAMP_NAME":camp_data['camp_name'],
+                "CAMP_DATE":batch_data['start_date'],
+                "TRANS_ID":data['transaction_id'],
+                "TRANS_AMT":data['payment_amount'],
+                "PAY_MODE":data["payment_mode"],
+                "AMOUNT":camp_data['Fees'],
+                "DISCOUNT":student_data['discount_amount'],
+                "PAYABLE_FEES":data['total_amount_payable'],
+                "NET_PAID":total_paid,
+                "BALANCE":float(data['total_amount_payable'])-float(total_paid),
+                "AMOUNT_INWORDS":"",
+                "1_INST_AMT":"-",
+                "1_INST_DT":"-",
+                "2_INST_AMT":"-",
+                "2_INST_DT":"-"
+                }
+            
+            if "totalPayment" in data['payment_option']:
+                for key, value in final_data.items():
+                        find_and_replace_tables_fee_receipt(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+                doc.save(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
+
+                convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
+
+
+                all_payments.insert_one({
+                "payment_id": payment_id,
+                "payment_option": data['payment_option'],
+                "payment_amount": data['payment_amount'],
+                "payment_date":data["payment_date"],
+                "transaction_id":data["transaction_id"],
+                "payment_mode":data["payment_mode"],
+                "sid":data['sid'],
+                "receipt_no":receipt_no,
+                "receipt_url":f"https://files.bnbdevelopers.in/mcf_files/{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+            })
+
+            elif "1installment" in data['payment_option']:
+                final_data['1_INST_AMT'] = data['payment_amount']
+                final_data['1_INST_DT'] = data["payment_date"]
+                for key, value in final_data.items():
+                        find_and_replace_tables_fee_receipt(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+                doc.save(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
+
+                convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
+
+
+                all_payments.insert_one({
+                "payment_id": payment_id,
+                "payment_option": data['payment_option'],
+                "payment_amount": data['payment_amount'],
+                "payment_date":data["payment_date"],
+                "transaction_id":data["transaction_id"],
+                "payment_mode":data["payment_mode"],
+                "sid":data['sid'],
+                "receipt_no":receipt_no,
+                "receipt_url":f"https://files.bnbdevelopers.in/mcf_files/{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+            })
+
+            elif '2installment' in data['payment_option']:
+                final_data['2_INST_AMT'] = data['payment_amount']
+                final_data['2_INST_DT'] = data["payment_date"]
+                for key, value in final_data.items():
+                        find_and_replace_tables_fee_receipt(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+                doc.save(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
+
+                convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
+
+
+                all_payments.insert_one({
+                "payment_id": payment_id,
+                "payment_option": data['payment_option'],
+                "payment_amount": data['payment_amount'],
+                "payment_date":data["payment_date"],
+                "transaction_id":data["transaction_id"],
+                "payment_mode":data["payment_mode"],
+                "sid":data['sid'],
+                "receipt_no":receipt_no,
+                "receipt_url":f"https://files.bnbdevelopers.in/mcf_files/{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+            })
+                
+            else:
+                return {"error":"Please Specify Payment Option"}
+
+            return jsonify({"message": f"Payment added successfully.", "payment_id": payment_id})
+        else:
+            return {"error":"Invalid Batch Duration"}
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
