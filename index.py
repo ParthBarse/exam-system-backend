@@ -272,7 +272,7 @@ def find_and_replace_paragraphs_fee_receipt(paragraphs, field, replacement):
     for paragraph in paragraphs:
         if field in paragraph.text:
             paragraph.text = paragraph.text.replace(field, replacement)
-            set_paragraph_font_fee_receipt(paragraph, 'Times New Roman', 11, False)
+            set_paragraph_font_fee_receipt(paragraph, 'Times New Roman', 9, False)
 
 def find_and_replace_tables_fee_receipt(tables, field, replacement):
     for table in tables:
