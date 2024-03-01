@@ -381,11 +381,7 @@ def register_student():
                     'BALANCE': 0,
                     # 'RECEIPT_NUM': '',
                     'DATE': '',
-                    'TIME': '',
-                    'total_amount_payable':0,
-                    "total_amount_paid":0,
-                    "discount_code":"",
-                    "discount_amount":0,
+                    'TIME': ''
                 }
                 doc = Document('mcf_entrance_card.docx')
 
@@ -520,7 +516,11 @@ def register_student():
             "parentGurdianSign":data.get("parentGurdianSign",""),
             "payment_status": data.get("payment_status", "Pending"),
             "entrence_card":entrance_cert_url,
-            "visiting_card":visiting_card_url
+            "visiting_card":visiting_card_url,
+            'total_amount_payable':0,
+            "total_amount_paid":0,
+            "discount_code":"",
+            "discount_amount":0,
         }
 
         # Store the student information in the MongoDB collection
