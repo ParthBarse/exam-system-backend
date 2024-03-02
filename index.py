@@ -87,6 +87,24 @@ def send_wp(sms_content, mobile_numbers):
             return 1
     else:
         return 1
+    
+
+def send_email(msg, sub, mailToSend):
+    # Send the password reset link via email
+    sender_email = "partbarse92@gmail.com"
+    smtp_server = smtplib.SMTP("smtp.gmail.com", 587)
+    smtp_server.ehlo()
+    smtp_server.starttls()
+    smtp_server.login("partbarse92@gmail.com", "xdfrjwaxctwqpzyg")
+
+    message_text = msg
+    message = MIMEText(message_text)
+    message["Subject"] = sub
+    message["From"] = sender_email
+    message["To"] = mailToSend
+
+    smtp_server.sendmail(sender_email, mailToSend, message.as_string())
+    smtp_server.quit()
 
 
 # ------------------------------------------------------------------------------------------------------------
@@ -618,7 +636,11 @@ def register_student():
                 return jsonify({"message": "Batch is Already Full !"})
             
         msg = "Dear Parent, Thank you for registering with MCF Camp, for any registration and payment-related query please visit us at www.mcfcamp.in. Or contact us at 9604087000/9604082000, or email us at mcfcamp@gmail.com MARSHAL CADEF"
-        sendSMS(msg,str(data["phn"]))
+        sub = "Registration Successful !"
+        mailToSend = data['email']
+        sendSMS(msg,data["phn"])
+        send_wp(msg,data["wp_no"])
+        send_email(msg, sub, mailToSend)
 
         return jsonify({"message": "Student registered successfully", "sid": sid})
 
