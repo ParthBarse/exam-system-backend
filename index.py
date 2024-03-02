@@ -396,7 +396,9 @@ def register_student():
                 day = start_date[0:2]
                 batch_name = batch["batch_name"].replace(" ", "")
 
-                sid = str(camp_short)+str(year)+str(day)+str(batch_name)+str(company)+str(sr_no)
+                company_sf = str(company[0])+"C"
+
+                sid = str(camp_short)+str(year)+str(day)+str(batch_name)+str(company_sf)+str(sr_no)
 
                 document_med_path = 'medical_certificate.docx'
 
