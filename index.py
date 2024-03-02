@@ -1856,8 +1856,8 @@ def sendReceipt_wp():
         sid = request.args.get('sid')
         payments_db = db["all_payments"]
         payment_data = payments_db.find_one({"payment_id":payment_id}, {"_id":0})
-        payments_db = db["all_payments"]
-        student_data = payments_db.find_one({"sid":sid}, {"_id":0})
+        students_db = db["students_db"]
+        student_data = students_db.find_one({"sid":sid}, {"_id":0})
 
         receipt = payment_data["receipt_url"]
         receipt_srt = ''
@@ -1891,8 +1891,8 @@ def sendReceipt_email():
         sid = request.args.get('sid')
         payments_db = db["all_payments"]
         payment_data = payments_db.find_one({"payment_id":payment_id}, {"_id":0})
-        payments_db = db["all_payments"]
-        student_data = payments_db.find_one({"sid":sid}, {"_id":0})
+        students_db = db["students_db"]
+        student_data = students_db.find_one({"sid":sid}, {"_id":0})
 
         receipt = payment_data["receipt_url"]
         receipt_srt = ''
