@@ -346,6 +346,40 @@ def replace_image_in_cell_admission_form(doc, table_index, row_index, column_ind
     run.add_picture(image_path, width=Inches(1.4))
     paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
+
+
+
+def number_to_words(num):
+    # Define lists of words for numbers
+    units = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine']
+    teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen']
+    tens = ['Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety']
+    thousands = ['', 'Thousand', 'Million', 'Billion', 'Trillion']
+
+    # Function to convert numbers less than 1000 to words
+    def helper(num):
+        if num == 0:
+            return ''
+        elif num < 10:
+            return units[num]
+        elif num < 20:
+            return teens[num - 10]
+        elif num < 100:
+            return tens[num // 10 - 2] + ' ' + helper(num % 10)
+        else:
+            return units[num // 100] + ' Hundred ' + helper(num % 100)
+
+    if num == 0:
+        return 'Zero'
+
+    words = ''
+    for i in range(len(thousands)):
+        if num % 1000 != 0:
+            words = helper(num % 1000) + thousands[i] + ' ' + words
+        num //= 1000
+
+    return words.strip()
+
         
 
 
@@ -1984,7 +2018,7 @@ def createPayment():
                 "PAYABLE_FEES":student_data['total_amount_payable'],
                 "NET_PAID":total_paid,
                 "BALANCE":float(student_data['total_amount_payable'])-float(total_paid),
-                "AMOUNT_INWORDS":"",
+                "AMOUNT_INWORDS":number_to_words(int(data['payment_amount'])),
                 "1_INST_AMT":"-",
                 "1_INST_DT":"-",
                 "2_INST_AMT":"-",
@@ -2090,7 +2124,7 @@ def createPayment():
                 "PAYABLE_FEES":student_data['total_amount_payable'],
                 "NET_PAID":total_paid,
                 "BALANCE":float(student_data['total_amount_payable'])-float(total_paid),
-                "AMOUNT_INWORDS":"",
+                "AMOUNT_INWORDS":number_to_words(int(data['payment_amount'])),
                 "1_INST_AMT":"-",
                 "1_INST_DT":"-",
                 "2_INST_AMT":"-",
