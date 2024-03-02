@@ -517,10 +517,10 @@ def register_student():
             "payment_status": data.get("payment_status", "Pending"),
             "entrence_card":entrance_cert_url,
             "visiting_card":visiting_card_url,
-            'total_amount_payable':0,
+            'total_amount_payable':int(data.get("total_amount_payable", 0)),
             "total_amount_paid":0,
-            "discount_code":"",
-            "discount_amount":0,
+            "discount_code":data.get("discount_code", ""),
+            "discount_amount":int(data.get("discount_amount", 0)),
         }
 
         # Store the student information in the MongoDB collection
