@@ -91,24 +91,28 @@ def send_wp(sms_content, mobile_numbers):
     
 
 def send_email(msg, sub, mailToSend):
-    # Send the password reset link via email
-    sender_email = "partbarse92@gmail.com"
-    smtp_server = smtplib.SMTP("smtp.gmail.com", 587)
-    smtp_server.ehlo()
-    smtp_server.starttls()
-    smtp_server.login("partbarse92@gmail.com", "xdfrjwaxctwqpzyg")
+    try:
+        # Send the password reset link via email
+        sender_email = "partbarse92@gmail.com"
+        smtp_server = smtplib.SMTP("smtp.gmail.com", 587)
+        smtp_server.ehlo()
+        smtp_server.starttls()
+        smtp_server.login("partbarse92@gmail.com", "xdfrjwaxctwqpzyg")
 
-    message_text = msg
-    message = MIMEText(message_text)
-    message["Subject"] = sub
-    message["From"] = sender_email
-    message["To"] = mailToSend
+        message_text = msg
+        message = MIMEText(message_text)
+        message["Subject"] = sub
+        message["From"] = sender_email
+        message["To"] = mailToSend
 
-    smtp_server.sendmail(sender_email, mailToSend, message.as_string())
-    print(mailToSend)
-    print("Send Mail")
-    smtp_server.quit()
-
+        smtp_server.sendmail(sender_email, mailToSend, message.as_string())
+        print(mailToSend)
+        print("Send Mail")
+        smtp_server.quit()
+        return 0
+    except Exception as e:
+        print(str(e))
+        return 1
 
 # ------------------------------------------------------------------------------------------------------------
 
@@ -397,8 +401,9 @@ def register_student():
                 batch_name = batch["batch_name"].replace(" ", "")
 
                 company_sf = str(company[0])+"C"
+                days = str(batch['duration'])+"D"
 
-                sid = str(camp_short)+str(year)+str(day)+str(batch_name)+str(company_sf)+str(sr_no)
+                sid = str(camp_short)+str(year)+str(days)+str(batch_name)+str(company_sf)+str(sr_no)
 
                 document_med_path = 'medical_certificate.docx'
 
@@ -1771,7 +1776,7 @@ def send_entrance_card_wp():
         else:
             print("Error:", response.status_code)
         msg = f"Hello, Download Link for your Entrance Card is {entrence_card_srt} \n Team MCF CAMP"
-        phn = student_data['phn']
+        phn = student_data['wp_no']
         send_wp(msg,phn)
 
         return jsonify({'success': True, 'msg': 'SMS Send'}), 200
@@ -1801,7 +1806,7 @@ def send_medical_certificate_wp():
         else:
             print("Error:", response.status_code)
         msg = f"Hello, Download Link for your Medical Certificate is {medical_cert_srt} \n Team MCF CAMP"
-        phn = student_data['phn']
+        phn = student_data['wp_no']
         send_wp(msg,phn)
 
         return jsonify({'success': True, 'msg': 'SMS Send'}), 200
@@ -1831,13 +1836,92 @@ def send_visiting_card_wp():
         else:
             print("Error:", response.status_code)
         msg = f"Hello, Download Link for your Visiting Card is {visiting_card_srt} \n Team MCF CAMP"
-        phn = student_data['phn']
+        phn = student_data['wp_no']
         send_wp(msg,phn)
 
         return jsonify({'success': True, 'msg': 'SMS Send'}), 200
 
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+
+
+
+
+
+@app.route("/sendReceipt_wp", methods=["GET"])
+def sendReceipt_wp():
+    try:
+        # collection = db["students_db"]
+        payment_id = request.args.get('payment_id')
+        sid = request.args.get('sid')
+        payments_db = db["all_payments"]
+        payment_data = payments_db.find_one({"payment_id":payment_id}, {"_id":0})
+        payments_db = db["all_payments"]
+        student_data = payments_db.find_one({"sid":sid}, {"_id":0})
+
+        receipt = payment_data["receipt_url"]
+        receipt_srt = ''
+        url = "https://s.mcfcamp.in/shorten"
+        data = {
+            "url": receipt
+        }
+        response = requests.post(url, json=data)
+        if response.status_code == 200:
+            json_data = response.json()
+            receipt_srt = json_data["short_url"]
+            print(receipt_srt)
+        else:
+            print("Error:", response.status_code)
+        msg = f"Hello, Download Link for your Payment Receipt is {receipt_srt} \n Team MCF CAMP"
+        phn = student_data['wp_no']
+        send_wp(msg,phn)
+
+        return jsonify({'success': True, 'msg': 'SMS Send'}), 200
+
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+    
+
+
+@app.route("/sendReceipt_email", methods=["GET"])
+def sendReceipt_email():
+    try:
+        # collection = db["students_db"]
+        payment_id = request.args.get('payment_id')
+        sid = request.args.get('sid')
+        payments_db = db["all_payments"]
+        payment_data = payments_db.find_one({"payment_id":payment_id}, {"_id":0})
+        payments_db = db["all_payments"]
+        student_data = payments_db.find_one({"sid":sid}, {"_id":0})
+
+        receipt = payment_data["receipt_url"]
+        receipt_srt = ''
+        url = "https://s.mcfcamp.in/shorten"
+        data = {
+            "url": receipt
+        }
+        response = requests.post(url, json=data)
+        if response.status_code == 200:
+            json_data = response.json()
+            receipt_srt = json_data["short_url"]
+            print(receipt_srt)
+        else:
+            print("Error:", response.status_code)
+        msg = f"Hello, Download Link for your Payment Receipt is {receipt_srt} \n Team MCF CAMP"
+        email = student_data['email']
+        send_email(msg=msg, sub="Payment Receipt Download Link", mailToSend=email)
+
+        return jsonify({'success': True, 'msg': 'SMS Send'}), 200
+
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+        
+    
+
+
+
+
+#----------------------------------------------------------------------------------
     
 
 
