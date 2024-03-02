@@ -2059,6 +2059,13 @@ def createPayment():
 
             else:
                 return {"error":"Please Specify Payment Option"}
+            
+            payment_receipt_url = f"https://files.bnbdevelopers.in/mcf_files/{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+            
+            msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {student_data['entrence_card']} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
+            
+            send_email(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'])
+            send_wp(msg,student_data['wp_no'])
 
             return jsonify({"message": f"Payment added successfully.", "payment_id": payment_id})
         
