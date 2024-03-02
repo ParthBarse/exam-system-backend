@@ -1984,6 +1984,31 @@ def getStudentPayment():
 
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+    
+
+
+@app.route('/deletePayment', methods=['DELETE'])
+def delete_payment():
+    try:
+        payment_db = db["all_payments"]
+        payment_id = request.args.get('payment_id')
+
+        if not payment_id:
+            return jsonify({"error": "Missing 'payment_id' parameter in the request."}), 400  # Bad Request
+
+        # Find the student based on payment_id
+        payment = payment_db.find_one({"payment_id": payment_id})
+
+        if not payment:
+            return jsonify({"error": f"No student found with payment_id: {payment_id}"}), 404  # Not Found
+
+        # Delete the student from the database
+        payment_db.delete_one({"payment_id": payment_id})
+
+        return jsonify({"message": f"Student with payment_id {payment_id} deleted successfully"})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
 
 
     
