@@ -281,6 +281,46 @@ def find_and_replace_tables_fee_receipt(tables, field, replacement):
                 for paragraph in cell.paragraphs:
                     find_and_replace_paragraphs_fee_receipt([paragraph], field, replacement)
 
+
+
+
+
+
+from docx import Document
+from docx.shared import Inches, Pt
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+
+
+def set_paragraph_font_admission_form(paragraph, font_name, font_size, bold=False):
+    for run in paragraph.runs:
+        font = run.font
+        font.name = font_name
+        font.size = Pt(font_size)                   
+
+def find_and_replace_paragraphs_admission_form(paragraphs, field, replacement):
+    for paragraph in paragraphs:
+        if field in paragraph.text:
+            paragraph.text = paragraph.text.replace(field, replacement)
+            set_paragraph_font_admission_form(paragraph, 'Times New Roman', 11, False)
+
+def find_and_replace_tables_admission_form(tables, field, replacement):
+    for table in tables:
+        for row in table.rows:
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    find_and_replace_paragraphs_admission_form([paragraph], field, replacement)
+
+
+def replace_image_in_cell_admission_form(doc, table_index, row_index, column_index, image_path):
+    table = doc.tables[table_index]
+    cell = table.cell(row_index, column_index)
+    for paragraph in cell.paragraphs:
+        paragraph.clear()
+    paragraph = cell.add_paragraph()
+    run = paragraph.add_run()
+    run.add_picture(image_path, width=Inches(1.4))
+    paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
         
 
 
@@ -458,12 +498,54 @@ def register_student():
                     doc1.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_visit_card.docx"))
 
                     convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_visit_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_visit_card.pdf"))
+
+
+
+                    doc = Document('admission_form.docx')
+                    student_data1 = {
+                    "REG_NO": sid,
+                    "FIRST_NAME": str(data["first_name"].upper()),
+                    "MIDDLE_NAME": str(data["middle_name"].upper()),
+                    "LAST_NAME": str(data["last_name"].upper()),
+                    "EMAIL_ID": str(data["email"]),
+                    "CONTACT_NO": str(data["phn"]),
+                    "DATE_OF_BIRTH": str(data["dob"]),
+                    "ADDRESS": str(data["address"]),
+                    "HOW_YOU_GOT_TO_KNOW": str(data["how_you_got_to_know"]),
+                    "EMPLOYEE_WHO_REACHED_OUT": str(data["employee_who_reached_out_to_you"]),
+                    "DISTRICT": str(data["district"]),
+                    "STATE": data["state"],
+                    "PINCODE": data["pincode"],
+                    "PICKUP_POINT": data["pick_up_point"],
+                    "BLOOD_GROUP": data["blood_group"],
+                    "SCHOOL_NAME": data["school_name"],
+                    "GENDER": data["gender"],
+                    "STANDARD": data["standard"],
+                    "WHATSAPP_NO": data["wp_no"],
+                    "PARENT_NAME":data["middle_name"],
+                    "CAMP_NAME":camp_name,
+                    "CAMP_DATE":batch["start_date"],
+                    "CAMP_DAYS":batch["duration"]
+                    }
+                    for key, value in student_data1.items():
+                            find_and_replace_tables_admission_form(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+
+                    image_path_sign_url = data["cadetSign"]
+                    image_path_sign = image_path_sign_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
+                    replace_image_in_cell(doc, table_index=0, row_index=26, column_index=1, image_path=cadet_photo_path)
+                    replace_image_in_cell(doc, table_index=0, row_index=28, column_index=7, image_path=image_path_sign)
+
+                    doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_admission_form.docx"))
+
+                    convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_admission_form.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_admission_form.pdf"))
+                                   
                 except Exception as e:
                     print("Error : ", str(e))
 
                 entrance_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_entrance_card.pdf"
                 medical_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_MEDICAL_CER.pdf"
                 visiting_card_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_visit_card.pdf"
+                admission_form = f"https://files.bnbdevelopers.in/mcf_files/{sid}_admission_form.pdf"
 
             else:
                 return jsonify({"message": "Batch is Already Full !"})
@@ -517,6 +599,7 @@ def register_student():
             "payment_status": data.get("payment_status", "Pending"),
             "entrence_card":entrance_cert_url,
             "visiting_card":visiting_card_url,
+            "admission_form":admission_form,
             'total_amount_payable':int(data.get("total_amount_payable", 0)),
             "total_amount_paid":0,
             "discount_code":data.get("discount_code", ""),
@@ -2004,7 +2087,6 @@ def delete_payment():
         payment_db.delete_one({"payment_id": payment_id})
 
         students_db = db['students_db']
-
         student_data = students_db.find_one({"sid":sid}, {"_id":0})
         total_paid = student_data['total_amount_paid']
         total_paid = float(total_paid) - float(payment_amount)
