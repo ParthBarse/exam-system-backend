@@ -82,6 +82,7 @@ def send_wp(sms_content, mobile_numbers):
     if response.status_code == 200:
         response_json = response.json()
         if 'response' in response_json:
+            print("Send WP")
             return 0
         else:
             return 1
@@ -104,6 +105,8 @@ def send_email(msg, sub, mailToSend):
     message["To"] = mailToSend
 
     smtp_server.sendmail(sender_email, mailToSend, message.as_string())
+    print(mailToSend)
+    print("Send Mail")
     smtp_server.quit()
 
 
