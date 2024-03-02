@@ -1978,6 +1978,7 @@ def getStudentPayment():
         sid = request.args.get('sid')
         students_db = db["all_payments"]
         payment_data = students_db.find({"sid":sid}, {"_id":0})
+        payment_data = list(payment_data)
 
         return jsonify({'success': True, "payments":payment_data}), 200
 
