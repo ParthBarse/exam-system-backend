@@ -1969,6 +1969,20 @@ def createPayment():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+
+@app.route("/getStudentPayment", methods=["GET"])
+def getStudentPayment():
+    try:
+        # collection = db["students_db"]
+        sid = request.args.get('sid')
+        students_db = db["all_payments"]
+        payment_data = students_db.find({"sid":sid}, {"_id":0})
+
+        return jsonify({'success': True, "payments":payment_data}), 200
+
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
 
 
     
