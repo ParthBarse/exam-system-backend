@@ -1993,7 +1993,7 @@ def delete_payment():
         payment_db = db["all_payments"]
         payment_id = request.args.get('payment_id')
         sid = request.args.get('sid')
-        payment_amount = request.args.get('payment_id')
+        payment_amount = request.args.get('payment_amount')
 
         if not payment_id:
             return jsonify({"error": "Missing 'payment_id' parameter in the request."}), 400  # Bad Request
