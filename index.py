@@ -1992,18 +1992,24 @@ def delete_payment():
     try:
         payment_db = db["all_payments"]
         payment_id = request.args.get('payment_id')
+        sid = request.args.get('sid')
+        payment_amount = request.args.get('payment_id')
 
         if not payment_id:
             return jsonify({"error": "Missing 'payment_id' parameter in the request."}), 400  # Bad Request
-
-        # Find the student based on payment_id
         payment = payment_db.find_one({"payment_id": payment_id})
 
         if not payment:
             return jsonify({"error": f"No student found with payment_id: {payment_id}"}), 404  # Not Found
-
-        # Delete the student from the database
         payment_db.delete_one({"payment_id": payment_id})
+
+        students_db = db['students_db']
+
+        student_data = students_db.find_one({"sid":sid}, {"_id":0})
+        total_paid = student_data['total_amount_paid']
+        total_paid = float(total_paid) - float(payment_amount)
+        student_data['total_amount_paid'] = total_paid
+        students_db.update_one({"sid": sid}, {"$set": student_data})
 
         return jsonify({"message": f"Student with payment_id {payment_id} deleted successfully"})
 
