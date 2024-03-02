@@ -2215,6 +2215,37 @@ def delete_payment():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+
+
+@app.route("/sendAllDocuments", methods=["GET"])
+def sendAllDocuments():
+    try:
+        # collection = db["students_db"]
+        sid = request.args.get('sid')
+        students_db = db["students_db"]
+        student_data = students_db.find_one({"sid":sid}, {"_id":0})
+
+        mailToSend = student_data['email']
+
+        payment_db = db["all_payments"]
+        payment_data = payment_db.find({"sid":sid},{"_id":0})
+        payment_data = list(payment_data)
+
+        payment_receipt_urls = []
+
+        for data in payment_data:
+            payment_receipt_urls.append(data['receipt_url'])
+
+        msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_urls}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {student_data['entrence_card']} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
+            
+        send_email(msg=msg, sub="All Documents Download Links", mailToSend=mailToSend)
+        send_wp(msg,student_data['wp_no'])
+
+        return jsonify({'success': True, 'msg': 'Mail Send'}), 200
+
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
 
 
     
