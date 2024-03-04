@@ -2266,12 +2266,15 @@ def sendAllDocuments():
         payment_data = payment_db.find({"sid":sid},{"_id":0})
         payment_data = list(payment_data)
 
-        payment_receipt_urls = []
+        payment_links = ''
 
+        c=1
         for data in payment_data:
-            payment_receipt_urls.append(data['receipt_url'])
+            payment_links += f"{c}) - {data['receipt_url']}\n"
+            c+=1
 
-        msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_urls}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {student_data['entrence_card']} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
+
+        msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_links}\n\n Medical Certificate - {student_data['medicalCertificate']} \n\nEntrance Card - {student_data['entrence_card']} \n\nVisiting Card - {student_data['visiting_card']} \n\nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
             
         send_email(msg=msg, sub="All Documents Download Links", mailToSend=mailToSend)
         send_wp(msg,student_data['wp_no'])
