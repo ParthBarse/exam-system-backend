@@ -1978,9 +1978,11 @@ def createPayment():
             batch_data = batch_db.find_one({"batch_id":batch_id}, {"_id":0})
             payment_db = db["all_payments"]
             payment_data = payment_db.find({"sid":data['sid']}, {"_id":0})
-            receipt_nos = ""
+            receipt_nos = "2024/3-101"
             for receipt in payment_data:
-                receipt_nos = receipt_nos + str(str(receipt['receipt_no'])+ " , ")
+                receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
+                print(receipt_nos)
+            print(receipt_nos)
 
             student_data_1 = {
                     'CADET_NAME': str(student_data["first_name"].upper()+" "+student_data["last_name"].upper()),
