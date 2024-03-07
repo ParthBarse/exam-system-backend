@@ -1980,7 +1980,7 @@ def createPayment():
             payment_data = payment_db.find({"sid":data['sid']}, {"_id":0})
             receipt_nos = ""
             payment_data = list(payment_data)
-            print(payment_data)
+            print(len(payment_data))
             for receipt in payment_data:
                 receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
                 print(receipt_nos)
