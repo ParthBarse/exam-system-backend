@@ -2371,7 +2371,7 @@ def resetDiscount():
         students_db = db["students_db"]
         camps_db = db["camps_db"]
         student_data = students_db.find({"sid":sid}, {"_id":0})
-        camp_data = camps_db.find({"camp_id":camp_id}, {"_id":0})
+        camp_data = camps_db.find_one({"camp_id":camp_id}, {"_id":0})
 
         original_amt = camp_data['camp_fee']
         reset_data = {
