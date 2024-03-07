@@ -1978,7 +1978,7 @@ def createPayment():
             batch_data = batch_db.find_one({"batch_id":batch_id}, {"_id":0})
             payment_db = db["all_payments"]
             payment_data = payment_db.find({"sid":data['sid']}, {"_id":0})
-            receipt_nos = "2024/3-101"
+            receipt_nos = ""
             for receipt in payment_data:
                 receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
                 print(receipt_nos)
