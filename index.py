@@ -1973,7 +1973,7 @@ def createPayment():
         total_paid = student_data['total_amount_paid']
         total_paid = float(total_paid) + float(data['payment_amount'])
         student_data['total_amount_paid'] = total_paid
-        if total_paid >= student_data['total_amount_payable']:
+        if float(total_paid) >= float(student_data['total_amount_payable']):
             student_data['status'] = "Active"
         students_db.update_one({"sid": data['sid']}, {"$set": student_data})
         # Load the document template
