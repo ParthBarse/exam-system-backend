@@ -631,7 +631,7 @@ def register_student():
             "district": data["district"].upper(),
             "state": data["state"].upper(),
             "pincode": str(data["pincode"]),
-            "status": "Active",
+            "status": "In Progress",
             "camp_id": data.get("camp_id", ""),
             "camp_category": data.get("camp_category", "").upper(),
             "batch_id": data.get("batch_id", ""),
@@ -665,7 +665,7 @@ def register_student():
             'total_amount_payable':int(data.get("total_amount_payable", 0)),
             "total_amount_paid":0,
             "discount_code":data.get("discount_code", ""),
-            "discount_amount":int(data.get("discount_amount", 0)),
+            "discount_amount":int(0),
         }
 
         # Store the student information in the MongoDB collection
@@ -1973,6 +1973,8 @@ def createPayment():
         total_paid = student_data['total_amount_paid']
         total_paid = float(total_paid) + float(data['payment_amount'])
         student_data['total_amount_paid'] = total_paid
+        if total_paid >= student_data['total_amount_payable']:
+            student_data['status'] = "Active"
         students_db.update_one({"sid": data['sid']}, {"$set": student_data})
         # Load the document template
 
@@ -2280,6 +2282,33 @@ def sendAllDocuments():
         send_wp(msg,student_data['wp_no'])
 
         return jsonify({'success': True, 'msg': 'Mail Send'}), 200
+
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+    
+
+
+@app.route("/resetDiscount", methods=["GET"])
+def resetDiscount():
+    try:
+        # collection = db["students_db"]
+        sid = request.args.get('sid')
+        camp_id = request.args.get('camp_id')
+        students_db = db["students_db"]
+        camps_db = db["camps_db"]
+        student_data = students_db.find({"sid":sid}, {"_id":0})
+        camp_data = camps_db.find({"camp_id":camp_id}, {"_id":0})
+
+        original_amt = camp_data['camp_fee']
+        reset_data = {
+            "total_amount_payable":original_amt,
+            "discount_amount":0
+        }
+
+        students_db.update_one({"sid": sid}, {"$set": reset_data})
+
+
+        return jsonify({'success': True, "msg":'Reset Successful'}), 200
 
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
