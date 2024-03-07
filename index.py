@@ -1980,7 +1980,7 @@ def createPayment():
             payment_data = payment_db.find({"sid":data['sid']}, {"_id":0})
             receipt_nos = ""
             for receipt in payment_data:
-                receipt_nos += receipt['receipt_no']+ " , "
+                receipt_nos = receipt_nos + str(str(receipt['receipt_no'])+ " , ")
 
             student_data_1 = {
                     'CADET_NAME': str(student_data["first_name"].upper()+" "+student_data["last_name"].upper()),
@@ -2038,7 +2038,7 @@ def createPayment():
                 # Add a new paragraph and insert the image
                 paragraph = cell.add_paragraph()
                 run = paragraph.add_run()
-                cadet_photo_url = data["cadetPhoto"]
+                cadet_photo_url = student_data["cadetPhoto"]
                 cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
                 run.add_picture(cadet_photo_path, width=Inches(0.9))
             except Exception as e:
