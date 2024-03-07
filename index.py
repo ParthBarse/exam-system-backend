@@ -1983,7 +1983,7 @@ def createPayment():
                 receipt_nos += receipt['receipt_no']+ " , "
 
             student_data_1 = {
-                    'CADET_NAME': str(data["first_name"].upper()+" "+data["last_name"].upper()),
+                    'CADET_NAME': str(student_data["first_name"].upper()+" "+student_data["last_name"].upper()),
                     'REGNO': data['sid'],
                     'RANK': 'CDT',
                     'C_NAME': camp_data['camp_name'],
