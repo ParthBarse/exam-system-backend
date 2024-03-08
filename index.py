@@ -267,7 +267,7 @@ def replace_image_in_cell(doc, table_index, row_index, column_index, image_path)
     # Add a new paragraph and insert the image
     paragraph = cell.add_paragraph()
     run = paragraph.add_run()
-    run.add_picture(image_path, width=Inches(1.4))
+    run.add_picture(image_path, width=Inches(1.4), height=Inches(1.8))
 
     # Align the paragraph to the center
     paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
@@ -453,83 +453,20 @@ def register_student():
                 }
                 replace_fields_in_document_med(document_med_path, field_values)
 
-                # student_data = {
-                #     'CADET_NAME': str(data["first_name"].upper()+" "+data["last_name"].upper()),
-                #     'REGNO': sid,
-                #     'RANK': '',
-                #     'C_NAME': camp_name,
-                #     'C_BATCH': batch_name,
-                #     'C_DAYS': batch["duration"],
-                #     'COMP_N': company,
-                #     'C_DATE': start_date,
-                #     'PICKPT': data["pick_up_point"],
-                #     'PICK_TIME': '',
-                #     'EMP_NAME':  data["employee_who_reached_out_to_you"],
-                #     'GAR_NAME': "",
-                #     'ADDRESS': data["address"],
-                #     'CITY': data["pick_up_city"],
-                #     'DISTRICT': data["district"],
-                #     'STATE': data['state'],
-                #     'PINCODE': data["pincode"],
-                #     'EMAIL': data["email"],
-                #     'C_NUM': str(data["phn"]),
-                #     'WP_NUM': data.get("wp_no", ""),
-                #     'FATHER_NUM': '',
-                #     'MOTHER_NUM': '',
-                #     'DOB': data["dob"],
-                #     'BLOOD_GROUP':  data.get("blood_group", ""),
-                #     'STD': data.get("standard", ""),
-                #     'SCHOOL': data.get("school_name", ""),
-                #     'FEE_PAID': student_data['total_amount_paid'],
-                #     'BALANCE': 0,
-                #     'RECEIPT_NUM': '',
-                #     'DATE': '',
-                #     'TIME': ''
-                # }
-
-                # doc = Document('mcf_entrance_card.docx')
-
-                # # Replace text fields in paragraphs
-                # find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD CADET_NAME}', student_data['CADET_NAME'])
-                # find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD DATE}', student_data['DATE'])
-                # find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD TIME}', student_data['TIME'])
-
-                # for key, value in student_data.items():
-                #         find_and_replace_tables_entrance_card(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
-
-                # try:
-                #     print("replacing image")
-                #     table = doc.tables[0]  # Assuming the first table
-                #     cell = table.cell(0, 3)  # Assuming the first cell in the third column
-
-                #     # Clear the content of the cell by removing its paragraphs
-                #     for paragraph in cell.paragraphs:
-                #         paragraph.clear()
-
-                #     # Add a new paragraph and insert the image
-                #     paragraph = cell.add_paragraph()
-                #     run = paragraph.add_run()
-                #     cadet_photo_url = data["cadetPhoto"]
-                #     cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
-                #     run.add_picture(cadet_photo_path, width=Inches(0.9))
-                # except Exception as e:
-                #     print("Error : ",str(e))
-
-                # doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_entrance_card.docx"))
-
-                # convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_entrance_card.pdf"))
-
                 # Load the document template
                 doc1 = Document('visit_card.docx')
 
                 # Sample student_data
                 student_data1 = {
                     'CADET_NAME': str(data["first_name"].upper()+" "+data["last_name"].upper()),
-                    'C_NAME': camp_name,
-                    'C_BATCH': batch_name,
+                    'CAMP_NAME': camp_name,
+                    'BATCH': batch_name,
                     'ADDRESS': data["address"],
-                    'C_NUM': data["phn"],
-                    'WP_NUM': data["wp_no"]
+                    'CONTACT': data["phn"],
+                    'WHATSAPP_NO': data["wp_no"],
+                    'CAMP_DATE':batch['start_date'],
+                    'REG_NO':data['sid'],
+                    'PICKUP_POINT':data['pick_up_point'],
                 }
 
                 for key, value in student_data1.items():
@@ -550,8 +487,8 @@ def register_student():
                     image_url_guardian = data["parentGurdianPhoto"]
                     image_path_guardian = image_url_guardian.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
                     
-                    replace_image_in_cell(doc1, table_index=0, row_index=4, column_index=6, image_path=cadet_photo_path)
-                    replace_image_in_cell(doc1, table_index=0, row_index=4, column_index=8, image_path=image_path_guardian)
+                    replace_image_in_cell(doc1, table_index=0, row_index=0, column_index=3, image_path=cadet_photo_path)
+                    replace_image_in_cell(doc1, table_index=0, row_index=0, column_index=4, image_path=image_path_guardian)
 
                     doc1.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_visit_card.docx"))
 
@@ -2017,6 +1954,7 @@ def createPayment():
                 "NET_PAID":total_paid,
                 "BALANCE":float(student_data['total_amount_payable'])-float(total_paid),
                 "AMOUNT_INWORDS":number_to_words(int(data['payment_amount'])),
+                "EMPLOYEE_NAME":student_data['employee_who_reached_out_to_you'],
                 "1_INST_AMT":"-",
                 "1_INST_DT":"-",
                 "2_INST_AMT":"-",
@@ -2402,6 +2340,7 @@ def createPayment():
                 "NET_PAID":total_paid,
                 "BALANCE":float(student_data['total_amount_payable'])-float(total_paid),
                 "AMOUNT_INWORDS":number_to_words(int(data['payment_amount'])),
+                "EMPLOYEE_NAME":student_data['employee_who_reached_out_to_you'],
                 "1_INST_AMT":"-",
                 "1_INST_DT":"-",
                 "2_INST_AMT":"-",
@@ -2895,11 +2834,11 @@ def bulkDownloadAdmissionCard():
 
         # Example usage
         directory = '/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/'
-        zip_filename = f"/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/All_{filter['camp_name']}_{filter['batch_name']}_{filter['status']}_Admission_Cards.zip"
+        zip_filename = f"/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/All_{filter['camp_id']}_{filter['batch_id']}_{filter['status']}_Admission_Cards.zip"
 
         create_zip(directory, fns, zip_filename)
 
-        zip_url = f"https://files.bnbdevelopers.in/mcf_files/All_{filter['camp_name']}_{filter['batch_name']}_{filter['status']}_Admission_Cards.zip"
+        zip_url = f"https://files.bnbdevelopers.in/mcf_files/All_{filter['camp_id']}_{filter['batch_id']}_{filter['status']}_Admission_Cards.zip"
 
 
         return jsonify({'success': True, "msg": zip_url}), 200
