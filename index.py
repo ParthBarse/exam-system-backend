@@ -2885,6 +2885,7 @@ def create_zip(directory, selected_files, zip_filename):
 def bulkDownloadAdmissionCard():
     try:
         data = request.data
+        pritn(data)
         # fns = []
         # for dt in data:
         #     admission_link = dt["admission_form"]
@@ -2898,7 +2899,7 @@ def bulkDownloadAdmissionCard():
         # create_zip(directory, selected_files, zip_filename)
 
 
-        return jsonify({'success': True, "msg":data}), 200
+        return jsonify({'success': True, "msg":list(data)}), 200
 
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
