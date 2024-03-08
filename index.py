@@ -2866,6 +2866,42 @@ def resetDiscount():
 
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+    
+
+import os
+import zipfile
+
+def create_zip(directory, selected_files, zip_filename):
+    with zipfile.ZipFile(zip_filename, 'w') as zipf:
+        for filename in selected_files:
+            filepath = os.path.join(directory, filename)
+            if os.path.exists(filepath):
+                zipf.write(filepath, arcname=filename)
+            else:
+                print(f"File '{filename}' not found in directory '{directory}'.")
+
+
+@app.route("/bulkDownloadAdmissionCard", methods=["POST"])
+def bulkDownloadAdmissionCard():
+    try:
+        data = request.body
+        # fns = []
+        # for dt in data:
+        #     admission_link = dt["admission_form"]
+        #     fn = admission_link.replace("https://files.bnbdevelopers.in/mcf_files/","")
+        #     fns.append(fn)
+
+        # # Example usage
+        # directory = '/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/'
+        # zip_filename = 'selected_files.zip'
+
+        # create_zip(directory, selected_files, zip_filename)
+
+
+        return jsonify({'success': True, "msg":data}), 200
+
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
 
 
     
