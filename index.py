@@ -2899,8 +2899,10 @@ def bulkDownloadAdmissionCard():
 
         create_zip(directory, fns, zip_filename)
 
+        zip_url = f"https://files.bnbdevelopers.in/mcf_files/All_{filter['camp_name']}_{filter['batch_name']}_{filter['status']}_Admission_Cards.zip"
 
-        return jsonify({'success': True, "msg":body}), 200
+
+        return jsonify({'success': True, "msg": zip_url}), 200
 
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
