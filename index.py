@@ -600,7 +600,7 @@ def register_student():
                 except Exception as e:
                     print("Error : ", str(e))
 
-                entrance_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_entrance_card.pdf"
+                # entrance_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_entrance_card.pdf"
                 medical_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_MEDICAL_CER.pdf"
                 visiting_card_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_visit_card.pdf"
                 admission_form = f"https://files.bnbdevelopers.in/mcf_files/{sid}_admission_form.pdf"
@@ -655,7 +655,6 @@ def register_student():
             "parentGurdianPhoto":data.get("parentGurdianPhoto",""),
             "parentGurdianSign":data.get("parentGurdianSign",""),
             "payment_status": data.get("payment_status", "Pending"),
-            "entrence_card":entrance_cert_url,
             "visiting_card":visiting_card_url,
             "admission_form":admission_form,
             'total_amount_payable':int(data.get("total_amount_payable", 0)),
@@ -1970,87 +1969,87 @@ def createPayment():
         total_paid = float(total_paid) + float(data['payment_amount'])
         student_data['total_amount_paid'] = total_paid
         if float(total_paid) >= float(student_data['total_amount_payable']):
-            camp_id = student_data['camp_id']
-            camp_db = db["camps_db"]
-            camp_data = camp_db.find_one({"camp_id":camp_id}, {"_id":0})
-            batch_id = student_data['batch_id']
-            batch_db = db["batches_db"]
-            batch_data = batch_db.find_one({"batch_id":batch_id}, {"_id":0})
-            payment_db = db["all_payments"]
-            payment_data = payment_db.find({"sid":data['sid']}, {"_id":0})
-            receipt_nos = ""
-            payment_data = list(payment_data)
-            print(len(payment_data))
-            for receipt in payment_data:
-                receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
-                print(receipt_nos)
-            print(receipt_nos)
+            # camp_id = student_data['camp_id']
+            # camp_db = db["camps_db"]
+            # camp_data = camp_db.find_one({"camp_id":camp_id}, {"_id":0})
+            # batch_id = student_data['batch_id']
+            # batch_db = db["batches_db"]
+            # batch_data = batch_db.find_one({"batch_id":batch_id}, {"_id":0})
+            # payment_db = db["all_payments"]
+            # payment_data = payment_db.find({"sid":data['sid']}, {"_id":0})
+            # receipt_nos = ""
+            # payment_data = list(payment_data)
+            # print(len(payment_data))
+            # for receipt in payment_data:
+            #     receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
+            #     print(receipt_nos)
+            # print(receipt_nos)
 
-            student_data_1 = {
-                    'CADET_NAME': str(student_data["first_name"].upper()+" "+student_data["last_name"].upper()),
-                    'REGNO': data['sid'],
-                    'RANK': 'CDT',
-                    'C_NAME': camp_data['camp_name'],
-                    'C_BATCH': batch_data['batch_name'],
-                    'C_DAYS': batch_data["duration"],
-                    'COMP_N': student_data['company'],
-                    'C_DATE': batch_data['start_date'],
-                    'PICKPT': student_data["pick_up_point"],
-                    'PICK_TIME': '',
-                    'EMP_NAME':  student_data["employee_who_reached_out_to_you"],
-                    'GAR_NAME': student_data["middle_name"],
-                    'ADDRESS': student_data["address"],
-                    'CITY': student_data["pick_up_city"],
-                    'DISTRICT': student_data["district"],
-                    'STATE': student_data['state'],
-                    'PINCODE': student_data["pincode"],
-                    'EMAIL': student_data["email"],
-                    'C_NUM': str(student_data["phn"]),
-                    'WP_NUM': student_data.get("wp_no", ""),
-                    'FATHER_NUM': '',
-                    'MOTHER_NUM': '',
-                    'DOB': student_data["dob"],
-                    'BLOOD_GROUP':  student_data.get("blood_group", ""),
-                    'STD': student_data.get("standard", ""),
-                    'SCHOOL': student_data.get("school_name", ""),
-                    'FEE_PAID': student_data['total_amount_paid'],
-                    'BALANCE': float(student_data['total_amount_payable']) - float(student_data['total_amount_paid']),
-                    'RECEIPT_NUM': receipt_nos,
-                    'DATE': '',
-                    'TIME': ''
-                }
+            # student_data_1 = {
+            #         'CADET_NAME': str(student_data["first_name"].upper()+" "+student_data["last_name"].upper()),
+            #         'REGNO': data['sid'],
+            #         'RANK': 'CDT',
+            #         'C_NAME': camp_data['camp_name'],
+            #         'C_BATCH': batch_data['batch_name'],
+            #         'C_DAYS': batch_data["duration"],
+            #         'COMP_N': student_data['company'],
+            #         'C_DATE': batch_data['start_date'],
+            #         'PICKPT': student_data["pick_up_point"],
+            #         'PICK_TIME': '',
+            #         'EMP_NAME':  student_data["employee_who_reached_out_to_you"],
+            #         'GAR_NAME': student_data["middle_name"],
+            #         'ADDRESS': student_data["address"],
+            #         'CITY': student_data["pick_up_city"],
+            #         'DISTRICT': student_data["district"],
+            #         'STATE': student_data['state'],
+            #         'PINCODE': student_data["pincode"],
+            #         'EMAIL': student_data["email"],
+            #         'C_NUM': str(student_data["phn"]),
+            #         'WP_NUM': student_data.get("wp_no", ""),
+            #         'FATHER_NUM': '',
+            #         'MOTHER_NUM': '',
+            #         'DOB': student_data["dob"],
+            #         'BLOOD_GROUP':  student_data.get("blood_group", ""),
+            #         'STD': student_data.get("standard", ""),
+            #         'SCHOOL': student_data.get("school_name", ""),
+            #         'FEE_PAID': student_data['total_amount_paid'],
+            #         'BALANCE': float(student_data['total_amount_payable']) - float(student_data['total_amount_paid']),
+            #         'RECEIPT_NUM': receipt_nos,
+            #         'DATE': '',
+            #         'TIME': ''
+            #     }
 
-            doc = Document('mcf_entrance_card.docx')
+            # doc = Document('mcf_entrance_card.docx')
 
-            # Replace text fields in paragraphs
-            find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD CADET_NAME}', student_data_1['CADET_NAME'])
-            find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD DATE}', student_data_1['DATE'])
-            find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD TIME}', student_data_1['TIME'])
+            # # Replace text fields in paragraphs
+            # find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD CADET_NAME}', student_data_1['CADET_NAME'])
+            # find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD DATE}', student_data_1['DATE'])
+            # find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD TIME}', student_data_1['TIME'])
 
-            for key, value in student_data_1.items():
-                    find_and_replace_tables_entrance_card(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+            # for key, value in student_data_1.items():
+            #         find_and_replace_tables_entrance_card(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
 
-            try:
-                print("replacing image")
-                table = doc.tables[0]  # Assuming the first table
-                cell = table.cell(0, 3)  # Assuming the first cell in the third column
+            # try:
+            #     print("replacing image")
+            #     table = doc.tables[0]  # Assuming the first table
+            #     cell = table.cell(0, 3)  # Assuming the first cell in the third column
 
-                # Clear the content of the cell by removing its paragraphs
-                for paragraph in cell.paragraphs:
-                    paragraph.clear()
+            #     # Clear the content of the cell by removing its paragraphs
+            #     for paragraph in cell.paragraphs:
+            #         paragraph.clear()
 
-                # Add a new paragraph and insert the image
-                paragraph = cell.add_paragraph()
-                run = paragraph.add_run()
-                cadet_photo_url = student_data["cadetPhoto"]
-                cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
-                run.add_picture(cadet_photo_path, width=Inches(0.9))
-            except Exception as e:
-                print("Error : ",str(e))
+            #     # Add a new paragraph and insert the image
+            #     paragraph = cell.add_paragraph()
+            #     run = paragraph.add_run()
+            #     cadet_photo_url = student_data["cadetPhoto"]
+            #     cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
+            #     run.add_picture(cadet_photo_path, width=Inches(0.9))
+            # except Exception as e:
+            #     print("Error : ",str(e))
 
-            doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"))
+            # doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"))
 
-            convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.pdf"))
+            # convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.pdf"))
             student_data['status'] = "Active"
             
         students_db.update_one({"sid": data['sid']}, {"$set": student_data})
@@ -2111,6 +2110,97 @@ def createPayment():
                 doc.save(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
 
                 convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
+                
+
+                if float(total_paid) >= float(student_data['total_amount_payable']):
+                    camp_id = student_data['camp_id']
+                    camp_db = db["camps_db"]
+                    camp_data = camp_db.find_one({"camp_id":camp_id}, {"_id":0})
+                    batch_id = student_data['batch_id']
+                    batch_db = db["batches_db"]
+                    batch_data = batch_db.find_one({"batch_id":batch_id}, {"_id":0})
+                    payment_db = db["all_payments"]
+                    payment_data = payment_db.find({"sid":data['sid']}, {"_id":0})
+                    receipt_nos = ""
+                    payment_data = list(payment_data)
+                    print(len(payment_data))
+                    for receipt in payment_data:
+                        receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
+                        print(receipt_nos)
+                    receipt_nos = str(receipt_nos + " , " + receipt_no)
+
+                    student_data_1 = {
+                            'CADET_NAME': str(student_data["first_name"].upper()+" "+student_data["last_name"].upper()),
+                            'REGNO': data['sid'],
+                            'RANK': 'CDT',
+                            'C_NAME': camp_data['camp_name'],
+                            'C_BATCH': batch_data['batch_name'],
+                            'C_DAYS': batch_data["duration"],
+                            'COMP_N': student_data['company'],
+                            'C_DATE': batch_data['start_date'],
+                            'PICKPT': student_data["pick_up_point"],
+                            'PICK_TIME': '',
+                            'EMP_NAME':  student_data["employee_who_reached_out_to_you"],
+                            'GAR_NAME': student_data["middle_name"],
+                            'ADDRESS': student_data["address"],
+                            'CITY': student_data["pick_up_city"],
+                            'DISTRICT': student_data["district"],
+                            'STATE': student_data['state'],
+                            'PINCODE': student_data["pincode"],
+                            'EMAIL': student_data["email"],
+                            'C_NUM': str(student_data["phn"]),
+                            'WP_NUM': student_data.get("wp_no", ""),
+                            'FATHER_NUM': '',
+                            'MOTHER_NUM': '',
+                            'DOB': student_data["dob"],
+                            'BLOOD_GROUP':  student_data.get("blood_group", ""),
+                            'STD': student_data.get("standard", ""),
+                            'SCHOOL': student_data.get("school_name", ""),
+                            'FEE_PAID': student_data['total_amount_paid'],
+                            'BALANCE': float(student_data['total_amount_payable']) - float(student_data['total_amount_paid']),
+                            'RECEIPT_NUM': receipt_nos,
+                            'DATE': '',
+                            'TIME': ''
+                        }
+
+                    doc = Document('mcf_entrance_card.docx')
+
+                    # Replace text fields in paragraphs
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD CADET_NAME}', student_data_1['CADET_NAME'])
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD DATE}', student_data_1['DATE'])
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD TIME}', student_data_1['TIME'])
+
+                    for key, value in student_data_1.items():
+                            find_and_replace_tables_entrance_card(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+
+                    try:
+                        print("replacing image")
+                        table = doc.tables[0]  # Assuming the first table
+                        cell = table.cell(0, 3)  # Assuming the first cell in the third column
+
+                        # Clear the content of the cell by removing its paragraphs
+                        for paragraph in cell.paragraphs:
+                            paragraph.clear()
+
+                        # Add a new paragraph and insert the image
+                        paragraph = cell.add_paragraph()
+                        run = paragraph.add_run()
+                        cadet_photo_url = student_data["cadetPhoto"]
+                        cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
+                        run.add_picture(cadet_photo_path, width=Inches(0.9))
+                    except Exception as e:
+                        print("Error : ",str(e))
+
+                    doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"))
+
+                    convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.pdf"))
+
+                    entrance_card = {
+                        "entrence_card" : f"https://files.bnbdevelopers.in/mcf_files/{data["sid"]}_entrance_card.pdf"
+                    }
+                    
+
+                    students_db.update_one({"sid": data['sid']}, {"$set": entrance_card})
 
 
                 all_payments.insert_one({
@@ -2135,6 +2225,97 @@ def createPayment():
                 convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
 
 
+                if float(total_paid) >= float(student_data['total_amount_payable']):
+                    camp_id = student_data['camp_id']
+                    camp_db = db["camps_db"]
+                    camp_data = camp_db.find_one({"camp_id":camp_id}, {"_id":0})
+                    batch_id = student_data['batch_id']
+                    batch_db = db["batches_db"]
+                    batch_data = batch_db.find_one({"batch_id":batch_id}, {"_id":0})
+                    payment_db = db["all_payments"]
+                    payment_data = payment_db.find({"sid":data['sid']}, {"_id":0})
+                    receipt_nos = ""
+                    payment_data = list(payment_data)
+                    print(len(payment_data))
+                    for receipt in payment_data:
+                        receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
+                        print(receipt_nos)
+                    receipt_nos = str(receipt_nos + " , " + receipt_no)
+
+                    student_data_1 = {
+                            'CADET_NAME': str(student_data["first_name"].upper()+" "+student_data["last_name"].upper()),
+                            'REGNO': data['sid'],
+                            'RANK': 'CDT',
+                            'C_NAME': camp_data['camp_name'],
+                            'C_BATCH': batch_data['batch_name'],
+                            'C_DAYS': batch_data["duration"],
+                            'COMP_N': student_data['company'],
+                            'C_DATE': batch_data['start_date'],
+                            'PICKPT': student_data["pick_up_point"],
+                            'PICK_TIME': '',
+                            'EMP_NAME':  student_data["employee_who_reached_out_to_you"],
+                            'GAR_NAME': student_data["middle_name"],
+                            'ADDRESS': student_data["address"],
+                            'CITY': student_data["pick_up_city"],
+                            'DISTRICT': student_data["district"],
+                            'STATE': student_data['state'],
+                            'PINCODE': student_data["pincode"],
+                            'EMAIL': student_data["email"],
+                            'C_NUM': str(student_data["phn"]),
+                            'WP_NUM': student_data.get("wp_no", ""),
+                            'FATHER_NUM': '',
+                            'MOTHER_NUM': '',
+                            'DOB': student_data["dob"],
+                            'BLOOD_GROUP':  student_data.get("blood_group", ""),
+                            'STD': student_data.get("standard", ""),
+                            'SCHOOL': student_data.get("school_name", ""),
+                            'FEE_PAID': student_data['total_amount_paid'],
+                            'BALANCE': float(student_data['total_amount_payable']) - float(student_data['total_amount_paid']),
+                            'RECEIPT_NUM': receipt_nos,
+                            'DATE': '',
+                            'TIME': ''
+                        }
+
+                    doc = Document('mcf_entrance_card.docx')
+
+                    # Replace text fields in paragraphs
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD CADET_NAME}', student_data_1['CADET_NAME'])
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD DATE}', student_data_1['DATE'])
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD TIME}', student_data_1['TIME'])
+
+                    for key, value in student_data_1.items():
+                            find_and_replace_tables_entrance_card(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+
+                    try:
+                        print("replacing image")
+                        table = doc.tables[0]  # Assuming the first table
+                        cell = table.cell(0, 3)  # Assuming the first cell in the third column
+
+                        # Clear the content of the cell by removing its paragraphs
+                        for paragraph in cell.paragraphs:
+                            paragraph.clear()
+
+                        # Add a new paragraph and insert the image
+                        paragraph = cell.add_paragraph()
+                        run = paragraph.add_run()
+                        cadet_photo_url = student_data["cadetPhoto"]
+                        cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
+                        run.add_picture(cadet_photo_path, width=Inches(0.9))
+                    except Exception as e:
+                        print("Error : ",str(e))
+
+                    doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"))
+
+                    convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.pdf"))
+
+                    entrance_card = {
+                        "entrence_card" : f"https://files.bnbdevelopers.in/mcf_files/{data["sid"]}_entrance_card.pdf"
+                    }
+                    
+
+                    students_db.update_one({"sid": data['sid']}, {"$set": entrance_card})
+
+
                 all_payments.insert_one({
                 "payment_id": payment_id,
                 "payment_option": data['payment_option'],
@@ -2156,6 +2337,97 @@ def createPayment():
                 doc.save(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
 
                 convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
+
+
+                if float(total_paid) >= float(student_data['total_amount_payable']):
+                    camp_id = student_data['camp_id']
+                    camp_db = db["camps_db"]
+                    camp_data = camp_db.find_one({"camp_id":camp_id}, {"_id":0})
+                    batch_id = student_data['batch_id']
+                    batch_db = db["batches_db"]
+                    batch_data = batch_db.find_one({"batch_id":batch_id}, {"_id":0})
+                    payment_db = db["all_payments"]
+                    payment_data = payment_db.find({"sid":data['sid']}, {"_id":0})
+                    receipt_nos = ""
+                    payment_data = list(payment_data)
+                    print(len(payment_data))
+                    for receipt in payment_data:
+                        receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
+                        print(receipt_nos)
+                    receipt_nos = str(receipt_nos + " , " + receipt_no)
+
+                    student_data_1 = {
+                            'CADET_NAME': str(student_data["first_name"].upper()+" "+student_data["last_name"].upper()),
+                            'REGNO': data['sid'],
+                            'RANK': 'CDT',
+                            'C_NAME': camp_data['camp_name'],
+                            'C_BATCH': batch_data['batch_name'],
+                            'C_DAYS': batch_data["duration"],
+                            'COMP_N': student_data['company'],
+                            'C_DATE': batch_data['start_date'],
+                            'PICKPT': student_data["pick_up_point"],
+                            'PICK_TIME': '',
+                            'EMP_NAME':  student_data["employee_who_reached_out_to_you"],
+                            'GAR_NAME': student_data["middle_name"],
+                            'ADDRESS': student_data["address"],
+                            'CITY': student_data["pick_up_city"],
+                            'DISTRICT': student_data["district"],
+                            'STATE': student_data['state'],
+                            'PINCODE': student_data["pincode"],
+                            'EMAIL': student_data["email"],
+                            'C_NUM': str(student_data["phn"]),
+                            'WP_NUM': student_data.get("wp_no", ""),
+                            'FATHER_NUM': '',
+                            'MOTHER_NUM': '',
+                            'DOB': student_data["dob"],
+                            'BLOOD_GROUP':  student_data.get("blood_group", ""),
+                            'STD': student_data.get("standard", ""),
+                            'SCHOOL': student_data.get("school_name", ""),
+                            'FEE_PAID': student_data['total_amount_paid'],
+                            'BALANCE': float(student_data['total_amount_payable']) - float(student_data['total_amount_paid']),
+                            'RECEIPT_NUM': receipt_nos,
+                            'DATE': '',
+                            'TIME': ''
+                        }
+
+                    doc = Document('mcf_entrance_card.docx')
+
+                    # Replace text fields in paragraphs
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD CADET_NAME}', student_data_1['CADET_NAME'])
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD DATE}', student_data_1['DATE'])
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD TIME}', student_data_1['TIME'])
+
+                    for key, value in student_data_1.items():
+                            find_and_replace_tables_entrance_card(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+
+                    try:
+                        print("replacing image")
+                        table = doc.tables[0]  # Assuming the first table
+                        cell = table.cell(0, 3)  # Assuming the first cell in the third column
+
+                        # Clear the content of the cell by removing its paragraphs
+                        for paragraph in cell.paragraphs:
+                            paragraph.clear()
+
+                        # Add a new paragraph and insert the image
+                        paragraph = cell.add_paragraph()
+                        run = paragraph.add_run()
+                        cadet_photo_url = student_data["cadetPhoto"]
+                        cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
+                        run.add_picture(cadet_photo_path, width=Inches(0.9))
+                    except Exception as e:
+                        print("Error : ",str(e))
+
+                    doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"))
+
+                    convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.pdf"))
+
+                    entrance_card = {
+                        "entrence_card" : f"https://files.bnbdevelopers.in/mcf_files/{data["sid"]}_entrance_card.pdf"
+                    }
+                    
+
+                    students_db.update_one({"sid": data['sid']}, {"$set": entrance_card})
 
 
                 all_payments.insert_one({
@@ -2219,6 +2491,97 @@ def createPayment():
                 convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
 
 
+                if float(total_paid) >= float(student_data['total_amount_payable']):
+                    camp_id = student_data['camp_id']
+                    camp_db = db["camps_db"]
+                    camp_data = camp_db.find_one({"camp_id":camp_id}, {"_id":0})
+                    batch_id = student_data['batch_id']
+                    batch_db = db["batches_db"]
+                    batch_data = batch_db.find_one({"batch_id":batch_id}, {"_id":0})
+                    payment_db = db["all_payments"]
+                    payment_data = payment_db.find({"sid":data['sid']}, {"_id":0})
+                    receipt_nos = ""
+                    payment_data = list(payment_data)
+                    print(len(payment_data))
+                    for receipt in payment_data:
+                        receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
+                        print(receipt_nos)
+                    receipt_nos = str(receipt_nos + " , " + receipt_no)
+
+                    student_data_1 = {
+                            'CADET_NAME': str(student_data["first_name"].upper()+" "+student_data["last_name"].upper()),
+                            'REGNO': data['sid'],
+                            'RANK': 'CDT',
+                            'C_NAME': camp_data['camp_name'],
+                            'C_BATCH': batch_data['batch_name'],
+                            'C_DAYS': batch_data["duration"],
+                            'COMP_N': student_data['company'],
+                            'C_DATE': batch_data['start_date'],
+                            'PICKPT': student_data["pick_up_point"],
+                            'PICK_TIME': '',
+                            'EMP_NAME':  student_data["employee_who_reached_out_to_you"],
+                            'GAR_NAME': student_data["middle_name"],
+                            'ADDRESS': student_data["address"],
+                            'CITY': student_data["pick_up_city"],
+                            'DISTRICT': student_data["district"],
+                            'STATE': student_data['state'],
+                            'PINCODE': student_data["pincode"],
+                            'EMAIL': student_data["email"],
+                            'C_NUM': str(student_data["phn"]),
+                            'WP_NUM': student_data.get("wp_no", ""),
+                            'FATHER_NUM': '',
+                            'MOTHER_NUM': '',
+                            'DOB': student_data["dob"],
+                            'BLOOD_GROUP':  student_data.get("blood_group", ""),
+                            'STD': student_data.get("standard", ""),
+                            'SCHOOL': student_data.get("school_name", ""),
+                            'FEE_PAID': student_data['total_amount_paid'],
+                            'BALANCE': float(student_data['total_amount_payable']) - float(student_data['total_amount_paid']),
+                            'RECEIPT_NUM': receipt_nos,
+                            'DATE': '',
+                            'TIME': ''
+                        }
+
+                    doc = Document('mcf_entrance_card.docx')
+
+                    # Replace text fields in paragraphs
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD CADET_NAME}', student_data_1['CADET_NAME'])
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD DATE}', student_data_1['DATE'])
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD TIME}', student_data_1['TIME'])
+
+                    for key, value in student_data_1.items():
+                            find_and_replace_tables_entrance_card(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+
+                    try:
+                        print("replacing image")
+                        table = doc.tables[0]  # Assuming the first table
+                        cell = table.cell(0, 3)  # Assuming the first cell in the third column
+
+                        # Clear the content of the cell by removing its paragraphs
+                        for paragraph in cell.paragraphs:
+                            paragraph.clear()
+
+                        # Add a new paragraph and insert the image
+                        paragraph = cell.add_paragraph()
+                        run = paragraph.add_run()
+                        cadet_photo_url = student_data["cadetPhoto"]
+                        cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
+                        run.add_picture(cadet_photo_path, width=Inches(0.9))
+                    except Exception as e:
+                        print("Error : ",str(e))
+
+                    doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"))
+
+                    convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.pdf"))
+
+                    entrance_card = {
+                        "entrence_card" : f"https://files.bnbdevelopers.in/mcf_files/{data["sid"]}_entrance_card.pdf"
+                    }
+                    
+
+                    students_db.update_one({"sid": data['sid']}, {"$set": entrance_card})
+
+
                 all_payments.insert_one({
                 "payment_id": payment_id,
                 "payment_option": data['payment_option'],
@@ -2241,6 +2604,97 @@ def createPayment():
                 convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
 
 
+                if float(total_paid) >= float(student_data['total_amount_payable']):
+                    camp_id = student_data['camp_id']
+                    camp_db = db["camps_db"]
+                    camp_data = camp_db.find_one({"camp_id":camp_id}, {"_id":0})
+                    batch_id = student_data['batch_id']
+                    batch_db = db["batches_db"]
+                    batch_data = batch_db.find_one({"batch_id":batch_id}, {"_id":0})
+                    payment_db = db["all_payments"]
+                    payment_data = payment_db.find({"sid":data['sid']}, {"_id":0})
+                    receipt_nos = ""
+                    payment_data = list(payment_data)
+                    print(len(payment_data))
+                    for receipt in payment_data:
+                        receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
+                        print(receipt_nos)
+                    receipt_nos = str(receipt_nos + " , " + receipt_no)
+
+                    student_data_1 = {
+                            'CADET_NAME': str(student_data["first_name"].upper()+" "+student_data["last_name"].upper()),
+                            'REGNO': data['sid'],
+                            'RANK': 'CDT',
+                            'C_NAME': camp_data['camp_name'],
+                            'C_BATCH': batch_data['batch_name'],
+                            'C_DAYS': batch_data["duration"],
+                            'COMP_N': student_data['company'],
+                            'C_DATE': batch_data['start_date'],
+                            'PICKPT': student_data["pick_up_point"],
+                            'PICK_TIME': '',
+                            'EMP_NAME':  student_data["employee_who_reached_out_to_you"],
+                            'GAR_NAME': student_data["middle_name"],
+                            'ADDRESS': student_data["address"],
+                            'CITY': student_data["pick_up_city"],
+                            'DISTRICT': student_data["district"],
+                            'STATE': student_data['state'],
+                            'PINCODE': student_data["pincode"],
+                            'EMAIL': student_data["email"],
+                            'C_NUM': str(student_data["phn"]),
+                            'WP_NUM': student_data.get("wp_no", ""),
+                            'FATHER_NUM': '',
+                            'MOTHER_NUM': '',
+                            'DOB': student_data["dob"],
+                            'BLOOD_GROUP':  student_data.get("blood_group", ""),
+                            'STD': student_data.get("standard", ""),
+                            'SCHOOL': student_data.get("school_name", ""),
+                            'FEE_PAID': student_data['total_amount_paid'],
+                            'BALANCE': float(student_data['total_amount_payable']) - float(student_data['total_amount_paid']),
+                            'RECEIPT_NUM': receipt_nos,
+                            'DATE': '',
+                            'TIME': ''
+                        }
+
+                    doc = Document('mcf_entrance_card.docx')
+
+                    # Replace text fields in paragraphs
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD CADET_NAME}', student_data_1['CADET_NAME'])
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD DATE}', student_data_1['DATE'])
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD TIME}', student_data_1['TIME'])
+
+                    for key, value in student_data_1.items():
+                            find_and_replace_tables_entrance_card(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+
+                    try:
+                        print("replacing image")
+                        table = doc.tables[0]  # Assuming the first table
+                        cell = table.cell(0, 3)  # Assuming the first cell in the third column
+
+                        # Clear the content of the cell by removing its paragraphs
+                        for paragraph in cell.paragraphs:
+                            paragraph.clear()
+
+                        # Add a new paragraph and insert the image
+                        paragraph = cell.add_paragraph()
+                        run = paragraph.add_run()
+                        cadet_photo_url = student_data["cadetPhoto"]
+                        cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
+                        run.add_picture(cadet_photo_path, width=Inches(0.9))
+                    except Exception as e:
+                        print("Error : ",str(e))
+
+                    doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"))
+
+                    convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.pdf"))
+
+                    entrance_card = {
+                        "entrence_card" : f"https://files.bnbdevelopers.in/mcf_files/{data["sid"]}_entrance_card.pdf"
+                    }
+                    
+
+                    students_db.update_one({"sid": data['sid']}, {"$set": entrance_card})
+
+
                 all_payments.insert_one({
                 "payment_id": payment_id,
                 "payment_option": data['payment_option'],
@@ -2261,6 +2715,97 @@ def createPayment():
                 doc.save(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
 
                 convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
+
+
+                if float(total_paid) >= float(student_data['total_amount_payable']):
+                    camp_id = student_data['camp_id']
+                    camp_db = db["camps_db"]
+                    camp_data = camp_db.find_one({"camp_id":camp_id}, {"_id":0})
+                    batch_id = student_data['batch_id']
+                    batch_db = db["batches_db"]
+                    batch_data = batch_db.find_one({"batch_id":batch_id}, {"_id":0})
+                    payment_db = db["all_payments"]
+                    payment_data = payment_db.find({"sid":data['sid']}, {"_id":0})
+                    receipt_nos = ""
+                    payment_data = list(payment_data)
+                    print(len(payment_data))
+                    for receipt in payment_data:
+                        receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
+                        print(receipt_nos)
+                    receipt_nos = str(receipt_nos + " , " + receipt_no)
+
+                    student_data_1 = {
+                            'CADET_NAME': str(student_data["first_name"].upper()+" "+student_data["last_name"].upper()),
+                            'REGNO': data['sid'],
+                            'RANK': 'CDT',
+                            'C_NAME': camp_data['camp_name'],
+                            'C_BATCH': batch_data['batch_name'],
+                            'C_DAYS': batch_data["duration"],
+                            'COMP_N': student_data['company'],
+                            'C_DATE': batch_data['start_date'],
+                            'PICKPT': student_data["pick_up_point"],
+                            'PICK_TIME': '',
+                            'EMP_NAME':  student_data["employee_who_reached_out_to_you"],
+                            'GAR_NAME': student_data["middle_name"],
+                            'ADDRESS': student_data["address"],
+                            'CITY': student_data["pick_up_city"],
+                            'DISTRICT': student_data["district"],
+                            'STATE': student_data['state'],
+                            'PINCODE': student_data["pincode"],
+                            'EMAIL': student_data["email"],
+                            'C_NUM': str(student_data["phn"]),
+                            'WP_NUM': student_data.get("wp_no", ""),
+                            'FATHER_NUM': '',
+                            'MOTHER_NUM': '',
+                            'DOB': student_data["dob"],
+                            'BLOOD_GROUP':  student_data.get("blood_group", ""),
+                            'STD': student_data.get("standard", ""),
+                            'SCHOOL': student_data.get("school_name", ""),
+                            'FEE_PAID': student_data['total_amount_paid'],
+                            'BALANCE': float(student_data['total_amount_payable']) - float(student_data['total_amount_paid']),
+                            'RECEIPT_NUM': receipt_nos,
+                            'DATE': '',
+                            'TIME': ''
+                        }
+
+                    doc = Document('mcf_entrance_card.docx')
+
+                    # Replace text fields in paragraphs
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD CADET_NAME}', student_data_1['CADET_NAME'])
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD DATE}', student_data_1['DATE'])
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD TIME}', student_data_1['TIME'])
+
+                    for key, value in student_data_1.items():
+                            find_and_replace_tables_entrance_card(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+
+                    try:
+                        print("replacing image")
+                        table = doc.tables[0]  # Assuming the first table
+                        cell = table.cell(0, 3)  # Assuming the first cell in the third column
+
+                        # Clear the content of the cell by removing its paragraphs
+                        for paragraph in cell.paragraphs:
+                            paragraph.clear()
+
+                        # Add a new paragraph and insert the image
+                        paragraph = cell.add_paragraph()
+                        run = paragraph.add_run()
+                        cadet_photo_url = student_data["cadetPhoto"]
+                        cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
+                        run.add_picture(cadet_photo_path, width=Inches(0.9))
+                    except Exception as e:
+                        print("Error : ",str(e))
+
+                    doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"))
+
+                    convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.pdf"))
+
+                    entrance_card = {
+                        "entrence_card" : f"https://files.bnbdevelopers.in/mcf_files/{data["sid"]}_entrance_card.pdf"
+                    }
+                    
+
+                    students_db.update_one({"sid": data['sid']}, {"$set": entrance_card})
 
 
                 all_payments.insert_one({
