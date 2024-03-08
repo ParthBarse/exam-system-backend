@@ -2114,7 +2114,7 @@ def createPayment():
 
                     convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.pdf"))
 
-                    ec = f"https://files.bnbdevelopers.in/mcf_files/{data["sid"]}_entrance_card.pdf"
+                    ec = f"https://files.bnbdevelopers.in/mcf_files/{data['sid']}_entrance_card.pdf"
 
                     entrance_card = {
                         "entrence_card" : ec
@@ -2229,7 +2229,7 @@ def createPayment():
 
                     convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.pdf"))
 
-                    ec = f"https://files.bnbdevelopers.in/mcf_files/{data["sid"]}_entrance_card.pdf"
+                    ec = f"https://files.bnbdevelopers.in/mcf_files/{data['sid']}_entrance_card.pdf"
 
                     entrance_card = {
                         "entrence_card" : ec
@@ -2345,7 +2345,7 @@ def createPayment():
 
                     convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.pdf"))
 
-                    ec = f"https://files.bnbdevelopers.in/mcf_files/{data["sid"]}_entrance_card.pdf"
+                    ec = f"https://files.bnbdevelopers.in/mcf_files/{data['sid']}_entrance_card.pdf"
 
                     entrance_card = {
                         "entrence_card" : ec
@@ -2499,7 +2499,7 @@ def createPayment():
 
                     convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.pdf"))
 
-                    ec = f"https://files.bnbdevelopers.in/mcf_files/{data["sid"]}_entrance_card.pdf"
+                    ec = f"https://files.bnbdevelopers.in/mcf_files/{data['sid']}_entrance_card.pdf"
 
                     entrance_card = {
                         "entrence_card" : ec
@@ -2614,7 +2614,7 @@ def createPayment():
 
                     convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.pdf"))
 
-                    ec = f"https://files.bnbdevelopers.in/mcf_files/{data["sid"]}_entrance_card.pdf"
+                    ec = f"https://files.bnbdevelopers.in/mcf_files/{data['sid']}_entrance_card.pdf"
 
                     entrance_card = {
                         "entrence_card" : ec
@@ -2729,7 +2729,7 @@ def createPayment():
 
                     convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.pdf"))
 
-                    ec = f"https://files.bnbdevelopers.in/mcf_files/{data["sid"]}_entrance_card.pdf"
+                    ec = f"https://files.bnbdevelopers.in/mcf_files/{data['sid']}_entrance_card.pdf"
 
                     entrance_card = {
                         "entrence_card" : ec
