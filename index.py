@@ -2811,7 +2811,9 @@ import os
 import zipfile
 
 def create_zip(directory, selected_files, zip_filename):
-    with zipfile.ZipFile(zip_filename, 'w') as zipf:
+    # Use allowZip64=True to support large files
+    mode = 'w' if not os.path.exists(zip_filename) else 'w'
+    with zipfile.ZipFile(zip_filename, mode, allowZip64=True) as zipf:
         for filename in selected_files:
             filepath = os.path.join(directory, filename)
             if os.path.exists(filepath):
