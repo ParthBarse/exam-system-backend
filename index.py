@@ -2046,7 +2046,7 @@ def createPayment():
                     for receipt in payment_data:
                         receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
                         print(receipt_nos)
-                    receipt_nos = str(receipt_nos + " , " + receipt_no)
+                    receipt_nos = str(receipt_nos + receipt_no)
 
                     student_data_1 = {
                             'CADET_NAME': str(student_data["first_name"].upper()+" "+student_data["last_name"].upper()),
@@ -2161,7 +2161,7 @@ def createPayment():
                     for receipt in payment_data:
                         receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
                         print(receipt_nos)
-                    receipt_nos = str(receipt_nos + " , " + receipt_no)
+                    receipt_nos = str(receipt_nos + receipt_no)
 
                     student_data_1 = {
                             'CADET_NAME': str(student_data["first_name"].upper()+" "+student_data["last_name"].upper()),
@@ -2277,7 +2277,7 @@ def createPayment():
                     for receipt in payment_data:
                         receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
                         print(receipt_nos)
-                    receipt_nos = str(receipt_nos + " , " + receipt_no)
+                    receipt_nos = str(receipt_nos + receipt_no)
 
                     student_data_1 = {
                             'CADET_NAME': str(student_data["first_name"].upper()+" "+student_data["last_name"].upper()),
@@ -2431,7 +2431,7 @@ def createPayment():
                     for receipt in payment_data:
                         receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
                         print(receipt_nos)
-                    receipt_nos = str(receipt_nos + " , " + receipt_no)
+                    receipt_nos = str(receipt_nos + receipt_no)
 
                     student_data_1 = {
                             'CADET_NAME': str(student_data["first_name"].upper()+" "+student_data["last_name"].upper()),
@@ -2546,7 +2546,7 @@ def createPayment():
                     for receipt in payment_data:
                         receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
                         print(receipt_nos)
-                    receipt_nos = str(receipt_nos + " , " + receipt_no)
+                    receipt_nos = str(receipt_nos + receipt_no)
 
                     student_data_1 = {
                             'CADET_NAME': str(student_data["first_name"].upper()+" "+student_data["last_name"].upper()),
@@ -2661,7 +2661,7 @@ def createPayment():
                     for receipt in payment_data:
                         receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
                         print(receipt_nos)
-                    receipt_nos = str(receipt_nos + " , " + receipt_no)
+                    receipt_nos = str(receipt_nos + receipt_no)
 
                     student_data_1 = {
                             'CADET_NAME': str(student_data["first_name"].upper()+" "+student_data["last_name"].upper()),
