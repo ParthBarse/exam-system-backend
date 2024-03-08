@@ -2898,7 +2898,7 @@ def bulkDownloadAdmissionCard():
         # create_zip(directory, selected_files, zip_filename)
 
 
-        return jsonify({'success': True, "msg":data}), 200
+        return jsonify({'success': True, "msg":"Hello"}), 200
 
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
