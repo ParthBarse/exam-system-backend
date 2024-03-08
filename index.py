@@ -465,7 +465,7 @@ def register_student():
                     'CONTACT': data["phn"],
                     'WHATSAPP_NO': data["wp_no"],
                     'CAMP_DATE':batch['start_date'],
-                    'REG_NO':data['sid'],
+                    'REG_NO':sid,
                     'PICKUP_POINT':data['pick_up_point'],
                 }
 
