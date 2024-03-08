@@ -2885,7 +2885,7 @@ def create_zip(directory, selected_files, zip_filename):
 def bulkDownloadAdmissionCard():
     try:
         data = request.data
-        pritn(data)
+        print(data)
         # fns = []
         # for dt in data:
         #     admission_link = dt["admission_form"]
