@@ -2895,7 +2895,7 @@ def bulkDownloadAdmissionCard():
 
         # Example usage
         directory = '/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/'
-        zip_filename = f'/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/All_{filter['camp_name']}_{filter['batch_name']}_{filter['status']}_Admission_Cards.zip'
+        zip_filename = f"/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/All_{filter['camp_name']}_{filter['batch_name']}_{filter['status']}_Admission_Cards.zip"
 
         create_zip(directory, fns, zip_filename)
 
