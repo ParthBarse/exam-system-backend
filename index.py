@@ -2885,19 +2885,19 @@ def create_zip(directory, selected_files, zip_filename):
 def bulkDownloadAdmissionCard():
     try:
         data = request.json
-        print(data)
         body = data['body']
-        # fns = []
-        # for dt in data:
-        #     admission_link = dt["admission_form"]
-        #     fn = admission_link.replace("https://files.bnbdevelopers.in/mcf_files/","")
-        #     fns.append(fn)
+        filter = data['filter']
+        fns = []
+        for dt in body:
+            admission_link = dt["admission_form"]
+            fn = admission_link.replace("https://files.bnbdevelopers.in/mcf_files/","")
+            fns.append(fn)
 
-        # # Example usage
-        # directory = '/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/'
-        # zip_filename = 'selected_files.zip'
+        # Example usage
+        directory = '/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/'
+        zip_filename = f'/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/All_{filter['camp_name']}_{filter['batch_name']}_{filter['status']}_Admission_Cards.zip'
 
-        # create_zip(directory, selected_files, zip_filename)
+        create_zip(directory, fns, zip_filename)
 
 
         return jsonify({'success': True, "msg":body}), 200
