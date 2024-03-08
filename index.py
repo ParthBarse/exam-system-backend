@@ -2884,7 +2884,7 @@ def create_zip(directory, selected_files, zip_filename):
 @app.route("/bulkDownloadAdmissionCard", methods=["POST"])
 def bulkDownloadAdmissionCard():
     try:
-        data = request.get_json()
+        data = request.data
         # fns = []
         # for dt in data:
         #     admission_link = dt["admission_form"]
@@ -2898,7 +2898,7 @@ def bulkDownloadAdmissionCard():
         # create_zip(directory, selected_files, zip_filename)
 
 
-        return jsonify({'success': True, "msg":"Hello"}), 200
+        return jsonify({'success': True, "msg":data}), 200
 
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
