@@ -449,7 +449,7 @@ def register_student():
                 }
 
                 for key, value in student_data1.items():
-                    find_and_replace_tables_visiting_card(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+                    find_and_replace_tables_visiting_card(doc1.tables, f'{{MERGEFIELD {key}}}', str(value))
 
                 try:
                     cadet_photo_url = data["cadetPhoto"]
