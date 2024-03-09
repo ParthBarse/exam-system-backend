@@ -449,7 +449,7 @@ def register_student():
                 }
 
                 for key, value in student_data1.items():
-                    find_and_replace_paragraphs_visiting_card(doc1.paragraphs, f'{{MERGEFIELD {key}}}', str(value))
+                    find_and_replace_tables_visiting_card(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
 
                 try:
                     cadet_photo_url = data["cadetPhoto"]
@@ -458,8 +458,8 @@ def register_student():
                     image_url_guardian = data["parentGurdianPhoto"]
                     image_path_guardian = image_url_guardian.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
                     
-                    replace_image_in_cell(doc1, table_index=0, row_index=0, column_index=3, image_path=cadet_photo_path)
-                    replace_image_in_cell(doc1, table_index=0, row_index=0, column_index=4, image_path=image_path_guardian)
+                    replace_image_in_cell(doc1, table_index=4, row_index=0, column_index=3, image_path=cadet_photo_path)
+                    replace_image_in_cell(doc1, table_index=4, row_index=0, column_index=4, image_path=image_path_guardian)
 
                     doc1.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_visit_card.docx"))
 
