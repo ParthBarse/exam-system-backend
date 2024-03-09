@@ -251,39 +251,18 @@ def find_and_replace_tables_visiting_card(tables, field, replacement):
                 for paragraph in cell.paragraphs:
                     find_and_replace_paragraphs_visiting_card([paragraph], field, replacement)
 
+
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 
 def replace_image_in_cell(doc, table_index, row_index, column_index, image_path):
-    # Get the specified table
     table = doc.tables[table_index]
-
-    # Get the specified cell
     cell = table.cell(row_index, column_index)
-
-    # Clear the content of the cell by removing its paragraphs
     for paragraph in cell.paragraphs:
         paragraph.clear()
-
-    # Add a new paragraph and insert the image
     paragraph = cell.add_paragraph()
     run = paragraph.add_run()
-    run.add_picture(image_path, width=Inches(1.4), height=Inches(1.8))
-
-    # Align the paragraph to the center
+    run.add_picture(image_path, width=Inches(1.4), height=Inches(1.6))
     paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-
-# image_path_father = 'img_rap.png'
-# image_path_mother = 'rutu.png'
-# image_path_cadet = 'aditi_pic.png'
-# image_path_guardian = 'sai_photo.jpeg'
-
-# replace_image_in_cell(doc, table_index=0, row_index=4, column_index=0, image_path=image_path_father)
-
-# replace_image_in_cell(doc, table_index=0, row_index=4, column_index=2, image_path=image_path_mother)
-# replace_image_in_cell(doc, table_index=0, row_index=4, column_index=6, image_path=image_path_cadet)
-# replace_image_in_cell(doc, table_index=0, row_index=4, column_index=8, image_path=image_path_guardian)
-    
-
 
 
 
@@ -459,27 +438,19 @@ def register_student():
                 # Sample student_data
                 student_data1 = {
                     'CADET_NAME': str(data["first_name"].upper()+" "+data["last_name"].upper()),
-                    'CAMP_NAME': camp_name,
-                    'BATCH': batch_name,
+                    'CAMP_NAME': str(camp_name),
+                    'BATCH_NO': str(batch_name),
                     'ADDRESS': data["address"],
                     'CONTACT': data["phn"],
                     'WHATSAPP_NO': data["wp_no"],
-                    'CAMP_DATE':batch['start_date'],
+                    'CAMP_DATE':start_date,
                     'REG_NO':sid,
                     'PICKUP_POINT':data['pick_up_point'],
                 }
 
                 for key, value in student_data1.items():
-                        find_and_replace_tables_visiting_card(doc1.tables, f'{{MERGEFIELD {key}}}', str(value))
-                
-                # image_path_father = 'img_rap.png'
-                # image_path_mother = 'rutu.png'
-                # image_path_cadet = 'aditi_pic.png'
-                # image_path_guardian = 'sai_photo.jpeg'
+                    find_and_replace_paragraphs_visiting_card(doc.paragraphs, f'{{MERGEFIELD {key}}}', str(value))
 
-                # replace_image_in_cell(doc1, table_index=0, row_index=4, column_index=0, image_path=image_path_father)
-
-                # replace_image_in_cell(doc1, table_index=0, row_index=4, column_index=2, image_path=image_path_mother)
                 try:
                     cadet_photo_url = data["cadetPhoto"]
                     cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
@@ -527,8 +498,8 @@ def register_student():
 
                     image_path_sign_url = data["cadetSign"]
                     image_path_sign = image_path_sign_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
-                    replace_image_in_cell(doc, table_index=0, row_index=26, column_index=1, image_path=cadet_photo_path)
-                    replace_image_in_cell(doc, table_index=0, row_index=28, column_index=7, image_path=image_path_sign)
+                    replace_image_in_cell_admission_form(doc, table_index=0, row_index=26, column_index=1, image_path=cadet_photo_path)
+                    replace_image_in_cell_admission_form(doc, table_index=0, row_index=28, column_index=7, image_path=image_path_sign)
 
                     doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_admission_form.docx"))
 
