@@ -809,7 +809,7 @@ def update_camp():
                     camp[key] = float(value) if key.endswith('_fee') else value
                     if camp['camp_status'] == "on":
                         camp["camp_status"] = "Active"
-                    elif not camp['camp_status']:
+                    else:
                         camp['camp_status'] = "Inactive"
 
         # Update the camp in the database
