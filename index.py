@@ -569,6 +569,7 @@ def register_student():
             "total_amount_paid":0,
             "discount_code":data.get("discount_code", ""),
             "discount_amount":int(0),
+            "camp_year":str("20"+str(year))
         }
 
         # Store the student information in the MongoDB collection
