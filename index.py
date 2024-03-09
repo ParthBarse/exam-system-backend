@@ -449,7 +449,7 @@ def register_student():
                 }
 
                 for key, value in student_data1.items():
-                    find_and_replace_paragraphs_visiting_card(doc.paragraphs, f'{{MERGEFIELD {key}}}', str(value))
+                    find_and_replace_paragraphs_visiting_card(doc1.paragraphs, f'{{MERGEFIELD {key}}}', str(value))
 
                 try:
                     cadet_photo_url = data["cadetPhoto"]
