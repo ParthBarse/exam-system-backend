@@ -2843,7 +2843,7 @@ def bulkDownloadAdmissionCard():
 
         zip_url = f"https://files.bnbdevelopers.in/mcf_files/All_{filter['camp_id']}_{filter['batch_id']}_{filter['status']}_Admission_Cards.zip"
 
-        return send_file(zip_url, as_attachment=True)
+        return send_file(zip_filename, as_attachment=True)
         # return jsonify({'success': True, "msg": zip_url}), 200
 
     except Exception as e:
