@@ -807,6 +807,10 @@ def update_camp():
                 # If the value is provided, update the field; otherwise, keep the existing value
                 if value:
                     camp[key] = float(value) if key.endswith('_fee') else value
+                    if camp['camp_status'] == "on":
+                        camp["camp_status"] = "Active"
+                    elif not camp['camp_status']:
+                        camp['camp_status'] = "Inactive"
 
         # Update the camp in the database
         camps_db.update_one({"camp_id": data['camp_id']}, {"$set": camp})
