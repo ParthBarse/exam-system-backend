@@ -2756,6 +2756,40 @@ def sendAllDocuments():
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
     
 
+import threading
+import time
+def process_data(body):
+    students_db = db["students_db"]
+    payment_db = db["all_payments"]
+    for dt in body:
+        student_data = students_db.find_one({"sid":dt['sid']}, {"_id":0})
+        mailToSend = student_data['email']
+        payment_data = payment_db.find({"sid":dt['sid']},{"_id":0})
+        payment_data = list(payment_data)
+        payment_links = ''
+        c=1
+        for data in payment_data:
+            payment_links += f"{c}) - {data['receipt_url']}\n"
+            c+=1
+        msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_links}\n\n Medical Certificate - {student_data['medicalCertificate']} \n\nEntrance Card - {student_data['entrence_card']} \n\nVisiting Card - {student_data['visiting_card']} \n\nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
+
+        send_email(msg=msg, sub="All Documents Download Links", mailToSend=mailToSend)
+        send_wp(msg,student_data['wp_no'])
+
+
+@app.route("/sendAllStudentsDocs", methods=["POST"])
+def sendAllStudentsDocs():
+    try:
+        data = request.json
+        body = data['body']
+        thread = threading.Thread(target=process_data, args=(body,))
+        thread.start()
+        return jsonify({'success': True, 'msg': 'Process Started'}), 200
+
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+    
+
 
 @app.route("/resetDiscount", methods=["GET"])
 def resetDiscount():
