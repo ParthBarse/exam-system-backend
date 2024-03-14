@@ -30,10 +30,15 @@ import zipfile
 
 #--------------------------------------------------------------------------------
 
-file_dir = "/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/"
-files_url = "https://files.bnbdevelopers.in"
-files_base_dir = "/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/"
-files_base_url = "https://files.bnbdevelopers.in/mcf_files/"
+# file_dir = "/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/"
+# files_url = "https://files.bnbdevelopers.in"
+# files_base_dir = "/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/"
+# files_base_url = "https://files.bnbdevelopers.in/mcf_files/"
+
+file_dir = "/home/mcfcamp-files/htdocs/files.mcfcamp.in/mcf_files/"
+files_url = "https://files.mcfcamp.in"
+files_base_dir = "/home/mcfcamp-files/htdocs/files.mcfcamp.in/"
+files_base_url = "https://files.mcfcamp.in/mcf_files/"
 
 #----------------------------------------------------------------------------------
 
