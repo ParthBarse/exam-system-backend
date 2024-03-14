@@ -1,14 +1,10 @@
 from flask import Flask
-from flask_login import login_user
 from flask import request, session
 from pymongo import MongoClient
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user
 from flask_bcrypt import Bcrypt
-from flask_login import LoginManager
 from flask_cors import CORS
-# from datetime import datetime
-# from datetime import datetime, timedelta
 import datetime
 from datetime import datetime
 import random
@@ -18,16 +14,39 @@ import smtplib
 import uuid
 import re
 import os
+from docx import Document
+from docx.shared import Inches, Pt
+import requests
+from io import BytesIO
+from reportlab.pdfgen import canvas
+from docx.shared import Pt
+import subprocess
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
+import threading
+import time
+import zipfile
+
+#--------------------------------------------------------------------------------
+
+file_dir = "/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/"
+files_url = "https://files.bnbdevelopers.in"
+files_base_dir = "/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/"
+files_base_url = "https://files.bnbdevelopers.in/mcf_files/"
+
+#----------------------------------------------------------------------------------
+
+
 
 app = Flask(__name__)
 CORS(app)
 
 client = MongoClient(
-    'mongodb+srv://bnbdevs:feLC7m4jiT9zrmHh@cluster0.fjnp4qu.mongodb.net/?retryWrites=true&w=majority')
-app.config['MONGO_URI'] = 'mongodb+srv://bnbdevs:feLC7m4jiT9zrmHh@cluster0.fjnp4qu.mongodb.net/?retryWrites=true&w=majority'
+    'mongodb+srv://mcfcamp:mcf123@mcf.nyh46tl.mongodb.net/')
+app.config['MONGO_URI'] = 'mongodb+srv://mcfcamp:mcf123@mcf.nyh46tl.mongodb.net/'
 app.config['SECRET_KEY'] = 'a6d217d048fdcd227661b755'
 db = client['mcf_db']
-# db2 = client['BnB_all_customers']
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -139,30 +158,6 @@ def calculate_age(dob):
         return age
     except ValueError:
         raise ValueError("Invalid date of birth format. Please use 'dd-mm-yyyy'.")
-    
-from reportlab.pdfgen import canvas
-    
-# def convert_docx_to_pdf(docx_path, pdf_path):
-#     # Load the DOCX file
-#     doc = Document(docx_path)
-
-#     # Create a PDF file
-#     pdf = canvas.Canvas(pdf_path)
-
-#     # Loop through paragraphs in the DOCX file and write them to the PDF
-#     for paragraph in doc.paragraphs:
-#         pdf.drawString(10, 800, paragraph.text)
-#         pdf.showPage()
-
-#     # Save the PDF file
-#     pdf.save()
-    
-
-from docx import Document
-from docx.shared import Pt
-# from docx2pdf import convert
-
-import subprocess
 
 def convert_to_pdf(docx_file, pdf_file):
     try:
@@ -188,23 +183,9 @@ def replace_fields_in_document_med(doc_path, field_values):
     doc = Document(doc_path)
     for paragraph in doc.paragraphs:
         find_and_replace_paragraph_med(paragraph, field_values)
-    doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.docx")))
+    doc.save(str(str(file_dir)+str(f"{field_values['sid']}_MEDICAL_CER.docx")))
 
-    # import aspose.words as aw
-    # doc = aw.Document(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.docx")))
-    # doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.pdf")))
-
-    convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.docx")),str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.pdf")))
-
-    # convert_docx_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.pdf")))
-
-    # convert(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{field_values['sid']}_MEDICAL_CER.pdf")))
-
-
-from docx import Document
-from docx.shared import Inches, Pt
-import requests
-from io import BytesIO
+    convert_to_pdf(str(str(file_dir)+str(f"{field_values['sid']}_MEDICAL_CER.docx")),str(str(file_dir)+str(f"{field_values['sid']}_MEDICAL_CER.pdf")))
 
 def set_paragraph_font_entrace_card(paragraph, font_name, font_size, bold=False):
     for run in paragraph.runs:
@@ -226,11 +207,6 @@ def find_and_replace_tables_entrance_card(tables, field, replacement):
                 for paragraph in cell.paragraphs:
                     find_and_replace_paragraphs_entrance_card([paragraph], field, replacement)
 
-from docx import Document
-from docx.shared import Inches, Pt
-import requests
-from io import BytesIO
-
 def set_paragraph_font_visiting_card(paragraph, font_name, font_size, bold=False):
     for run in paragraph.runs:
         font = run.font
@@ -250,9 +226,6 @@ def find_and_replace_tables_visiting_card(tables, field, replacement):
             for cell in row.cells:
                 for paragraph in cell.paragraphs:
                     find_and_replace_paragraphs_visiting_card([paragraph], field, replacement)
-
-
-from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 
 def replace_image_in_cell(doc, table_index, row_index, column_index, image_path):
     table = doc.tables[table_index]
@@ -284,15 +257,6 @@ def find_and_replace_tables_fee_receipt(tables, field, replacement):
             for cell in row.cells:
                 for paragraph in cell.paragraphs:
                     find_and_replace_paragraphs_fee_receipt([paragraph], field, replacement)
-
-
-
-
-
-
-from docx import Document
-from docx.shared import Inches, Pt
-from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 
 
 def set_paragraph_font_admission_form(paragraph, font_name, font_size, bold=False):
@@ -453,17 +417,17 @@ def register_student():
 
                 try:
                     cadet_photo_url = data["cadetPhoto"]
-                    cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
+                    cadet_photo_path = cadet_photo_url.replace(files_url,files_base_dir)
 
                     image_url_guardian = data["parentGurdianPhoto"]
-                    image_path_guardian = image_url_guardian.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
+                    image_path_guardian = image_url_guardian.replace(files_url,files_base_dir)
                     
                     replace_image_in_cell(doc1, table_index=0, row_index=0, column_index=3, image_path=cadet_photo_path)
                     replace_image_in_cell(doc1, table_index=0, row_index=0, column_index=4, image_path=image_path_guardian)
 
-                    doc1.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_visit_card.docx"))
+                    doc1.save(str(str(file_dir)+f"{sid}_visit_card.docx"))
 
-                    convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_visit_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_visit_card.pdf"))
+                    convert_to_pdf(str(str(file_dir)+f"{sid}_visit_card.docx"), str(str(file_dir)+f"{sid}_visit_card.pdf"))
 
 
 
@@ -497,21 +461,19 @@ def register_student():
                             find_and_replace_tables_admission_form(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
 
                     image_path_sign_url = data["cadetSign"]
-                    image_path_sign = image_path_sign_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
+                    image_path_sign = image_path_sign_url.replace(files_url,files_base_dir)
                     replace_image_in_cell_admission_form(doc, table_index=0, row_index=26, column_index=1, image_path=cadet_photo_path)
                     replace_image_in_cell_admission_form(doc, table_index=0, row_index=28, column_index=7, image_path=image_path_sign)
 
-                    doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_admission_form.docx"))
+                    doc.save(str(str(file_dir)+f"{sid}_admission_form.docx"))
 
-                    convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_admission_form.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{sid}_admission_form.pdf"))
+                    convert_to_pdf(str(str(file_dir)+f"{sid}_admission_form.docx"), str(str(file_dir)+f"{sid}_admission_form.pdf"))
                                    
                 except Exception as e:
                     print("Error : ", str(e))
-
-                # entrance_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_entrance_card.pdf"
-                medical_cert_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_MEDICAL_CER.pdf"
-                visiting_card_url = f"https://files.bnbdevelopers.in/mcf_files/{sid}_visit_card.pdf"
-                admission_form = f"https://files.bnbdevelopers.in/mcf_files/{sid}_admission_form.pdf"
+                medical_cert_url = f"{files_base_url}{sid}_MEDICAL_CER.pdf"
+                visiting_card_url = f"{files_base_url}{sid}_visit_card.pdf"
+                admission_form = f"{files_base_url}{sid}_admission_form.pdf"
 
             else:
                 return jsonify({"message": "Batch is Already Full !"})
@@ -1135,8 +1097,6 @@ def generate_report():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
-    
-from werkzeug.security import generate_password_hash, check_password_hash
 
 @app.route('/addAdmin', methods=['POST'])
 def add_admin():
@@ -1169,33 +1129,6 @@ def add_admin():
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
 
-# @app.route('/loginAdmin', methods=['POST'])
-# def login_admin():
-#     try:
-#         data = request.get_json()
-
-#         # Get parameters from the JSON data
-#         username = data.get('username')
-#         password = data.get('password')
-
-#         # Check if username and password are provided
-#         if not username or not password:
-#             return jsonify({"error": "Username and password are required.","success":False}), 400  # Bad Request
-
-#         # Find the admin based on username
-#         admins_db = db['admins_db']
-#         admin = admins_db.find_one({"username": username}, {"_id": 0})
-
-#         if not admin or not check_password_hash(admin.get("password", ""), password):
-#             return jsonify({"error": "Invalid username or password."}), 401  # Unauthorized
-
-#         return jsonify({"message": "Login successful.","success":True,"admin_id":admin['admin_id']})
-
-#     except Exception as e:
-#         return jsonify({"error": str(e),"success":False}), 500  # Internal Server Error
-
-# Function to create a JWT token
-import jwt
 def create_jwt_token(admin_id):
     import datetime
     payload = {
@@ -1456,7 +1389,7 @@ def check_discount_code():
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
     
-file_directory = '/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/'
+file_directory = file_dir
     
 def save_file(file, uid):
     try:
@@ -1471,7 +1404,7 @@ def save_file(file, uid):
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         file.save(file_path)
 
-        return f'https://files.bnbdevelopers.in/mcf_files/{uid}/{filename}'
+        return f'{files_base_url}{uid}/{filename}'
     except Exception as e:
         raise e
     
@@ -1628,7 +1561,7 @@ def send_entrance_card_sms():
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
 
 
-import requests
+# import requests
 # Endpoint for requesting password reset (for admin)
 @app.route("/sendMedicalCertificate_sms", methods=["GET"])
 def send_medical_certificate_sms():
@@ -1895,19 +1828,6 @@ def createPayment():
         camp_id = student_data['camp_id']
         camp_db = db["camps_db"]
         camp_data = camp_db.find_one({"camp_id":camp_id}, {"_id":0})
-        
-
-        # all_payments.insert_one({
-        #         "payment_id": payment_id,
-        #         "payment_option": data['payment_option'],
-        #         "payment_amount": data['payment_amount'],
-        #         "payment_date":data["payment_date"],
-        #         "transaction_id":data["transaction_id"],
-        #         "payment_mode":data["payment_mode"],
-        #         "sid":data['sid'],
-        #         "receipt_no":receipt_no,
-        #         "receipt_url":f"https://files.bnbdevelopers.in/mcf_files/{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
-        #     })
 
         if "7" in batch_dur:
             doc = Document('fee_receipt_7.docx')
@@ -1940,9 +1860,9 @@ def createPayment():
             if "totalPayment" in data['payment_option']:
                 for key, value in final_data.items():
                         find_and_replace_tables_fee_receipt(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
-                doc.save(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
+                doc.save(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
 
-                convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
+                convert_to_pdf(str(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
                 
 
                 if float(total_paid) >= float(student_data['total_amount_payable']):
@@ -2019,16 +1939,16 @@ def createPayment():
                         paragraph = cell.add_paragraph()
                         run = paragraph.add_run()
                         cadet_photo_url = student_data["cadetPhoto"]
-                        cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
+                        cadet_photo_path = cadet_photo_url.replace(files_url,files_base_dir)
                         run.add_picture(cadet_photo_path, width=Inches(0.9))
                     except Exception as e:
                         print("Error : ",str(e))
 
-                    doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"))
+                    doc.save(str(str(file_dir)+f"{data['sid']}_entrance_card.docx"))
 
-                    convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.pdf"))
+                    convert_to_pdf(str(str(file_dir)+f"{data['sid']}_entrance_card.docx"), str(str(file_dir)+f"{data['sid']}_entrance_card.pdf"))
 
-                    ec = f"https://files.bnbdevelopers.in/mcf_files/{data['sid']}_entrance_card.pdf"
+                    ec = f"{files_base_url}{data['sid']}_entrance_card.pdf"
 
                     entrance_card = {
                         "entrence_card" : ec
@@ -2047,7 +1967,7 @@ def createPayment():
                 "payment_mode":data["payment_mode"],
                 "sid":data['sid'],
                 "receipt_no":receipt_no,
-                "receipt_url":f"https://files.bnbdevelopers.in/mcf_files/{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+                "receipt_url":f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
             })
                 
             elif "1installment" in data['payment_option']:
@@ -2055,9 +1975,9 @@ def createPayment():
                 final_data['1_INST_DT'] = data["payment_date"]
                 for key, value in final_data.items():
                         find_and_replace_tables_fee_receipt(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
-                doc.save(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
+                doc.save(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
 
-                convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
+                convert_to_pdf(str(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
 
 
                 if float(total_paid) >= float(student_data['total_amount_payable']):
@@ -2134,16 +2054,16 @@ def createPayment():
                         paragraph = cell.add_paragraph()
                         run = paragraph.add_run()
                         cadet_photo_url = student_data["cadetPhoto"]
-                        cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
+                        cadet_photo_path = cadet_photo_url.replace(files_url,files_base_dir)
                         run.add_picture(cadet_photo_path, width=Inches(0.9))
                     except Exception as e:
                         print("Error : ",str(e))
 
-                    doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"))
+                    doc.save(str(str(file_dir)+f"{data['sid']}_entrance_card.docx"))
 
-                    convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.pdf"))
+                    convert_to_pdf(str(str(file_dir)+f"{data['sid']}_entrance_card.docx"), str(str(file_dir)+f"{data['sid']}_entrance_card.pdf"))
 
-                    ec = f"https://files.bnbdevelopers.in/mcf_files/{data['sid']}_entrance_card.pdf"
+                    ec = f"{files_base_url}{data['sid']}_entrance_card.pdf"
 
                     entrance_card = {
                         "entrence_card" : ec
@@ -2162,7 +2082,7 @@ def createPayment():
                 "payment_mode":data["payment_mode"],
                 "sid":data['sid'],
                 "receipt_no":receipt_no,
-                "receipt_url":f"https://files.bnbdevelopers.in/mcf_files/{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+                "receipt_url":f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
             })
                 
 
@@ -2171,9 +2091,9 @@ def createPayment():
                 final_data['2_INST_DT'] = data["payment_date"]
                 for key, value in final_data.items():
                         find_and_replace_tables_fee_receipt(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
-                doc.save(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
+                doc.save(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
 
-                convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
+                convert_to_pdf(str(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
 
 
                 if float(total_paid) >= float(student_data['total_amount_payable']):
@@ -2250,16 +2170,16 @@ def createPayment():
                         paragraph = cell.add_paragraph()
                         run = paragraph.add_run()
                         cadet_photo_url = student_data["cadetPhoto"]
-                        cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
+                        cadet_photo_path = cadet_photo_url.replace(files_url,files_base_dir)
                         run.add_picture(cadet_photo_path, width=Inches(0.9))
                     except Exception as e:
                         print("Error : ",str(e))
 
-                    doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"))
+                    doc.save(str(str(file_dir)+f"{data['sid']}_entrance_card.docx"))
 
-                    convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.pdf"))
+                    convert_to_pdf(str(str(file_dir)+f"{data['sid']}_entrance_card.docx"), str(str(file_dir)+f"{data['sid']}_entrance_card.pdf"))
 
-                    ec = f"https://files.bnbdevelopers.in/mcf_files/{data['sid']}_entrance_card.pdf"
+                    ec = f"{files_base_url}{data['sid']}_entrance_card.pdf"
 
                     entrance_card = {
                         "entrence_card" : ec
@@ -2278,14 +2198,14 @@ def createPayment():
                 "payment_mode":data["payment_mode"],
                 "sid":data['sid'],
                 "receipt_no":receipt_no,
-                "receipt_url":f"https://files.bnbdevelopers.in/mcf_files/{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+                "receipt_url":f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
             })
                 
 
             else:
                 return {"error":"Please Specify Payment Option"}
             
-            payment_receipt_url = f"https://files.bnbdevelopers.in/mcf_files/{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+            payment_receipt_url = f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
             
             msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {student_data['entrence_card']} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
             
@@ -2326,9 +2246,9 @@ def createPayment():
             if "totalPayment" in data['payment_option']:
                 for key, value in final_data.items():
                         find_and_replace_tables_fee_receipt(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
-                doc.save(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
+                doc.save(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
 
-                convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
+                convert_to_pdf(str(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
 
 
                 if float(total_paid) >= float(student_data['total_amount_payable']):
@@ -2405,16 +2325,16 @@ def createPayment():
                         paragraph = cell.add_paragraph()
                         run = paragraph.add_run()
                         cadet_photo_url = student_data["cadetPhoto"]
-                        cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
+                        cadet_photo_path = cadet_photo_url.replace(files_url,files_base_dir)
                         run.add_picture(cadet_photo_path, width=Inches(0.9))
                     except Exception as e:
                         print("Error : ",str(e))
 
-                    doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"))
+                    doc.save(str(str(file_dir)+f"{data['sid']}_entrance_card.docx"))
 
-                    convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.pdf"))
+                    convert_to_pdf(str(str(file_dir)+f"{data['sid']}_entrance_card.docx"), str(str(file_dir)+f"{data['sid']}_entrance_card.pdf"))
 
-                    ec = f"https://files.bnbdevelopers.in/mcf_files/{data['sid']}_entrance_card.pdf"
+                    ec = f"{files_base_url}{data['sid']}_entrance_card.pdf"
 
                     entrance_card = {
                         "entrence_card" : ec
@@ -2433,7 +2353,7 @@ def createPayment():
                 "payment_mode":data["payment_mode"],
                 "sid":data['sid'],
                 "receipt_no":receipt_no,
-                "receipt_url":f"https://files.bnbdevelopers.in/mcf_files/{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+                "receipt_url":f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
             })
 
             elif "1installment" in data['payment_option']:
@@ -2441,9 +2361,9 @@ def createPayment():
                 final_data['1_INST_DT'] = data["payment_date"]
                 for key, value in final_data.items():
                         find_and_replace_tables_fee_receipt(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
-                doc.save(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
+                doc.save(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
 
-                convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
+                convert_to_pdf(str(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
 
 
                 if float(total_paid) >= float(student_data['total_amount_payable']):
@@ -2520,16 +2440,16 @@ def createPayment():
                         paragraph = cell.add_paragraph()
                         run = paragraph.add_run()
                         cadet_photo_url = student_data["cadetPhoto"]
-                        cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
+                        cadet_photo_path = cadet_photo_url.replace(files_url,files_base_dir)
                         run.add_picture(cadet_photo_path, width=Inches(0.9))
                     except Exception as e:
                         print("Error : ",str(e))
 
-                    doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"))
+                    doc.save(str(str(file_dir)+f"{data['sid']}_entrance_card.docx"))
 
-                    convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.pdf"))
+                    convert_to_pdf(str(str(file_dir)+f"{data['sid']}_entrance_card.docx"), str(str(file_dir)+f"{data['sid']}_entrance_card.pdf"))
 
-                    ec = f"https://files.bnbdevelopers.in/mcf_files/{data['sid']}_entrance_card.pdf"
+                    ec = f"{files_base_url}{data['sid']}_entrance_card.pdf"
 
                     entrance_card = {
                         "entrence_card" : ec
@@ -2548,7 +2468,7 @@ def createPayment():
                 "payment_mode":data["payment_mode"],
                 "sid":data['sid'],
                 "receipt_no":receipt_no,
-                "receipt_url":f"https://files.bnbdevelopers.in/mcf_files/{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+                "receipt_url":f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
             })
 
             elif '2installment' in data['payment_option']:
@@ -2556,9 +2476,9 @@ def createPayment():
                 final_data['2_INST_DT'] = data["payment_date"]
                 for key, value in final_data.items():
                         find_and_replace_tables_fee_receipt(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
-                doc.save(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
+                doc.save(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
 
-                convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
+                convert_to_pdf(str(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
 
 
                 if float(total_paid) >= float(student_data['total_amount_payable']):
@@ -2635,16 +2555,16 @@ def createPayment():
                         paragraph = cell.add_paragraph()
                         run = paragraph.add_run()
                         cadet_photo_url = student_data["cadetPhoto"]
-                        cadet_photo_path = cadet_photo_url.replace("https://files.bnbdevelopers.in","/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/")
+                        cadet_photo_path = cadet_photo_url.replace(files_url,files_base_dir)
                         run.add_picture(cadet_photo_path, width=Inches(0.9))
                     except Exception as e:
                         print("Error : ",str(e))
 
-                    doc.save(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"))
+                    doc.save(str(str(file_dir)+f"{data['sid']}_entrance_card.docx"))
 
-                    convert_to_pdf(str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.docx"), str(str("/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/")+f"{data['sid']}_entrance_card.pdf"))
+                    convert_to_pdf(str(str(file_dir)+f"{data['sid']}_entrance_card.docx"), str(str(file_dir)+f"{data['sid']}_entrance_card.pdf"))
 
-                    ec = f"https://files.bnbdevelopers.in/mcf_files/{data['sid']}_entrance_card.pdf"
+                    ec = f"{files_base_url}{data['sid']}_entrance_card.pdf"
 
                     entrance_card = {
                         "entrence_card" : ec
@@ -2663,7 +2583,7 @@ def createPayment():
                 "payment_mode":data["payment_mode"],
                 "sid":data['sid'],
                 "receipt_no":receipt_no,
-                "receipt_url":f"https://files.bnbdevelopers.in/mcf_files/{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+                "receipt_url":f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
             })
                 
             else:
@@ -2755,9 +2675,6 @@ def sendAllDocuments():
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
     
-
-import threading
-import time
 def process_data(body):
     students_db = db["students_db"]
     payment_db = db["all_payments"]
@@ -2815,10 +2732,6 @@ def resetDiscount():
 
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
-    
-
-import os
-import zipfile
 
 def create_zip(directory, selected_files, zip_filename):
     if os.path.exists(zip_filename):
@@ -2831,8 +2744,6 @@ def create_zip(directory, selected_files, zip_filename):
             else:
                 print(f"File '{filename}' not found in directory '{directory}'.")
 
-
-from flask import Flask, send_file
 @app.route("/bulkDownloadAdmissionCard", methods=["POST"])
 def bulkDownloadAdmissionCard():
     try:
@@ -2842,16 +2753,16 @@ def bulkDownloadAdmissionCard():
         fns = []
         for dt in body:
             admission_link = dt["admission_form"]
-            fn = admission_link.replace("https://files.bnbdevelopers.in/mcf_files/","")
+            fn = admission_link.replace(files_base_url,"")
             fns.append(fn)
 
         # Example usage
-        directory = '/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/'
-        zip_filename = f"/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/All_{filter['camp_id']}_{filter['batch_id']}_{filter['status']}_Admission_Cards.zip"
+        directory = file_dir
+        zip_filename = f"{file_dir}All_{filter['camp_id']}_{filter['batch_id']}_{filter['status']}_Admission_Cards.zip"
 
         create_zip(directory, fns, zip_filename)
 
-        zip_url = f"https://files.bnbdevelopers.in/mcf_files/All_{filter['camp_id']}_{filter['batch_id']}_{filter['status']}_Admission_Cards.zip"
+        zip_url = f"{files_base_url}All_{filter['camp_id']}_{filter['batch_id']}_{filter['status']}_Admission_Cards.zip"
 
         # return send_file(zip_filename, as_attachment=True)
         return jsonify({'success': True, "msg": zip_url, "filename":f"All_{filter['camp_id']}_{filter['batch_id']}_{filter['status']}_Admission_Cards.zip"}), 200
