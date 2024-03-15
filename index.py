@@ -2198,6 +2198,13 @@ def createPayment():
 
                     students_db.update_one({"sid": data['sid']}, {"$set": entrance_card})
 
+                    payment_receipt_url = f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+
+                    msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {ec} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
+            
+                    send_email(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'])
+                    send_wp(msg,student_data['wp_no'])
+
 
                 all_payments.insert_one({
                 "payment_id": payment_id,
@@ -2215,12 +2222,10 @@ def createPayment():
             else:
                 return {"error":"Please Specify Payment Option"}
             
-            payment_receipt_url = f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+            # msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {ec} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
             
-            msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {ec} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
-            
-            send_email(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'])
-            send_wp(msg,student_data['wp_no'])
+            # send_email(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'])
+            # send_wp(msg,student_data['wp_no'])
 
             return jsonify({"message": f"Payment added successfully.", "payment_id": payment_id})
         
@@ -2580,8 +2585,13 @@ def createPayment():
                         "entrence_card" : ec
                     }
                     
+                    payment_receipt_url = f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
 
                     students_db.update_one({"sid": data['sid']}, {"$set": entrance_card})
+                    msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {ec} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
+            
+                    send_email(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'])
+                    send_wp(msg,student_data['wp_no'])
 
 
                 all_payments.insert_one({
@@ -2600,12 +2610,12 @@ def createPayment():
                 return {"error":"Please Specify Payment Option"}
             
 
-            payment_receipt_url = f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+            # payment_receipt_url = f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
             
-            msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {ec} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
+            # msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {ec} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
             
-            send_email(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'])
-            send_wp(msg,student_data['wp_no'])
+            # send_email(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'])
+            # send_wp(msg,student_data['wp_no'])
 
             return jsonify({"message": f"Payment added successfully.", "payment_id": payment_id})
         else:
