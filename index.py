@@ -2803,7 +2803,7 @@ def bulkDownloadAdmissionCard():
         # return send_file(zip_filename, as_attachment=True)
         data = {
             'success': True,
-            'msg': zip_url + f"nocache={rint}",
+            'msg': zip_url + f"?nocache={rint}",
             'filename': f"All_{filter['camp_id']}_{filter['batch_id']}_{filter['status']}_Admission_Cards.zip"
         }
 
