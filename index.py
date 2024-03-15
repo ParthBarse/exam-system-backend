@@ -483,7 +483,7 @@ def send_email_attachments(msg, sub, mailToSend, files=[]):
             # Add header as key/value pair to attachment part
             part.add_header(
                 "Content-Disposition",
-                f"attachment; filename= {file_path}",
+                f"attachment; filename= {file_path.replace(file_dir)}",
             )
 
             # Attach the attachment to the message
