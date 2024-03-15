@@ -206,6 +206,7 @@ def sync_data(original_sid):
 
                 convert_to_pdf(str(str(file_dir)+f"{sid}_admission_form.docx"), str(str(file_dir)+f"{sid}_admission_form.pdf"))
 
+                final_status = data['status']
                 if float(data['total_amount_paid']) >= float(data['total_amount_payable']):
                     camp_id = data['camp_id']
                     camp_db = db["camps_db"]
@@ -297,10 +298,10 @@ def sync_data(original_sid):
                     }
                     students_db.update_one({"sid": data['sid']}, {"$set": entrance_card})
                 else:
-                    if data['status']!="Cancel" and data['status']!="Refund" and data['status']!="Extend":
-                        students_db.update_one({"sid": data['sid']}, {"$set": {"status":"In Progress"}})
+                    if data['status']=="Active" or data['status']=="In Progress":
+                        final_status = "In Progress"
                     else:
-                        students_db.update_one({"sid": data['sid']}, {"$set": {"status":data['status']}})
+                        final_status = data['status']
                                 
             except Exception as e:
                 print("Error : ", str(e))
@@ -326,7 +327,7 @@ def sync_data(original_sid):
             "district": data["district"].upper(),
             "state": data["state"].upper(),
             "pincode": str(data["pincode"]),
-            "status": str(data['status']),
+            "status": str(final_status),
             "camp_id": data.get("camp_id", ""),
             "camp_category": data.get("camp_category", "").upper(),
             "batch_id": data.get("batch_id", ""),
