@@ -479,11 +479,12 @@ def send_email_attachments(msg, sub, mailToSend, files=[]):
 
             # Encode file in ASCII characters to send by email
             encoders.encode_base64(part)
+            fn = file_path.replace(file_dir)
 
             # Add header as key/value pair to attachment part
             part.add_header(
                 "Content-Disposition",
-                f"attachment; filename= {file_path.replace(file_dir)}",
+                f"attachment; filename= {fn}",
             )
 
             # Attach the attachment to the message
