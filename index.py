@@ -272,7 +272,7 @@ def sync_data(original_sid):
         batch = batches_db.find_one({"batch_id":data.get("batch_id")}, {"_id":0})
         if batch:
             if int(batch["students_registered"]) <= int(batch["batch_intake"]):
-                students_db.update_one({'sid': original_sid},student)
+                students_db.update_one({'sid': original_sid},{"$set": student})
                 batches_db.update_one({"batch_id": data.get("batch_id")}, {"$set": {"students_registered":int(int(batch["students_registered"])+1)}})
 
                 payment_db = db['all_payments']
