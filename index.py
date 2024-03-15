@@ -804,7 +804,7 @@ def update_student():
         if batch:
             if int(batch["students_registered"]) <= int(batch["batch_intake"]):
                 students_db.update_one({"sid": data['sid']}, {"$set": student})
-                result = syncStudent(data['sid'])
+                result = sync_data(data['sid'])
                 return jsonify({"message": f"Student with sid {data['sid']} updated successfully"})
             else:
                 return jsonify({"message": "Batch is Already Full !"}),400
@@ -3028,11 +3028,11 @@ def bulkDownloadAdmissionCard():
 
 
 @app.route("/syncStudent", methods=["GET"])
-def syncStudent():
+def sync_Student():
     try:
         sid = request.args.get('sid')
 
-        result = syncStudent(sid)
+        result = sync_data(sid)
 
         if result == 0:
             return jsonify({'success': True, "msg":'Sync Successful'}), 200
