@@ -205,6 +205,98 @@ def sync_data(original_sid):
                 doc.save(str(str(file_dir)+f"{sid}_admission_form.docx"))
 
                 convert_to_pdf(str(str(file_dir)+f"{sid}_admission_form.docx"), str(str(file_dir)+f"{sid}_admission_form.pdf"))
+
+                if float(data['total_amount_paid']) >= float(data['total_amount_payable']):
+                    camp_id = data['camp_id']
+                    camp_db = db["camps_db"]
+                    camp_data = camp_db.find_one({"camp_id":camp_id}, {"_id":0})
+                    batch_id = data['batch_id']
+                    batch_db = db["batches_db"]
+                    batch_data = batch_db.find_one({"batch_id":batch_id}, {"_id":0})
+                    payment_db = db["all_payments"]
+                    payment_data = payment_db.find({"sid":data['sid']}, {"_id":0})
+                    receipt_nos = ""
+                    payment_data = list(payment_data)
+                    print(len(payment_data))
+                    for receipt in payment_data:
+                        receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
+                        print(receipt_nos)
+                    receipt_nos = str(receipt_nos)
+
+                    student_data_1 = {
+                            'CADET_NAME': str(data["first_name"].upper()+" "+data["last_name"].upper()),
+                            'REGNO': data['sid'],
+                            'RANK': 'CDT',
+                            'C_NAME': camp_data['camp_name'],
+                            'C_BATCH': batch_data['batch_name'],
+                            'C_DAYS': batch_data["duration"],
+                            'COMP_N': data['company'],
+                            'C_DATE': batch_data['start_date'],
+                            'PICKPT': data["pick_up_point"],
+                            'PICK_TIME': '',
+                            'EMP_NAME':  data["employee_who_reached_out_to_you"],
+                            'GAR_NAME': data["middle_name"],
+                            'ADDRESS': data["address"],
+                            'CITY': data["pick_up_city"],
+                            'DISTRICT': data["district"],
+                            'STATE': data['state'],
+                            'PINCODE': data["pincode"],
+                            'EMAIL': data["email"],
+                            'C_NUM': str(data["phn"]),
+                            'WP_NUM': data.get("wp_no", ""),
+                            'FATHER_NUM': '',
+                            'MOTHER_NUM': '',
+                            'DOB': data["dob"],
+                            'BLOOD_GROUP':  data.get("blood_group", ""),
+                            'STD': data.get("standard", ""),
+                            'SCHOOL': data.get("school_name", ""),
+                            'FEE_PAID': data['total_amount_paid'],
+                            'BALANCE': float(data['total_amount_payable']) - float(data['total_amount_paid']),
+                            'RECEIPT_NUM': receipt_nos,
+                            'DATE': '',
+                            'TIME': ''
+                        }
+
+                    doc = Document('mcf_entrance_card.docx')
+
+                    # Replace text fields in paragraphs
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD CADET_NAME}', student_data_1['CADET_NAME'])
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD DATE}', student_data_1['DATE'])
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD TIME}', student_data_1['TIME'])
+
+                    for key, value in student_data_1.items():
+                            find_and_replace_tables_entrance_card(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+
+                    try:
+                        print("replacing image")
+                        table = doc.tables[0]  # Assuming the first table
+                        cell = table.cell(0, 3)  # Assuming the first cell in the third column
+
+                        # Clear the content of the cell by removing its paragraphs
+                        for paragraph in cell.paragraphs:
+                            paragraph.clear()
+
+                        # Add a new paragraph and insert the image
+                        paragraph = cell.add_paragraph()
+                        run = paragraph.add_run()
+                        cadet_photo_url = data["cadetPhoto"]
+                        cadet_photo_path = cadet_photo_url.replace(files_url,files_base_dir)
+                        run.add_picture(cadet_photo_path, width=Inches(0.9))
+                    except Exception as e:
+                        print("Error : ",str(e))
+
+                    doc.save(str(str(file_dir)+f"{data['sid']}_entrance_card.docx"))
+
+                    convert_to_pdf(str(str(file_dir)+f"{data['sid']}_entrance_card.docx"), str(str(file_dir)+f"{data['sid']}_entrance_card.pdf"))
+
+                    ec = f"{files_base_url}{data['sid']}_entrance_card.pdf"
+
+                    entrance_card = {
+                        "entrence_card" : ec
+                    }
+                    students_db.update_one({"sid": data['sid']}, {"$set": entrance_card})
+
+
                                 
             except Exception as e:
                 print("Error : ", str(e))
