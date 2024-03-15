@@ -1038,11 +1038,17 @@ def activate_student():
         students_db = db["students_db"]
         student = students_db.find_one({"sid": sid}, {"_id": 0})
 
+        amt_paid = student['total_amount_paid']
+        amt_payable = student['total_amount_payable']
+
         if not student:
             return jsonify({"error": f"No student found with sid: {sid}"}), 404  # Not Found
 
         # Update the status to "Active"
-        students_db.update_one({"sid": sid}, {"$set": {"status": "In Progress"}})
+        if amt_paid >= amt_payable:
+            students_db.update_one({"sid": sid}, {"$set": {"status": "Active"}})
+        else:
+            students_db.update_one({"sid": sid}, {"$set": {"status": "In Progress"}})
 
         return jsonify({"message": f"Student with sid {sid} is now Active."})
 
