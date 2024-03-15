@@ -445,6 +445,58 @@ def send_email(msg, sub, mailToSend):
     except Exception as e:
         print(str(e))
         return 1
+    
+
+
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
+
+def send_email_attachments(msg, sub, mailToSend, files=[]):
+    try:
+        sender_email = "partbarse92@gmail.com"
+        smtp_server = smtplib.SMTP("smtp.gmail.com", 587)
+        smtp_server.ehlo()
+        smtp_server.starttls()
+        smtp_server.login("partbarse92@gmail.com", "xdfrjwaxctwqpzyg")
+
+        # Create a multipart message
+        message = MIMEMultipart()
+        message["Subject"] = sub
+        message["From"] = sender_email
+        message["To"] = mailToSend
+
+        # Attach message body
+        message.attach(MIMEText(msg, "plain"))
+
+        # Attach files
+        for file_path in files:
+            with open(file_path, "rb") as attachment:
+                part = MIMEBase("application", "octet-stream")
+                part.set_payload(attachment.read())
+
+            # Encode file in ASCII characters to send by email
+            encoders.encode_base64(part)
+
+            # Add header as key/value pair to attachment part
+            part.add_header(
+                "Content-Disposition",
+                f"attachment; filename= {file_path}",
+            )
+
+            # Attach the attachment to the message
+            message.attach(part)
+
+        smtp_server.sendmail(sender_email, mailToSend, message.as_string())
+        print(mailToSend)
+        print("Send Mail")
+        smtp_server.quit()
+        return 0
+    except Exception as e:
+        print(str(e))
+        return 1
 
 # ------------------------------------------------------------------------------------------------------------
 
@@ -854,16 +906,22 @@ def register_student():
             if int(batch["students_registered"]) <= int(batch["batch_intake"]):
                 students_db.insert_one(student)
                 batches_db.update_one({"batch_id": data.get("batch_id")}, {"$set": {"students_registered":int(int(batch["students_registered"])+1)}})
+                msg = "Dear Parent, Thank you for registering with MCF Camp, for any registration and payment-related query please visit us at www.mcfcamp.in. Or contact us at 9604087000/9604082000, or email us at mcfcamp@gmail.com MARSHAL CADEF"
+                sub = "Registration Successful !"
+                mailToSend = data['email']
+                sendSMS(msg,data["phn"])
+                send_wp(msg,data["wp_no"])
+                send_email(msg, sub, mailToSend)
                 return jsonify({"message": "Student registered successfully", "sid": sid})
             else:
                 return jsonify({"message": "Batch is Already Full !"})
             
-        msg = "Dear Parent, Thank you for registering with MCF Camp, for any registration and payment-related query please visit us at www.mcfcamp.in. Or contact us at 9604087000/9604082000, or email us at mcfcamp@gmail.com MARSHAL CADEF"
-        sub = "Registration Successful !"
-        mailToSend = data['email']
-        sendSMS(msg,data["phn"])
-        send_wp(msg,data["wp_no"])
-        send_email(msg, sub, mailToSend)
+        # msg = "Dear Parent, Thank you for registering with MCF Camp, for any registration and payment-related query please visit us at www.mcfcamp.in. Or contact us at 9604087000/9604082000, or email us at mcfcamp@gmail.com MARSHAL CADEF"
+        # sub = "Registration Successful !"
+        # mailToSend = data['email']
+        # sendSMS(msg,data["phn"])
+        # send_wp(msg,data["wp_no"])
+        # send_email(msg, sub, mailToSend)
 
         return jsonify({"message": "Student registered successfully", "sid": sid})
 
@@ -2104,7 +2162,8 @@ def sendReceipt_email():
             print("Error:", response.status_code)
         msg = f"Hello, Download Link for your Payment Receipt is {receipt_srt} \n Team MCF CAMP"
         email = student_data['email']
-        send_email(msg=msg, sub="Payment Receipt Download Link", mailToSend=email)
+        fn = receipt.replace(files_url,files_base_dir)
+        send_email_attachments(msg=msg, sub="Payment Receipt Download Link", mailToSend=email, files=[fn])
 
         return jsonify({'success': True, 'msg': 'SMS Send'}), 200
 
@@ -2511,8 +2570,16 @@ def createPayment():
                     payment_receipt_url = f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
 
                     msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {ec} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
+
+                    fns = []
+                    payment_receipt = payment_receipt_url.replace(files_url,files_base_dir)
+                    mcert = student_data['medicalCertificate'].replace(files_url,files_base_dir)
+                    ecfn = ec.replace(files_url,files_base_dir)
+                    vc = student_data['visiting_card'].replace(student_data['visiting_card'])
+                    af = student_data['admission_form'].replace(files_url,files_base_dir)
+                    fns = [payment_receipt, mcert, ecfn, vc, af]
             
-                    send_email(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'])
+                    send_email_attachments(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'], files=fns)
                     send_wp(msg,student_data['wp_no'])
 
 
@@ -2899,8 +2966,16 @@ def createPayment():
 
                     students_db.update_one({"sid": data['sid']}, {"$set": entrance_card})
                     msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {ec} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
+
+                    fns = []
+                    payment_receipt = payment_receipt_url.replace(files_url,files_base_dir)
+                    mcert = student_data['medicalCertificate'].replace(files_url,files_base_dir)
+                    ecfn = ec.replace(files_url,files_base_dir)
+                    vc = student_data['visiting_card'].replace(student_data['visiting_card'])
+                    af = student_data['admission_form'].replace(files_url,files_base_dir)
+                    fns = [payment_receipt, mcert, ecfn, vc, af]
             
-                    send_email(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'])
+                    send_email_attachments(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'], files=fns)
                     send_wp(msg,student_data['wp_no'])
 
 
@@ -2997,15 +3072,22 @@ def sendAllDocuments():
 
         payment_links = ''
 
+        mcert = student_data['medicalCertificate'].replace(files_url,files_base_dir)
+        ecfn = student_data['entrence_card'].replace(files_url,files_base_dir)
+        vc = student_data['visiting_card'].replace(student_data['visiting_card'])
+        af = student_data['admission_form'].replace(files_url,files_base_dir)
+        fns = [mcert, ecfn, vc, af]
+
         c=1
         for data in payment_data:
             payment_links += f"{c}) - {data['receipt_url']}\n"
+            fns.append(data['receipt_url'].replace(files_url,files_base_dir))
             c+=1
 
 
         msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_links}\n\n Medical Certificate - {student_data['medicalCertificate']} \n\nEntrance Card - {student_data['entrence_card']} \n\nVisiting Card - {student_data['visiting_card']} \n\nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
             
-        send_email(msg=msg, sub="All Documents Download Links", mailToSend=mailToSend)
+        send_email_attachments(msg=msg, sub="All Documents Download Links", mailToSend=mailToSend, files=fns)
         send_wp(msg,student_data['wp_no'])
 
         return jsonify({'success': True, 'msg': 'Mail Send'}), 200
@@ -3022,13 +3104,19 @@ def process_data(body):
         payment_data = payment_db.find({"sid":dt['sid']},{"_id":0})
         payment_data = list(payment_data)
         payment_links = ''
+        mcert = student_data['medicalCertificate'].replace(files_url,files_base_dir)
+        ecfn = student_data['entrence_card'].replace(files_url,files_base_dir)
+        vc = student_data['visiting_card'].replace(student_data['visiting_card'])
+        af = student_data['admission_form'].replace(files_url,files_base_dir)
+        fns = [mcert, ecfn, vc, af]
         c=1
         for data in payment_data:
             payment_links += f"{c}) - {data['receipt_url']}\n"
+            fns.append(data['receipt_url'].replace(files_url,files_base_dir))
             c+=1
         msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_links}\n\n Medical Certificate - {student_data['medicalCertificate']} \n\nEntrance Card - {student_data['entrence_card']} \n\nVisiting Card - {student_data['visiting_card']} \n\nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
 
-        send_email(msg=msg, sub="All Documents Download Links", mailToSend=mailToSend)
+        send_email_attachments(msg=msg, sub="All Documents Download Links", mailToSend=mailToSend, files=fns)
         send_wp(msg,student_data['wp_no'])
 
 
