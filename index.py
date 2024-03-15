@@ -47,9 +47,14 @@ files_base_url = "https://files.mcfcamp.in/mcf_files/"
 app = Flask(__name__)
 CORS(app)
 
+# client = MongoClient(
+#     'mongodb+srv://bnbdevs:feLC7m4jiT9zrmHh@cluster0.fjnp4qu.mongodb.net/?retryWrites=true&w=majority')
+# app.config['MONGO_URI'] = 'mongodb+srv://bnbdevs:feLC7m4jiT9zrmHh@cluster0.fjnp4qu.mongodb.net/?retryWrites=true&w=majority'
+
 client = MongoClient(
     'mongodb+srv://mcfcamp:mcf123@mcf.nyh46tl.mongodb.net/')
 app.config['MONGO_URI'] = 'mongodb+srv://mcfcamp:mcf123@mcf.nyh46tl.mongodb.net/'
+
 app.config['SECRET_KEY'] = 'a6d217d048fdcd227661b755'
 db = client['mcf_db']
 bcrypt = Bcrypt(app)
@@ -2593,6 +2598,14 @@ def createPayment():
                 
             else:
                 return {"error":"Please Specify Payment Option"}
+            
+
+            payment_receipt_url = f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+            
+            msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {student_data['entrence_card']} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
+            
+            send_email(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'])
+            send_wp(msg,student_data['wp_no'])
 
             return jsonify({"message": f"Payment added successfully.", "payment_id": payment_id})
         else:
