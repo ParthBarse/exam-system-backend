@@ -1042,7 +1042,7 @@ def activate_student():
             return jsonify({"error": f"No student found with sid: {sid}"}), 404  # Not Found
 
         # Update the status to "Active"
-        students_db.update_one({"sid": sid}, {"$set": {"status": "Active"}})
+        students_db.update_one({"sid": sid}, {"$set": {"status": "In Progress"}})
 
         return jsonify({"message": f"Student with sid {sid} is now Active."})
 
