@@ -275,7 +275,7 @@ def sync_data(original_sid):
                 students_db.insert_one(student)
                 batches_db.update_one({"batch_id": data.get("batch_id")}, {"$set": {"students_registered":int(int(batch["students_registered"])+1)}})
 
-                payment_db = ['all_payments']
+                payment_db = db['all_payments']
                 filter_criteria = {'sid': original_sid}
                 update_operation = {'$set': {'sid': sid}}
                 payment_db.update_many(filter_criteria, update_operation)
