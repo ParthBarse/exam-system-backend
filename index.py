@@ -292,11 +292,15 @@ def sync_data(original_sid):
                     ec = f"{files_base_url}{data['sid']}_entrance_card.pdf"
 
                     entrance_card = {
-                        "entrence_card" : ec
+                        "entrence_card" : ec,
+                        "status":"Active"
                     }
                     students_db.update_one({"sid": data['sid']}, {"$set": entrance_card})
-
-
+                else:
+                    if data['status']!="Cancel" and data['status']!="Refund" and data['status']!="Extend":
+                        students_db.update_one({"sid": data['sid']}, {"$set": {"status":"In Progress"}})
+                    else:
+                        students_db.update_one({"sid": data['sid']}, {"$set": {"status":data['status']}})
                                 
             except Exception as e:
                 print("Error : ", str(e))
