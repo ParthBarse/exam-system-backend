@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import request, session
+from flask import request, session , make_response
 from pymongo import MongoClient
 from flask import Flask, request, jsonify, send_file
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user
@@ -2798,8 +2798,22 @@ def bulkDownloadAdmissionCard():
 
         zip_url = f"{files_base_url}All_{filter['camp_id']}_{filter['batch_id']}_{filter['status']}_Admission_Cards.zip"
 
+        rint = str(uuid.uuid4().hex)
+
         # return send_file(zip_filename, as_attachment=True)
-        return jsonify({'success': True, "msg": zip_url, "filename":f"All_{filter['camp_id']}_{filter['batch_id']}_{filter['status']}_Admission_Cards.zip"}), 200
+        data = {
+            'success': True,
+            'msg': zip_url + f"nocache={rint}",
+            'filename': f"All_{filter['camp_id']}_{filter['batch_id']}_{filter['status']}_Admission_Cards.zip"
+        }
+
+        # Create a JSON response
+        response = make_response(jsonify(data), 200)
+
+        # Set Cache-Control header to no-store
+        response.headers['Cache-Control'] = 'no-store'
+
+        return response
 
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
