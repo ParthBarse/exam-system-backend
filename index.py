@@ -2575,7 +2575,7 @@ def createPayment():
                     payment_receipt = payment_receipt_url.replace(files_url,files_base_dir)
                     mcert = student_data['medicalCertificate'].replace(files_url,files_base_dir)
                     ecfn = ec.replace(files_url,files_base_dir)
-                    vc = student_data['visiting_card'].replace(student_data['visiting_card'])
+                    vc = student_data['visiting_card'].replace(files_url,files_base_dir)
                     af = student_data['admission_form'].replace(files_url,files_base_dir)
                     fns = [payment_receipt, mcert, ecfn, vc, af]
             
@@ -2971,7 +2971,7 @@ def createPayment():
                     payment_receipt = payment_receipt_url.replace(files_url,files_base_dir)
                     mcert = student_data['medicalCertificate'].replace(files_url,files_base_dir)
                     ecfn = ec.replace(files_url,files_base_dir)
-                    vc = student_data['visiting_card'].replace(student_data['visiting_card'])
+                    vc = student_data['visiting_card'].replace(files_url,files_base_dir)
                     af = student_data['admission_form'].replace(files_url,files_base_dir)
                     fns = [payment_receipt, mcert, ecfn, vc, af]
             
@@ -3074,7 +3074,7 @@ def sendAllDocuments():
 
         mcert = student_data['medicalCertificate'].replace(files_url,files_base_dir)
         ecfn = student_data['entrence_card'].replace(files_url,files_base_dir)
-        vc = student_data['visiting_card'].replace(student_data['visiting_card'])
+        vc = student_data['visiting_card'].replace(files_url,files_base_dir)
         af = student_data['admission_form'].replace(files_url,files_base_dir)
         fns = [mcert, ecfn, vc, af]
 
@@ -3106,7 +3106,7 @@ def process_data(body):
         payment_links = ''
         mcert = student_data['medicalCertificate'].replace(files_url,files_base_dir)
         ecfn = student_data['entrence_card'].replace(files_url,files_base_dir)
-        vc = student_data['visiting_card'].replace(student_data['visiting_card'])
+        vc = student_data['visiting_card'].replace(files_url,files_base_dir)
         af = student_data['admission_form'].replace(files_url,files_base_dir)
         fns = [mcert, ecfn, vc, af]
         c=1
