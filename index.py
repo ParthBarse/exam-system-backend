@@ -286,9 +286,9 @@ def sync_data(original_sid):
                     except Exception as e:
                         print("Error : ",str(e))
 
-                    doc.save(str(str(file_dir)+f"{data['sid']}_entrance_card.docx"))
+                    doc.save(str(str(file_dir)+f"{sid}_entrance_card.docx"))
 
-                    convert_to_pdf(str(str(file_dir)+f"{data['sid']}_entrance_card.docx"), str(str(file_dir)+f"{data['sid']}_entrance_card.pdf"))
+                    convert_to_pdf(str(str(file_dir)+f"{sid}_entrance_card.docx"), str(str(file_dir)+f"{sid}_entrance_card.pdf"))
 
                     ec = f"{files_base_url}{sid}_entrance_card.pdf"
 
