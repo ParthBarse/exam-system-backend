@@ -226,7 +226,7 @@ def sync_data(original_sid):
 
                     student_data_1 = {
                             'CADET_NAME': str(data["first_name"].upper()+" "+data["last_name"].upper()),
-                            'REGNO': data['sid'],
+                            'REGNO': sid,
                             'RANK': 'CDT',
                             'C_NAME': camp_data['camp_name'],
                             'C_BATCH': batch_data['batch_name'],
@@ -290,7 +290,7 @@ def sync_data(original_sid):
 
                     convert_to_pdf(str(str(file_dir)+f"{data['sid']}_entrance_card.docx"), str(str(file_dir)+f"{data['sid']}_entrance_card.pdf"))
 
-                    ec = f"{files_base_url}{data['sid']}_entrance_card.pdf"
+                    ec = f"{files_base_url}{sid}_entrance_card.pdf"
 
                     entrance_card = {
                         "entrence_card" : ec,
