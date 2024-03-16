@@ -583,7 +583,7 @@ def find_and_replace_paragraphs_visiting_card(paragraphs, field, replacement):
     for paragraph in paragraphs:
         if field in paragraph.text:
             paragraph.text = paragraph.text.replace(field, replacement)
-            set_paragraph_font_visiting_card(paragraph, 'Times New Roman', 16, False)
+            set_paragraph_font_visiting_card(paragraph, 'Times New Roman', 14, False)
 
 def find_and_replace_tables_visiting_card(tables, field, replacement):
     for table in tables:
@@ -599,7 +599,7 @@ def replace_image_in_cell(doc, table_index, row_index, column_index, image_path)
         paragraph.clear()
     paragraph = cell.add_paragraph()
     run = paragraph.add_run()
-    run.add_picture(image_path, width=Inches(1.4), height=Inches(1.6))
+    run.add_picture(image_path, width=Inches(1.4), height=Inches(1.8))
     paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
 
