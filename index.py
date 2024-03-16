@@ -27,6 +27,8 @@ import jwt
 import threading
 import time
 import zipfile
+import requests
+import base64
 
 #--------------------------------------------------------------------------------
 
@@ -394,7 +396,8 @@ def sendSMS(msg,phn):
     else:
         return 1
     
-def send_wp(sms_content, mobile_numbers):
+
+def send_wp(sms_content, mobile_numbers, file_paths=None):
     api_url = "http://msg.msgclub.net/rest/services/sendSMS/sendGroupSms"
     auth_key = "2b4186d8fc21f47949e7f5e92b56390"
     route_id = "21"
@@ -411,6 +414,50 @@ def send_wp(sms_content, mobile_numbers):
         "AUTH_KEY": auth_key,
         "Content-Type": "application/json"
     }
+
+    payload2 = {
+        "smsContent": "",
+        "routeId": route_id,
+        "mobileNumbers": mobile_numbers,
+        "senderId": sender_id,
+        "smsContentType": sms_content_type
+    }
+
+    # Add file data if file_path is provided
+    if file_paths:
+        if len(file_paths) == 1:
+            filedata_encoded = encode_file_to_base64(file_paths[0])
+            if filedata_encoded:
+                payload["filename"] = file_paths[0].split('/')[-1]  # Extract filename from path
+                payload["filedata"] = filedata_encoded
+            else:
+                print(f"Error: Unable to encode {file_path} to Base64")
+                return 1
+            response = requests.post(api_url, json=payload, headers=headers)
+            if response.status_code == 200:
+                response_json = response.json()
+                if 'response' in response_json:
+                    print("Send WP")
+                    return 0
+                else:
+                    return 1
+            else:
+                return 1
+        elif len(file_paths) > 1:
+            for file_path in file_paths:
+                filedata_encoded = encode_file_to_base64(file_path)
+                if filedata_encoded:
+                    payload2["filename"] = file_path.split('/')[-1]  # Extract filename from path
+                    payload2["filedata"] = filedata_encoded
+                else:
+                    print(f"Error: Unable to encode {file_path} to Base64")
+                response = requests.post(api_url, json=payload2, headers=headers)
+                if response.status_code == 200:
+                    response_json = response.json()
+                    if 'response' in response_json:
+                        print("Send WP")
+                    else:
+                        print("Error")
     response = requests.post(api_url, json=payload, headers=headers)
     if response.status_code == 200:
         response_json = response.json()
@@ -421,6 +468,16 @@ def send_wp(sms_content, mobile_numbers):
             return 1
     else:
         return 1
+
+def encode_file_to_base64(file_path):
+    try:
+        with open(file_path, "rb") as file:
+            filedata = file.read()
+            filedata_encoded = base64.b64encode(filedata).decode('utf-8')
+            return filedata_encoded
+    except Exception as e:
+        print(f"Error encoding file to Base64: {str(e)}")
+        return None
     
 
 def send_email(msg, sub, mailToSend):
@@ -916,13 +973,6 @@ def register_student():
                 return jsonify({"message": "Student registered successfully", "sid": sid})
             else:
                 return jsonify({"message": "Batch is Already Full !"})
-            
-        # msg = "Dear Parent, Thank you for registering with MCF Camp, for any registration and payment-related query please visit us at www.mcfcamp.in. Or contact us at 9604087000/9604082000, or email us at mcfcamp@gmail.com MARSHAL CADEF"
-        # sub = "Registration Successful !"
-        # mailToSend = data['email']
-        # sendSMS(msg,data["phn"])
-        # send_wp(msg,data["wp_no"])
-        # send_email(msg, sub, mailToSend)
 
         return jsonify({"message": "Student registered successfully", "sid": sid})
 
@@ -2017,6 +2067,7 @@ def send_entrance_card_wp():
         students_db = db["students_db"]
         student_data = students_db.find_one({"sid":sid}, {"_id":0})
         entrence_card = student_data["entrence_card"]
+        ec = entrence_card.replace(files_url,files_base_dir)
         entrence_card_srt = ''
         url = "https://s.mcfcamp.in/shorten"
         data = {
@@ -2031,7 +2082,7 @@ def send_entrance_card_wp():
             print("Error:", response.status_code)
         msg = f"Hello, Download Link for your Entrance Card is {entrence_card_srt} \n Team MCF CAMP"
         phn = student_data['wp_no']
-        send_wp(msg,phn)
+        send_wp(msg,phn,file_paths=[ec])
 
         return jsonify({'success': True, 'msg': 'SMS Send'}), 200
 
@@ -2047,6 +2098,7 @@ def send_medical_certificate_wp():
         students_db = db["students_db"]
         student_data = students_db.find_one({"sid":sid}, {"_id":0})
         medical_cert = student_data["medicalCertificate"]
+        mcert = medical_cert.replace(files_url,files_base_dir)
         medical_cert_srt = ''
         url = "https://s.mcfcamp.in/shorten"
         data = {
@@ -2061,7 +2113,7 @@ def send_medical_certificate_wp():
             print("Error:", response.status_code)
         msg = f"Hello, Download Link for your Medical Certificate is {medical_cert_srt} \n Team MCF CAMP"
         phn = student_data['wp_no']
-        send_wp(msg,phn)
+        send_wp(msg,phn,file_paths=[mcert])
 
         return jsonify({'success': True, 'msg': 'SMS Send'}), 200
 
@@ -2077,6 +2129,7 @@ def send_visiting_card_wp():
         students_db = db["students_db"]
         student_data = students_db.find_one({"sid":sid}, {"_id":0})
         visiting_card = student_data["visiting_card"]
+        vc = visiting_card.replace(files_url,files_base_dir)
         visiting_card_srt = ''
         url = "https://s.mcfcamp.in/shorten"
         data = {
@@ -2091,7 +2144,7 @@ def send_visiting_card_wp():
             print("Error:", response.status_code)
         msg = f"Hello, Download Link for your Visiting Card is {visiting_card_srt} \n Team MCF CAMP"
         phn = student_data['wp_no']
-        send_wp(msg,phn)
+        send_wp(msg,phn,file_paths=[vc])
 
         return jsonify({'success': True, 'msg': 'SMS Send'}), 200
 
@@ -2114,6 +2167,7 @@ def sendReceipt_wp():
         student_data = students_db.find_one({"sid":sid}, {"_id":0})
 
         receipt = payment_data["receipt_url"]
+        payment_receipt = receipt.replace(files_url,files_base_dir)
         receipt_srt = ''
         url = "https://s.mcfcamp.in/shorten"
         data = {
@@ -2128,7 +2182,7 @@ def sendReceipt_wp():
             print("Error:", response.status_code)
         msg = f"Hello, Download Link for your Payment Receipt is {receipt_srt} \n Team MCF CAMP"
         phn = student_data['wp_no']
-        send_wp(msg,phn)
+        send_wp(msg,phn,file_paths=[payment_receipt])
 
         return jsonify({'success': True, 'msg': 'SMS Send'}), 200
 
@@ -2581,7 +2635,7 @@ def createPayment():
                     fns = [payment_receipt, mcert, ecfn, vc, af]
             
                     send_email_attachments(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'], files=fns)
-                    send_wp(msg,student_data['wp_no'])
+                    send_wp(msg,student_data['wp_no'],file_paths=fns)
 
 
                 all_payments.insert_one({
@@ -2599,11 +2653,6 @@ def createPayment():
 
             else:
                 return {"error":"Please Specify Payment Option"}
-            
-            # msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {ec} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
-            
-            # send_email(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'])
-            # send_wp(msg,student_data['wp_no'])
 
             return jsonify({"message": f"Payment added successfully.", "payment_id": payment_id})
         
@@ -2977,7 +3026,7 @@ def createPayment():
                     fns = [payment_receipt, mcert, ecfn, vc, af]
             
                     send_email_attachments(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'], files=fns)
-                    send_wp(msg,student_data['wp_no'])
+                    send_wp(msg,student_data['wp_no'],file_paths=fns)
 
 
                 all_payments.insert_one({
@@ -2994,14 +3043,6 @@ def createPayment():
                 
             else:
                 return {"error":"Please Specify Payment Option"}
-            
-
-            # payment_receipt_url = f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
-            
-            # msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {ec} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
-            
-            # send_email(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'])
-            # send_wp(msg,student_data['wp_no'])
 
             return jsonify({"message": f"Payment added successfully.", "payment_id": payment_id})
         else:
@@ -3089,7 +3130,7 @@ def sendAllDocuments():
         msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_links}\n\n Medical Certificate - {student_data['medicalCertificate']} \n\nEntrance Card - {student_data['entrence_card']} \n\nVisiting Card - {student_data['visiting_card']} \n\nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
             
         send_email_attachments(msg=msg, sub="All Documents Download Links", mailToSend=mailToSend, files=fns)
-        send_wp(msg,student_data['wp_no'])
+        send_wp(msg,student_data['wp_no'],file_paths=fns)
 
         return jsonify({'success': True, 'msg': 'Mail Send'}), 200
 
@@ -3118,7 +3159,7 @@ def process_data(body):
         msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_links}\n\n Medical Certificate - {student_data['medicalCertificate']} \n\nEntrance Card - {student_data['entrence_card']} \n\nVisiting Card - {student_data['visiting_card']} \n\nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
 
         send_email_attachments(msg=msg, sub="All Documents Download Links", mailToSend=mailToSend, files=fns)
-        send_wp(msg,student_data['wp_no'])
+        send_wp(msg,student_data['wp_no'],file_paths=fns)
 
 
 @app.route("/sendAllStudentsDocs", methods=["POST"])
