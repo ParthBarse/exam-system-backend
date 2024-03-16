@@ -296,6 +296,7 @@ def sync_data(original_sid):
                         "entrence_card" : ec,
                         "status":"Active"
                     }
+                    final_status = "Active"
                     students_db.update_one({"sid": data['sid']}, {"$set": entrance_card})
                 else:
                     if data['status']=="Active" or data['status']=="In Progress":
