@@ -968,7 +968,7 @@ def register_student():
             if int(batch["students_registered"]) <= int(batch["batch_intake"]):
                 students_db.insert_one(student)
                 batches_db.update_one({"batch_id": data.get("batch_id")}, {"$set": {"students_registered":int(int(batch["students_registered"])+1)}})
-                msg = "Dear Parent, Thank you for registering with MCF Camp, for any registration and payment-related query please visit us at www.mcfcamp.in. Or contact us at 9604087000/9604082000, or email us at mcfcamp@gmail.com MARSHAL CADEF"
+                msg = "Dear Parent, Thank you for registering with MCF Camp, for any registration and payment-related query please visit us at www.mcfcamp.in. Or contact us at 9604087000/9604082000, or email us at mcfcamp@gmail.com MARSHAL CADET"
                 sub = "Registration Successful !"
                 mailToSend = data['email']
                 sendSMS(msg,data["phn"])
