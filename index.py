@@ -403,7 +403,7 @@ def send_wp(sms_content, mobile_numbers, file_paths=[]):
     api_url = "http://msg.msgclub.net/rest/services/sendSMS/sendGroupSms"
     auth_key = "2b4186d8fc21f47949e7f5e92b56390"
     route_id = "21"
-    sender_id = "8793015610"
+    sender_id = "7720014900"
     sms_content_type = "english"
     payload = {
         "smsContent": sms_content,
@@ -485,11 +485,11 @@ def encode_file_to_base64(file_path):
 def send_email(msg, sub, mailToSend):
     try:
         # Send the password reset link via email
-        sender_email = "partbarse92@gmail.com"
+        sender_email = "mcfcamp@gmail.com"
         smtp_server = smtplib.SMTP("smtp.gmail.com", 587)
         smtp_server.ehlo()
         smtp_server.starttls()
-        smtp_server.login("partbarse92@gmail.com", "xdfrjwaxctwqpzyg")
+        smtp_server.login("mcfcamp@gmail.com", "meyv ghup onbl fqhu")
 
         message_text = msg
         message = MIMEText(message_text)
@@ -518,11 +518,11 @@ def send_email_attachments(msg, sub, mailToSend, files=[]):
     try:
         if len(files)>1:
             files.append("THINGS_TO_BRING.pdf")
-        sender_email = "partbarse92@gmail.com"
+        sender_email = "mcfcamp@gmail.com"
         smtp_server = smtplib.SMTP("smtp.gmail.com", 587)
         smtp_server.ehlo()
         smtp_server.starttls()
-        smtp_server.login("partbarse92@gmail.com", "xdfrjwaxctwqpzyg")
+        smtp_server.login("mcfcamp@gmail.com", "meyv ghup onbl fqhu")
 
         # Create a multipart message
         message = MIMEMultipart()
@@ -1877,11 +1877,11 @@ def send_entrance_card():
         student_data = students_db.find_one({"sid":sid}, {"_id":0})
         mailToSend = student_data['email']
         # Send the password reset link via email
-        sender_email = "partbarse92@gmail.com"
+        sender_email = "mcfcamp@gmail.com"
         smtp_server = smtplib.SMTP("smtp.gmail.com", 587)
         smtp_server.ehlo()
         smtp_server.starttls()
-        smtp_server.login("partbarse92@gmail.com", "xdfrjwaxctwqpzyg")
+        smtp_server.login("mcfcamp@gmail.com", "meyvghuponblfqhu")
 
         message_text = f"Hello {student_data['first_name']}, \n\n You can download your Entrance Card from below Link. \n {student_data['entrence_card']} \n\n You need to print the Entrance Card and Bring to camp in Hardcopy."
         message = MIMEText(message_text)
@@ -1908,11 +1908,11 @@ def send_medical_certificate():
         student_data = students_db.find_one({"sid":sid}, {"_id":0})
         mailToSend = student_data['email']
         # Send the password reset link via email
-        sender_email = "partbarse92@gmail.com"
+        sender_email = "mcfcamp@gmail.com"
         smtp_server = smtplib.SMTP("smtp.gmail.com", 587)
         smtp_server.ehlo()
         smtp_server.starttls()
-        smtp_server.login("partbarse92@gmail.com", "xdfrjwaxctwqpzyg")
+        smtp_server.login("mcfcamp@gmail.com", "meyv ghup onbl fqhu")
 
         message_text = f"Hello {student_data['first_name']}, \n\n You can download your Medical Certificate from below Link. \n {student_data['medicalCertificate']} \n\n You need to print the Medical Certificate and Take a signature from your Doctor and Bring to camp in Hardcopy."
         message = MIMEText(message_text)
@@ -1937,11 +1937,11 @@ def send_visiting_card():
         student_data = students_db.find_one({"sid":sid}, {"_id":0})
         mailToSend = student_data['email']
         # Send the password reset link via email
-        sender_email = "partbarse92@gmail.com"
+        sender_email = "mcfcamp@gmail.com"
         smtp_server = smtplib.SMTP("smtp.gmail.com", 587)
         smtp_server.ehlo()
         smtp_server.starttls()
-        smtp_server.login("partbarse92@gmail.com", "xdfrjwaxctwqpzyg")
+        smtp_server.login("mcfcamp@gmail.com", "meyv ghup onbl fqhu")
 
         message_text = f"Hello {student_data['first_name']}, \n\n You can download your Visiting Card from below Link. \n {student_data['visiting_card']} \n\n You need to print the Visiting Card and bring to camp for parents to visit Student"
         message = MIMEText(message_text)
