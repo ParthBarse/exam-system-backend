@@ -514,6 +514,7 @@ from email import encoders
 
 def send_email_attachments(msg, sub, mailToSend, files=[]):
     try:
+        files.append("THINGS_TO_BRING.pdf")
         sender_email = "partbarse92@gmail.com"
         smtp_server = smtplib.SMTP("smtp.gmail.com", 587)
         smtp_server.ehlo()
@@ -2263,7 +2264,7 @@ def createPayment():
         camp_db = db["camps_db"]
         camp_data = camp_db.find_one({"camp_id":camp_id}, {"_id":0})
 
-        if "7" in batch_dur:
+        if "7" in batch_dur or "5" in batch_dur or "3" in batch_dur:
             doc = Document('fee_receipt_7.docx')
             final_data = {
                 "REG_NO": student_data['sid'],
