@@ -397,7 +397,9 @@ def sendSMS(msg,phn):
         return 1
     
 
-def send_wp(sms_content, mobile_numbers, file_paths=None):
+def send_wp(sms_content, mobile_numbers, file_paths=[]):
+    if len(file_paths)>1:
+            file_paths.append("THINGS_TO_BRING.pdf")
     api_url = "http://msg.msgclub.net/rest/services/sendSMS/sendGroupSms"
     auth_key = "2b4186d8fc21f47949e7f5e92b56390"
     route_id = "21"
@@ -514,7 +516,8 @@ from email import encoders
 
 def send_email_attachments(msg, sub, mailToSend, files=[]):
     try:
-        files.append("THINGS_TO_BRING.pdf")
+        if len(files)>1:
+            files.append("THINGS_TO_BRING.pdf")
         sender_email = "partbarse92@gmail.com"
         smtp_server = smtplib.SMTP("smtp.gmail.com", 587)
         smtp_server.ehlo()
