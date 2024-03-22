@@ -3272,6 +3272,35 @@ def sync_Student():
 
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+    
+
+@app.route('/submitFeedback', methods=['POST'])
+def submit_feedback():
+    try:
+        json_data = request.get_json()
+        feedback_db = db['feedback_db']
+        students_db = db["students_db"]
+        feedback=feedback_db.find({"sid":json_data['sid']})
+        student = students_db.find_one({"sid":json_data['sid']})
+        if not feedback and student:
+            feedback_db.insert_one(json_data)
+            response = {
+            'success': True,
+            'message': 'Feedback stored successfully',
+        }
+            return jsonify(response), 200
+        else:
+            response = {
+            'success': False,
+            'message': 'Feedback from this MRN already Exist. or Cadet does not exist',
+        }
+            return jsonify(response), 400
+    except Exception as e:
+        error_response = {
+            'success': False,
+            'message': f'Error storing JSON data: {str(e)}'
+        }
+        return jsonify(error_response), 500
 
 
     
