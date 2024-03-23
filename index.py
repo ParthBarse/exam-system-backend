@@ -1166,7 +1166,7 @@ def add_camp():
 
         camp = {
             "camp_id": camp_id,
-            "camp_name": data["camp_name"],
+            "camp_name": data["camp_name"].strip(),
             "camp_place": data["camp_place"],
             "camp_fee": float(data["camp_fee"]),  # assuming camp_fee is a float
             "camp_description": data["camp_description"],
@@ -3295,7 +3295,7 @@ def submit_feedback():
         students_db = db["students_db"]
         feedback=feedback_db.find({"sid":json_data['sid']})
         student = students_db.find_one({"sid":json_data['sid']})
-        if not feedback and student:
+        if student:
             feedback_db.insert_one(json_data)
             response = {
             'success': True,
