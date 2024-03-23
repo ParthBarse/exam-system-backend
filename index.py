@@ -170,7 +170,7 @@ def sync_data(original_sid):
 
 
 
-                doc = Document('admission_form.docx')
+                doc = Document('admission_form_new_format.docx')
                 student_data1 = {
                 "REG_NO": sid,
                 "FIRST_NAME": str(data["first_name"].upper()),
@@ -201,8 +201,14 @@ def sync_data(original_sid):
 
                 image_path_sign_url = data["cadetSign"]
                 image_path_sign = image_path_sign_url.replace(files_url,files_base_dir)
-                replace_image_in_cell_admission_form(doc, table_index=0, row_index=26, column_index=1, image_path=cadet_photo_path)
-                replace_image_in_cell_admission_form(doc, table_index=0, row_index=28, column_index=7, image_path=image_path_sign)
+
+                image_url_guardian_sign = data["parentGurdianSign"]
+                image_path_guardian_sign = image_url_guardian_sign.replace(files_url,files_base_dir)
+
+                replace_image_in_cell_admission_form(doc, table_index=0, row_index=25, column_index=1, image_path=cadet_photo_path,w=1.4,h=1.6)
+                replace_image_in_cell_admission_form(doc, table_index=0, row_index=25, column_index=12, image_path=image_path_sign,w=1.8,h=1.0)
+                replace_image_in_cell_admission_form(doc, table_index=1, row_index=16, column_index=1, image_path=image_path_guardian,w=1.4,h=1.6)
+                replace_image_in_cell_admission_form(doc, table_index=1, row_index=17, column_index=6, image_path=image_path_guardian_sign,w=1.8,h=1.0)
 
                 doc.save(str(str(file_dir)+f"{sid}_admission_form.docx"))
 
@@ -706,14 +712,15 @@ def find_and_replace_tables_admission_form(tables, field, replacement):
                     find_and_replace_paragraphs_admission_form([paragraph], field, replacement)
 
 
-def replace_image_in_cell_admission_form(doc, table_index, row_index, column_index, image_path):
+
+def replace_image_in_cell_admission_form(doc, table_index, row_index, column_index, image_path,w,h):
     table = doc.tables[table_index]
     cell = table.cell(row_index, column_index)
     for paragraph in cell.paragraphs:
         paragraph.clear()
     paragraph = cell.add_paragraph()
     run = paragraph.add_run()
-    run.add_picture(image_path, width=Inches(1.4))
+    run.add_picture(image_path,width=Inches(w), height=Inches(h))
     paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
 
@@ -858,7 +865,7 @@ def register_student():
 
 
 
-                    doc = Document('admission_form.docx')
+                    doc = Document('admission_form_new_format.docx')
                     student_data1 = {
                     "REG_NO": sid,
                     "FIRST_NAME": str(data["first_name"].upper()),
@@ -889,8 +896,14 @@ def register_student():
 
                     image_path_sign_url = data["cadetSign"]
                     image_path_sign = image_path_sign_url.replace(files_url,files_base_dir)
-                    replace_image_in_cell_admission_form(doc, table_index=0, row_index=26, column_index=1, image_path=cadet_photo_path)
-                    replace_image_in_cell_admission_form(doc, table_index=0, row_index=28, column_index=7, image_path=image_path_sign)
+
+                    image_url_guardian_sign = data["parentGurdianSign"]
+                    image_path_guardian_sign = image_url_guardian_sign.replace(files_url,files_base_dir)
+
+                    replace_image_in_cell_admission_form(doc, table_index=0, row_index=25, column_index=1, image_path=cadet_photo_path,w=1.4,h=1.6)
+                    replace_image_in_cell_admission_form(doc, table_index=0, row_index=25, column_index=12, image_path=image_path_sign,w=1.8,h=1.0)
+                    replace_image_in_cell_admission_form(doc, table_index=1, row_index=16, column_index=1, image_path=image_path_guardian,w=1.4,h=1.6)
+                    replace_image_in_cell_admission_form(doc, table_index=1, row_index=17, column_index=6, image_path=image_path_guardian_sign,w=1.8,h=1.0)
 
                     doc.save(str(str(file_dir)+f"{sid}_admission_form.docx"))
 
