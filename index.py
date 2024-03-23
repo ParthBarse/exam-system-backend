@@ -751,17 +751,17 @@ def generate_certificate_cert(sid):
         return 1
     else:
         if 'BTC' in camp_data['camp_name'] or 'btc' in camp_data['camp_name']:
-            doc = Document('CER_3D_BTC.docx')
+            doc = Document('templates_cert/CER_3D_BTC.docx')
         elif 'RTC' in camp_data['camp_name'] or 'rtc' in camp_data['camp_name']:
-            doc = Document('CER_5D_RTC.docx')
+            doc = Document('templates_cert/CER_5D_RTC.docx')
         elif 'ATC' in camp_data['camp_name'] or 'atc' in camp_data['camp_name']:
-            doc = Document('CER_7D_ATC.docx')
+            doc = Document('templates_cert/CER_7D_ATC.docx')
         elif 'CTC' in camp_data['camp_name'] or 'ctc' in camp_data['camp_name']:
-            doc = Document('CER_15D_CTC.docx')
+            doc = Document('templates_cert/CER_15D_CTC.docx')
         elif 'PDC' in camp_data['camp_name'] or 'pdc' in camp_data['camp_name']:
-            doc = Document('CER_15D_PDC.docx')
+            doc = Document('templates_cert/CER_15D_PDC.docx')
         elif 'SMTC' in camp_data['camp_name'] or 'smtc' in camp_data['camp_name']:
-            doc = Document('CER_30D_SMTC.docx')
+            doc = Document('templates_cert/CER_30D_SMTC.docx')
         else:
             print("invalid camp name")
 
