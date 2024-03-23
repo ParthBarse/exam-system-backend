@@ -3360,7 +3360,7 @@ def submit_feedback():
         feedback=feedback_db.find({"sid":json_data['sid']})
         student = students_db.find_one({"sid":json_data['sid']})
         if not feedback or student:
-            if len(json_data) > 17:
+            if len(json_data) >= 17:
                 feedback_db.insert_one(json_data)
                 response = {
                 'success': True,
