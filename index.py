@@ -1048,7 +1048,7 @@ def register_student():
             if int(batch["students_registered"]) <= int(batch["batch_intake"]):
                 students_db.insert_one(student)
                 batches_db.update_one({"batch_id": data.get("batch_id")}, {"$set": {"students_registered":int(int(batch["students_registered"])+1)}})
-                msg = "Dear Parent, Thank you for registering with MCF Camp, for any registration and payment-related query please visit us at www.mcfcamp.in. Or contact us at 9604087000/9604082000, or email us at mcfcamp@gmail.com MARSHAL CADET"
+                msg = "Dear Parent, Thank you for registering with MCF Camp, for any registration and payment-related query please visit us at www.mcfcamp.in. Or contact us at 9604087000/9604082000, or email us at mcfcamp@gmail.com MCF Summer Camp"
                 sub = "Registration Successful !"
                 mailToSend = data['email']
                 sendSMS(msg,data["phn"])
@@ -3390,6 +3390,25 @@ def generate_camp_certificates():
             return jsonify({'success': True, "msg":'Generate Successful'}), 200
         else:
             return jsonify({"success":False,"msg":"Generate Failed"}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+
+
+
+def bulk_generate_cert(data):
+    for dt in data:
+        generate_certificate_cert(dt['sid'])
+
+
+@app.route("/bulkGenerateCampCertificate", methods=["POST"])
+def bulkGenerateCampCertificate():
+    try:
+        data = request.json
+        body = data['body']
+        thread = threading.Thread(target=bulk_generate_cert, args=(body,))
+        thread.start()
+        return jsonify({'success': True, 'msg': 'Process Started'}), 200
+
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
 
