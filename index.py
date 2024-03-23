@@ -746,6 +746,8 @@ def generate_certificate_cert(sid):
     student_data = students_db.find_one({"sid":sid})
     camp_db = db["camps_db"]
     camp_data = camp_db.find_one({"camp_id":student_data['camp_id']})
+    batches_db = db["batches_db"]
+    batch_data = batches_db.find_one({"batch_id":student_data['batch_id']})
 
     if not student_data:
         return 1
@@ -764,6 +766,15 @@ def generate_certificate_cert(sid):
             doc = Document('templates_cert/CER_30D_SMTC.docx')
         else:
             print("invalid camp name")
+
+        student_data1 = {
+            'REG_NO': sid,
+            'CADET_NAME': str(student_data['first_name']+student_data['last_name']),
+            'START_DATE': batch_data['start_date'],
+            'END_DATE':batch_data['end_date'],
+            'CQY': '',
+            'CAMP_NAME':'SMTC'
+        }
 
         for key, value in student_data.items():
             if key == 'CADET_NAME':
