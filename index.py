@@ -3359,7 +3359,7 @@ def submit_feedback():
         students_db = db["students_db"]
         feedback=feedback_db.find({"sid":json_data['sid']})
         student = students_db.find_one({"sid":json_data['sid']})
-        if not feedback and student:
+        if not feedback:
             if len(json_data) >= 17:
                 feedback_db.insert_one(json_data)
                 response = {
@@ -3376,7 +3376,7 @@ def submit_feedback():
         else:
             response = {
             'success': False,
-            'message': 'Feedback from this MRN already Exist. or Cadet does not exist',
+            'message': 'Feedback from this MRN already Exist',
         }
             return jsonify(response), 400
     except Exception as e:
