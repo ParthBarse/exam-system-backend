@@ -726,6 +726,62 @@ def replace_image_in_cell_admission_form(doc, table_index, row_index, column_ind
 
 
 
+
+def set_paragraph_font_cert(paragraph, font_name, font_size, bold):
+    for run in paragraph.runs:
+        font = run.font
+        font.name = font_name
+        font.size = Pt(font_size)
+        font.bold = bold
+
+def find_and_replace_paragraphs_cert(paragraphs, field, replacement, specific_font=None):
+    for paragraph in paragraphs:
+        if field in paragraph.text:
+            paragraph.text = paragraph.text.replace(field, replacement)
+            if specific_font is not None:
+                set_paragraph_font_cert(paragraph, *specific_font)
+
+def generate_certificate_cert(sid):
+    students_db = db["students_db"]
+    student_data = students_db.find_one({"sid":sid})
+    camp_db = db["camps_db"]
+    camp_data = camp_db.find_one({"camp_id":student_data['camp_id']})
+
+    if not student_data:
+        return 1
+    else:
+        if 'BTC' in camp_data['camp_name'] or 'btc' in camp_data['camp_name']:
+            doc = Document('CER_3D_BTC.docx')
+        elif 'RTC' in camp_data['camp_name'] or 'rtc' in camp_data['camp_name']:
+            doc = Document('CER_5D_RTC.docx')
+        elif 'ATC' in camp_data['camp_name'] or 'atc' in camp_data['camp_name']:
+            doc = Document('CER_7D_ATC.docx')
+        elif 'CTC' in camp_data['camp_name'] or 'ctc' in camp_data['camp_name']:
+            doc = Document('CER_15D_CTC.docx')
+        elif 'PDC' in camp_data['camp_name'] or 'pdc' in camp_data['camp_name']:
+            doc = Document('CER_15D_PDC.docx')
+        elif 'SMTC' in camp_data['camp_name'] or 'smtc' in camp_data['camp_name']:
+            doc = Document('CER_30D_SMTC.docx')
+        else:
+            print("invalid camp name")
+
+        for key, value in student_data.items():
+            if key == 'CADET_NAME':
+                find_and_replace_paragraphs_cert(doc.paragraphs, f'{{MERGEFIELD {key}}}', str(value), specific_font=('Times New Roman', 18, True))
+            else:
+                find_and_replace_paragraphs_cert(doc.paragraphs, f'{{MERGEFIELD {key}}}', str(value), specific_font=('Times New Roman', 14, True))
+                
+        # doc.save(f"{student_data['REG_NO']}_CER_{student_data['CAMP_NAME']}.docx")
+        doc.save(str(str(file_dir)+f"{sid}_Certificate.docx"))
+        convert_to_pdf(str(str(file_dir)+f"{sid}_Certificate.docx"), str(str(file_dir)+f"{sid}_Certificate.pdf"))
+        cert_url = f"{files_base_url}{sid}_Certificate.pdf"
+
+        students_db.update_one({"sid": sid}, {"$set": {"completion_cert":cert_url}})
+    return 0
+
+
+
+
 def number_to_words(num):
     # Define lists of words for numbers
     units = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine']
@@ -3275,14 +3331,11 @@ def bulkDownloadAdmissionCard():
 def sync_Student():
     try:
         sid = request.args.get('sid')
-
         result = sync_data(sid)
-
         if result == 0:
             return jsonify({'success': True, "msg":'Sync Successful'}), 200
         else:
             return jsonify({"success":False,"msg":"Not Sync"}), 400
-
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
     
@@ -3314,6 +3367,20 @@ def submit_feedback():
             'message': f'Error storing JSON data: {str(e)}'
         }
         return jsonify(error_response), 500
+    
+
+
+@app.route("/generateCampCertificate", methods=["GET"])
+def sync_Student():
+    try:
+        sid = request.args.get('sid')
+        result = generate_certificate_cert(sid)
+        if result == 0:
+            return jsonify({'success': True, "msg":'Generate Successful'}), 200
+        else:
+            return jsonify({"success":False,"msg":"Generate Failed"}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
 
 
     
