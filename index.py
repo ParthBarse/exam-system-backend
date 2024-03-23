@@ -776,7 +776,7 @@ def generate_certificate_cert(sid):
             'CAMP_NAME':'SMTC'
         }
 
-        for key, value in student_data.items():
+        for key, value in student_data1.items():
             if key == 'CADET_NAME':
                 find_and_replace_paragraphs_cert(doc.paragraphs, f'{{MERGEFIELD {key}}}', str(value), specific_font=('Times New Roman', 18, True))
             else:
@@ -788,7 +788,7 @@ def generate_certificate_cert(sid):
         cert_url = f"{files_base_url}{sid}_Certificate.pdf"
 
         students_db.update_one({"sid": sid}, {"$set": {"completion_cert":cert_url}})
-    return 0
+        return 0
 
 
 
