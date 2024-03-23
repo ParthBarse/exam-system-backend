@@ -3371,7 +3371,7 @@ def submit_feedback():
 
 
 @app.route("/generateCampCertificate", methods=["GET"])
-def sync_Student():
+def generate_camp_certificates():
     try:
         sid = request.args.get('sid')
         result = generate_certificate_cert(sid)
