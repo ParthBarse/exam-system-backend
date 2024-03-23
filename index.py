@@ -3357,7 +3357,7 @@ def submit_feedback():
         json_data = request.get_json()
         feedback_db = db['feedback_db']
         students_db = db["students_db"]
-        feedback=feedback_db.find({"sid":json_data['sid']})
+        feedback=feedback_db.find_one({"sid":json_data['sid']})
         student = students_db.find_one({"sid":json_data['sid']})
         if not feedback:
             if len(json_data) >= 17:
