@@ -3359,13 +3359,20 @@ def submit_feedback():
         students_db = db["students_db"]
         feedback=feedback_db.find({"sid":json_data['sid']})
         student = students_db.find_one({"sid":json_data['sid']})
-        if student:
-            feedback_db.insert_one(json_data)
-            response = {
-            'success': True,
-            'message': 'Feedback stored successfully',
-        }
-            return jsonify(response), 200
+        if not feedback or student:
+            if len(json_data) > 17:
+                feedback_db.insert_one(json_data)
+                response = {
+                'success': True,
+                'message': 'Feedback stored successfully',
+                }
+                return jsonify(response), 200
+            else:
+                response = {
+                'success': False,
+                'message': 'Some Fields are not filled...',
+                }
+                return jsonify(response), 400
         else:
             response = {
             'success': False,
