@@ -3246,12 +3246,42 @@ def process_data(body):
         send_wp(msg,student_data['wp_no'],file_paths=fns)
 
 
+
+def send_certs_bulk(body):
+    students_db = db["students_db"]
+    payment_db = db["all_payments"]
+    for dt in body:
+        student_data = students_db.find_one({"sid":dt['sid']}, {"_id":0})
+        mailToSend = student_data['email']
+        payment_data = payment_db.find({"sid":dt['sid']},{"_id":0})
+        payment_data = list(payment_data)
+        cc = student_data['completion_cert'].replace(files_url,files_base_dir)
+        ncc = cc.replace(files_url,files_base_dir)
+        msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nCertificate - {cc}\n\nTeam MCF Camp"
+
+        send_email_attachments(msg=msg, sub="Camp Completion Certificate from MCF Camp", mailToSend=mailToSend, files=[ncc])
+        send_wp(msg,student_data['wp_no'],file_paths=[ncc])
+
+
 @app.route("/sendAllStudentsDocs", methods=["POST"])
 def sendAllStudentsDocs():
     try:
         data = request.json
         body = data['body']
         thread = threading.Thread(target=process_data, args=(body,))
+        thread.start()
+        return jsonify({'success': True, 'msg': 'Process Started'}), 200
+
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+    
+
+@app.route("/sendAllStudentsCert", methods=["POST"])
+def sendAllStudentsCert():
+    try:
+        data = request.json
+        body = data['body']
+        thread = threading.Thread(target=send_certs_bulk, args=(body,))
         thread.start()
         return jsonify({'success': True, 'msg': 'Process Started'}), 200
 
