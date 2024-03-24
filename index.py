@@ -3451,17 +3451,17 @@ def submit_feedback():
                 no_of_stars = int(json_data['camp_rating'])
                 i_index = 1
                 for i in range (no_of_stars):
-                    replace_image_in_cell(doc, table_index=1, row_index=0, column_index=i_index, image_path=yes_star,w=0.23)
+                    replace_image_in_cell_fdb(doc, table_index=1, row_index=0, column_index=i_index, image_path=yes_star,w=0.23)
                     i_index = i_index + 1
                 no_star_num = 5 - no_of_stars
                 ns_index = i_index
                 for i in range (no_star_num) :
-                    replace_image_in_cell(doc, table_index=1, row_index=0, column_index=ns_index, image_path=no_star,w=0.23)
+                    replace_image_in_cell_fdb(doc, table_index=1, row_index=0, column_index=ns_index, image_path=no_star,w=0.23)
                     ns_index = ns_index + 1
 
 
                 image_path_guardian = json_data['parent_sign'].replace(files_url,files_base_dir)
-                replace_image_in_cell(doc, table_index=2, row_index=1, column_index=3, image_path=image_path_guardian,w=1.8)
+                replace_image_in_cell_fdb(doc, table_index=2, row_index=1, column_index=3, image_path=image_path_guardian,w=1.8)
 
                 docx_path = f"{file_dir}{student_data1['REG_NO']}_feedback.docx"
                 doc.save(docx_path)
