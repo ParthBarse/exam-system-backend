@@ -769,11 +769,10 @@ def generate_certificate_cert(sid):
 
         student_data1 = {
             'REG_NO': sid,
-            'CADET_NAME': str(student_data['first_name']+student_data['last_name']),
+            'CADET_NAME': str(student_data['first_name']+" "+student_data['last_name']),
             'START_DATE': batch_data['start_date'],
             'END_DATE':batch_data['end_date'],
-            'CQY': '',
-            'CAMP_NAME':'SMTC'
+            'CQY': ''
         }
 
         for key, value in student_data1.items():
@@ -789,6 +788,38 @@ def generate_certificate_cert(sid):
 
         students_db.update_one({"sid": sid}, {"$set": {"completion_cert":cert_url}})
         return 0
+    
+
+
+def set_paragraph_font_fdb(paragraph, font_name, font_size, bold=False):
+    for run in paragraph.runs:
+        font = run.font
+        font.name = font_name
+        font.size = Pt(font_size)
+        font.bold = bold                    
+
+def find_and_replace_paragraphs_fdb(paragraphs, field, replacement):
+    for paragraph in paragraphs:
+        if field in paragraph.text:
+            paragraph.text = paragraph.text.replace(field, replacement)
+            set_paragraph_font_fdb(paragraph, 'Times New Roman', 11, False)
+
+def find_and_replace_tables_fdb(tables, field, replacement):
+    for table in tables:
+        for row in table.rows:
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    find_and_replace_paragraphs_fdb([paragraph], field, replacement)
+
+def replace_image_in_cell_fdb(doc, table_index, row_index, column_index, image_path,w):
+    table = doc.tables[table_index]
+    cell = table.cell(row_index, column_index)
+    for paragraph in cell.paragraphs:
+        paragraph.clear()
+    paragraph = cell.add_paragraph()
+    run = paragraph.add_run()
+    run.add_picture(image_path, width=Inches(w))
+    paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
 
 
@@ -3391,11 +3422,66 @@ def submit_feedback():
         student = students_db.find_one({"sid":json_data['sid']})
         if student and not feedback:
             if len(json_data) >= 17:
+
+                doc = Document('feedback_files/SUMMER_CAMP_FEEDBACK.docx')
+
+                # Sample student_data
+                student_data1 = {
+                    'CADET_NAME': str(json_data['name']),
+                    'CAMP_NAME': json_data['camp_name'],
+                    'DAYS' : json_data['duration'],
+                    'BATCH': json_data['batch_name'],
+                    'REG_NO': json_data['sid'],
+                    'TRANING' : json_data['training'],
+                    'CAMPUS' : json_data['campus'],
+                    'FOOD': json_data['food'],
+                    'DORMITORY':json_data['dormitory'],
+                    'TRAVELLING':json_data['traveling'],
+                    'CAMP_EXPERIENCE':json_data['campExperience'],
+                    'SUGGESTIONS' : json_data['suggestions'],
+                    'PARENT_NAME': json_data['middle_name'],
+
+                }
+
+                for key, value in student_data1.items():
+                        find_and_replace_tables_fdb(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+
+                yes_star = "feedback_files/fill_star.png"
+                no_star = "feedback_files/hollow_star.png"
+                no_of_stars = int(json_data['camp_rating'])
+                i_index = 1
+                for i in range (no_of_stars):
+                    replace_image_in_cell(doc, table_index=1, row_index=0, column_index=i_index, image_path=yes_star,w=0.23)
+                    i_index = i_index + 1
+                no_star_num = 5 - no_of_stars
+                ns_index = i_index
+                for i in range (no_star_num) :
+                    replace_image_in_cell(doc, table_index=1, row_index=0, column_index=ns_index, image_path=no_star,w=0.23)
+                    ns_index = ns_index + 1
+
+
+                image_path_guardian = json_data['parent_sign'].replace(files_url,files_base_dir)
+                replace_image_in_cell(doc, table_index=2, row_index=1, column_index=3, image_path=image_path_guardian,w=1.8)
+
+                docx_path = f"{file_dir}{student_data1['REG_NO']}_feedback.docx"
+                doc.save(docx_path)
+                output_path = f"{file_dir}{student_data1['REG_NO']}_feedback.pdf"
+                convert_to_pdf(docx_path,output_path)
+
+                feedback_url = f"{files_base_url}{student_data1['REG_NO']}_feedback.pdf"
+
+                json_data['feedback_form'] = feedback_url
+
+                students_db.update_one({"sid": json_data['sid']}, {"$set": {"feedback_form":feedback_url}})
+
                 feedback_db.insert_one(json_data)
+
                 response = {
                 'success': True,
                 'message': 'Feedback stored successfully',
                 }
+
+
                 return jsonify(response), 200
             else:
                 response = {
