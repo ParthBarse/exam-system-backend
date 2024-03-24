@@ -3249,18 +3249,18 @@ def process_data(body):
 
 def send_certs_bulk(body):
     students_db = db["students_db"]
-    payment_db = db["all_payments"]
     for dt in body:
         student_data = students_db.find_one({"sid":dt['sid']}, {"_id":0})
         mailToSend = student_data['email']
-        payment_data = payment_db.find({"sid":dt['sid']},{"_id":0})
-        payment_data = list(payment_data)
-        cc = student_data['completion_cert'].replace(files_url,files_base_dir)
-        ncc = cc.replace(files_url,files_base_dir)
-        msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nCertificate - {cc}\n\nTeam MCF Camp"
+        if student_data['completion_cert']:
+            cc = student_data['completion_cert'].replace(files_url,files_base_dir)
+            ncc = cc.replace(files_url,files_base_dir)
+            msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nCertificate - {cc}\n\nTeam MCF Camp"
 
-        send_email_attachments(msg=msg, sub="Camp Completion Certificate from MCF Camp", mailToSend=mailToSend, files=[ncc])
-        send_wp(msg,student_data['wp_no'],file_paths=[ncc])
+            send_email_attachments(msg=msg, sub="Camp Completion Certificate from MCF Camp", mailToSend=mailToSend, files=[ncc])
+            send_wp(msg,student_data['wp_no'],file_paths=[ncc])
+        else:
+            print("Generate Certificate First")
 
 
 @app.route("/sendAllStudentsDocs", methods=["POST"])
@@ -3445,6 +3445,17 @@ def bulkGenerateCampCertificate():
         thread = threading.Thread(target=bulk_generate_cert, args=(body,))
         thread.start()
         return jsonify({'success': True, 'msg': 'Process Started'}), 200
+
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+    
+
+@app.route("/sendCampCertificate", methods=["GET"])
+def sendCampCertificate():
+    try:
+        sid = request.args.get('sid')
+        send_certs_bulk([{"sid":sid}])
+        return jsonify({'success': True, 'msg': 'Send Succefully'}), 200
 
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
