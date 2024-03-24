@@ -3545,6 +3545,17 @@ def sendCampCertificate():
 
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+    
+
+@app.route("/getAllFeedbacks", methods=["GET"])
+def getAllFeedbacks():
+    try:
+        feedback_db = db["feedback_db"]
+        feedbacks = feedback_db.find({},{'_id':0})
+        return jsonify({'success': True, "feedbacks":feedbacks}), 200
+
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
 
 
     
