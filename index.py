@@ -898,7 +898,6 @@ def register_student():
             "medication_allergy":data.get("medication_allergy",""),
             "medication_other":data.get("medication_other",""),
             "allergy":data.get("allergy",""),
-            "medicalCertificate":medical_cert_url,
             "cadetPhoto":data.get("cadetPhoto",""),
             "cadetSign":data.get("cadetSign",""),
             "parentGurdianPhoto":data.get("parentGurdianPhoto",""),
