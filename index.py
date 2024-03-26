@@ -863,6 +863,57 @@ def register_student():
     try:
         data = request.form
 
+        student_raw_data = {
+            "first_name": data["first_name"],
+            "middle_name": data.get("middle_name", ""),
+            "last_name": data["last_name"],
+            "email": data["email"],
+            "phn": str(data["phn"]),
+            "dob": data["dob"],
+            "address": data["address"],
+            "fathers_occupation": data["fathers_occupation"],
+            "mothers_occupation": data["mothers_occupation"],
+            "how_you_got_to_know": data["how_you_got_to_know"],
+            "employee_who_reached_out_to_you": data["employee_who_reached_out_to_you"],
+            "district": data["district"],
+            "state": data["state"],
+            "pincode": str(data["pincode"]),
+            "camp_id": data.get("camp_id", ""),
+            "camp_category": data.get("camp_category", ""),
+            "batch_id": data.get("batch_id", ""),
+            "food_option": data.get("food_option", ""),
+            "pick_up_city": data.get("pick_up_city", ""),
+            "pick_up_point": data.get("pick_up_point", ""),
+            "height": data.get("height", ""),
+            "weight": data.get("weight", ""),
+            "blood_group": data.get("blood_group", ""),
+            "payment_option": data.get("payment_option", ""),
+            "school_name": data.get("school_name", ""),
+            "gender": data.get("gender", ""),
+            "standard": data.get("standard", ""),
+            "wp_no": data.get("wp_no", ""),
+            "medication_physical":data.get("medication_physical"),
+            "other_problem":data.get("other_problem"),
+            "physical_problem":data.get("physical_problem",""),
+            "medication_allergy":data.get("medication_allergy",""),
+            "medication_other":data.get("medication_other",""),
+            "allergy":data.get("allergy",""),
+            "medicalCertificate":medical_cert_url,
+            "cadetPhoto":data.get("cadetPhoto",""),
+            "cadetSign":data.get("cadetSign",""),
+            "parentGurdianPhoto":data.get("parentGurdianPhoto",""),
+            "parentGurdianSign":data.get("parentGurdianSign",""),
+            "payment_status": data.get("payment_status", "Pending"),
+            'total_amount_payable':int(data.get("total_amount_payable", 0)),
+            "discount_code":data.get("discount_code", ""),
+        }
+
+        all_keys = student_raw_data.keys()
+        required_keys = list(all_keys)
+        for key in required_keys:
+            if not student.get(key) or student[key] == "":
+                return jsonify({"error": f"Please fill in the '{key}' field."}), 400
+
         # Check if email and phn are not repeating
         students_db = db["students_db"]
         existing_student_email = students_db.find_one({"email": data["email"]})
@@ -1071,12 +1122,6 @@ def register_student():
             "discount_amount":int(0),
             "camp_year":str("20"+str(year))
         }
-
-        all_keys = student.keys()
-        required_keys = list(all_keys)
-        for key in required_keys:
-            if not student.get(key) or student[key] == "":
-                return jsonify({"error": f"Please fill in the '{key}' field."}), 400
 
         # Store the student information in the MongoDB collection
         batches_db = db["batches_db"]
