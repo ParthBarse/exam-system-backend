@@ -910,7 +910,7 @@ def register_student():
         all_keys = student_raw_data.keys()
         required_keys = list(all_keys)
         for key in required_keys:
-            if not student.get(key) or student[key] == "":
+            if not student_raw_data.get(key) or student_raw_data[key] == "":
                 return jsonify({"error": f"Please fill in the '{key}' field."}), 400
 
         # Check if email and phn are not repeating
