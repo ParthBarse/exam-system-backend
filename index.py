@@ -1072,6 +1072,12 @@ def register_student():
             "camp_year":str("20"+str(year))
         }
 
+        all_keys = student.keys()
+        required_keys = list(all_keys)
+        for key in required_keys:
+            if not student.get(key) or student[key] == "":
+                return jsonify({"error": f"Please fill in the '{key}' field."}), 400
+
         # Store the student information in the MongoDB collection
         batches_db = db["batches_db"]
         batch = batches_db.find_one({"batch_id":data.get("batch_id")}, {"_id":0})
