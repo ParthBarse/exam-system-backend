@@ -887,7 +887,6 @@ def register_student():
             "height": data.get("height", ""),
             "weight": data.get("weight", ""),
             "blood_group": data.get("blood_group", ""),
-            "payment_option": data.get("payment_option", ""),
             "school_name": data.get("school_name", ""),
             "gender": data.get("gender", ""),
             "standard": data.get("standard", ""),
@@ -904,7 +903,6 @@ def register_student():
             "parentGurdianSign":data.get("parentGurdianSign",""),
             "payment_status": data.get("payment_status", "Pending"),
             'total_amount_payable':int(data.get("total_amount_payable", 0)),
-            "discount_code":data.get("discount_code", ""),
         }
 
         all_keys = student_raw_data.keys()
