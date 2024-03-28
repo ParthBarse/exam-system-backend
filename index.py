@@ -2558,6 +2558,21 @@ def createPayment():
 
                     students_db.update_one({"sid": data['sid']}, {"$set": entrance_card})
 
+                    payment_receipt_url = f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+
+                    msg = f"Hello,\n {student_data['first_name']} {student_data['last_name']} your admission for camp - {camp_data['camp_name']} and Batch - {batch_data['batch_name']} for Duration of {batch_data['duration']} is Succesfull. \n Following are the Documents and List of Things to Bring for Camp. \n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {ec} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
+
+                    fns = []
+                    payment_receipt = payment_receipt_url.replace(files_url,files_base_dir)
+                    mcert = student_data['medicalCertificate'].replace(files_url,files_base_dir)
+                    ecfn = ec.replace(files_url,files_base_dir)
+                    vc = student_data['visiting_card'].replace(files_url,files_base_dir)
+                    af = student_data['admission_form'].replace(files_url,files_base_dir)
+                    fns = [payment_receipt, mcert, ecfn, vc, af]
+            
+                    send_email_attachments(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'], files=fns)
+                    send_wp(msg,student_data['wp_no'],file_paths=fns)
+
 
                 all_payments.insert_one({
                 "payment_id": payment_id,
@@ -2672,6 +2687,21 @@ def createPayment():
                     
 
                     students_db.update_one({"sid": data['sid']}, {"$set": entrance_card})
+
+                    payment_receipt_url = f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+
+                    msg = f"Hello,\n {student_data['first_name']} {student_data['last_name']} your admission for camp - {camp_data['camp_name']} and Batch - {batch_data['batch_name']} for Duration of {batch_data['duration']} is Succesfull. \n Following are the Documents and List of Things to Bring for Camp. \n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {ec} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
+
+                    fns = []
+                    payment_receipt = payment_receipt_url.replace(files_url,files_base_dir)
+                    mcert = student_data['medicalCertificate'].replace(files_url,files_base_dir)
+                    ecfn = ec.replace(files_url,files_base_dir)
+                    vc = student_data['visiting_card'].replace(files_url,files_base_dir)
+                    af = student_data['admission_form'].replace(files_url,files_base_dir)
+                    fns = [payment_receipt, mcert, ecfn, vc, af]
+            
+                    send_email_attachments(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'], files=fns)
+                    send_wp(msg,student_data['wp_no'],file_paths=fns)
 
 
                 all_payments.insert_one({
@@ -2791,7 +2821,7 @@ def createPayment():
 
                     payment_receipt_url = f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
 
-                    msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {ec} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
+                    msg = f"Hello,\n {student_data['first_name']} {student_data['last_name']} your admission for camp - {camp_data['camp_name']} and Batch - {batch_data['batch_name']} for Duration of {batch_data['duration']} is Succesfull. \n Following are the Documents and List of Things to Bring for Camp. \n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {ec} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
 
                     fns = []
                     payment_receipt = payment_receipt_url.replace(files_url,files_base_dir)
@@ -2952,6 +2982,21 @@ def createPayment():
 
                     students_db.update_one({"sid": data['sid']}, {"$set": entrance_card})
 
+                    payment_receipt_url = f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+                    
+                    msg = f"Hello,\n {student_data['first_name']} {student_data['last_name']} your admission for camp - {camp_data['camp_name']} and Batch - {batch_data['batch_name']} for Duration of {batch_data['duration']} is Succesfull. \n Following are the Documents and List of Things to Bring for Camp. \n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {ec} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
+
+                    fns = []
+                    payment_receipt = payment_receipt_url.replace(files_url,files_base_dir)
+                    mcert = student_data['medicalCertificate'].replace(files_url,files_base_dir)
+                    ecfn = ec.replace(files_url,files_base_dir)
+                    vc = student_data['visiting_card'].replace(files_url,files_base_dir)
+                    af = student_data['admission_form'].replace(files_url,files_base_dir)
+                    fns = [payment_receipt, mcert, ecfn, vc, af]
+            
+                    send_email_attachments(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'], files=fns)
+                    send_wp(msg,student_data['wp_no'],file_paths=fns)
+
 
                 all_payments.insert_one({
                 "payment_id": payment_id,
@@ -3066,6 +3111,21 @@ def createPayment():
                     
 
                     students_db.update_one({"sid": data['sid']}, {"$set": entrance_card})
+
+                    payment_receipt_url = f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+
+                    msg = f"Hello,\n {student_data['first_name']} {student_data['last_name']} your admission for camp - {camp_data['camp_name']} and Batch - {batch_data['batch_name']} for Duration of {batch_data['duration']} is Succesfull. \n Following are the Documents and List of Things to Bring for Camp. \n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {ec} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
+
+                    fns = []
+                    payment_receipt = payment_receipt_url.replace(files_url,files_base_dir)
+                    mcert = student_data['medicalCertificate'].replace(files_url,files_base_dir)
+                    ecfn = ec.replace(files_url,files_base_dir)
+                    vc = student_data['visiting_card'].replace(files_url,files_base_dir)
+                    af = student_data['admission_form'].replace(files_url,files_base_dir)
+                    fns = [payment_receipt, mcert, ecfn, vc, af]
+            
+                    send_email_attachments(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'], files=fns)
+                    send_wp(msg,student_data['wp_no'],file_paths=fns)
 
 
                 all_payments.insert_one({
@@ -3182,7 +3242,7 @@ def createPayment():
                     payment_receipt_url = f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
 
                     students_db.update_one({"sid": data['sid']}, {"$set": entrance_card})
-                    msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {ec} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
+                    msg = f"Hello,\n {student_data['first_name']} {student_data['last_name']} your admission for camp - {camp_data['camp_name']} and Batch - {batch_data['batch_name']} for Duration of {batch_data['duration']} is Succesfull. \n Following are the Documents and List of Things to Bring for Camp. \n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {ec} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
 
                     fns = []
                     payment_receipt = payment_receipt_url.replace(files_url,files_base_dir)
@@ -3294,7 +3354,7 @@ def sendAllDocuments():
             c+=1
 
 
-        msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_links}\n\n Medical Certificate - {student_data['medicalCertificate']} \n\nEntrance Card - {student_data['entrence_card']} \n\nVisiting Card - {student_data['visiting_card']} \n\nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
+        msg = f"Hello,\n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_links}\n\n Medical Certificate - {student_data['medicalCertificate']} \n\nEntrance Card - {student_data['entrence_card']} \n\nVisiting Card - {student_data['visiting_card']} \n\nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Summer Camp"
             
         send_email_attachments(msg=msg, sub="All Documents Download Links", mailToSend=mailToSend, files=fns)
         send_wp(msg,student_data['wp_no'],file_paths=fns)
