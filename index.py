@@ -49,13 +49,13 @@ files_base_url = "https://files.mcfcamp.in/mcf_files/"
 app = Flask(__name__)
 CORS(app)
 
-client = MongoClient(
-    'mongodb+srv://bnbdevs:feLC7m4jiT9zrmHh@cluster0.fjnp4qu.mongodb.net/?retryWrites=true&w=majority')
-app.config['MONGO_URI'] = 'mongodb+srv://bnbdevs:feLC7m4jiT9zrmHh@cluster0.fjnp4qu.mongodb.net/?retryWrites=true&w=majority'
-
 # client = MongoClient(
-#     'mongodb+srv://mcfcamp:mcf123@mcf.nyh46tl.mongodb.net/')
-# app.config['MONGO_URI'] = 'mongodb+srv://mcfcamp:mcf123@mcf.nyh46tl.mongodb.net/'
+#     'mongodb+srv://bnbdevs:feLC7m4jiT9zrmHh@cluster0.fjnp4qu.mongodb.net/?retryWrites=true&w=majority')
+# app.config['MONGO_URI'] = 'mongodb+srv://bnbdevs:feLC7m4jiT9zrmHh@cluster0.fjnp4qu.mongodb.net/?retryWrites=true&w=majority'
+
+client = MongoClient(
+    'mongodb+srv://mcfcamp:mcf123@mcf.nyh46tl.mongodb.net/')
+app.config['MONGO_URI'] = 'mongodb+srv://mcfcamp:mcf123@mcf.nyh46tl.mongodb.net/'
 
 app.config['SECRET_KEY'] = 'a6d217d048fdcd227661b755'
 db = client['mcf_db']
@@ -409,7 +409,7 @@ def send_wp(sms_content, mobile_numbers, file_paths=[]):
     api_url = "http://msg.msgclub.net/rest/services/sendSMS/sendGroupSms"
     auth_key = "2b4186d8fc21f47949e7f5e92b56390"
     route_id = "21"
-    sender_id = "7720014900"
+    sender_id = "9604992000"
     sms_content_type = "english"
     payload = {
         "smsContent": sms_content,
