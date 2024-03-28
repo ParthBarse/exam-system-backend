@@ -2403,6 +2403,10 @@ def createPayment():
         data = request.get_json()
         if 'payment_option' not in data or 'payment_amount' not in data or 'sid' not in data:
             return jsonify({"error": "Both 'payment_option' and 'payment_amount' and 'sid' are required."}), 400
+        payment_db = db["all_payments"]
+        payment = payment_db.find_one({"transaction_id":data['transaction_id']})
+        if payment:
+            return jsonify({"message": f"Payment with transaction_id - {data['transaction_id']} already exist."}), 400
         payment_id = str(uuid.uuid4().hex)
         receipt_no = str(uuid.uuid4().hex)[:10]
         all_payments = db["all_payments"]
