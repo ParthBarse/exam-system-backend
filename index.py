@@ -200,6 +200,12 @@ def sync_v2():
         num = generate_3_digit_number(sr)
         sac_table[num] = student['sid']
         sac_table_db.update_one({"batch_id":student['batch_id']}, {"$set": sac_table})
+
+    for batch in all_batches:
+        reg_students = 0
+        students = students_db.find({"batch_id":batch['batch_id']})
+        reg_students = len(students)
+        batch_db.update_one({"batch_id":batch['batch_id']}, {"$set": {"students_registered":reg_students}})
     
 
 @app.route("/sync_v2", methods=["GET"])
