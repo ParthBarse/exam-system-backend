@@ -186,6 +186,12 @@ def sync_v2():
     all_batches = batch_db.find({})
 
     for batch in all_batches:
+        reg_students = 0
+        students = students_db.find({"batch_id":batch["batch_id"]})
+        reg_students = len(list(students))
+        print(reg_students)
+        batch['students_registered'] = reg_students
+        batch_db.update_one({"batch_id":batch["batch_id"]}, {"$set": batch})
         sac_table = sac_table_db.find_one({"batch_id":batch["batch_id"]})
         if not sac_table:
             sac_table_generator(batch['batch_id'], batch['camp_id'], batch['batch_intake'])
@@ -200,14 +206,6 @@ def sync_v2():
         num = generate_3_digit_number(sr)
         sac_table[num] = student['sid']
         sac_table_db.update_one({"batch_id":student['batch_id']}, {"$set": sac_table})
-
-    for batch in all_batches:
-        reg_students = 0
-        students = students_db.find({"batch_id":batch['batch_id']})
-        # reg_students = len(list(students))
-        # print(reg_students)
-        batch['students_registered'] = 0
-        batch_db.update_one({"batch_id":batch['batch_id']}, {"$set": batch})
     
 
 @app.route("/sync_v2", methods=["GET"])
