@@ -107,6 +107,7 @@ def sync_data(original_sid):
     elif age>=17 and age<=21 and data.get("gender").lower() == "female":
         company = "FOXFORD"
 
+    isCountInc = False
     if batch:
         if int(batch["students_registered"]) <= int(batch["batch_intake"]):
             sr_no = int(int(batch["students_registered"]))
@@ -124,6 +125,7 @@ def sync_data(original_sid):
             if stud:
                 while stud:
                     sr_no = int(int(batch["students_registered"])+1)
+                    isCountInc = True
                     start_date = batch["start_date"]
                     year = start_date[-2:]
                     day = start_date[0:2]
@@ -393,7 +395,10 @@ def sync_data(original_sid):
         if batch:
             if int(batch["students_registered"]) <= int(batch["batch_intake"]):
                 students_db.update_one({'sid': original_sid},{"$set": student})
-                batches_db.update_one({"batch_id": data.get("batch_id")}, {"$set": {"students_registered":int(int(batch["students_registered"])+1)}})
+                if isCountInc:
+                    batches_db.update_one({"batch_id": data.get("batch_id")}, {"$set": {"students_registered":int(int(batch["students_registered"])+1)}})
+                else:
+                    pass
 
                 payment_db = db['all_payments']
                 filter_criteria = {'sid': original_sid}
