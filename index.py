@@ -208,6 +208,11 @@ def sync_v2():
         sac_table_db.update_one({"batch_id":student['batch_id']}, {"$set": sac_table})
     
 
+
+
+#-----------------------------------  SSM APIs -------------------------------------------------------
+        
+
 @app.route("/sync_v2", methods=["GET"])
 def get_sync_v2():
     sync_v2()
@@ -248,233 +253,221 @@ def sync_data(original_sid):
         company = "ECO"
     elif age>=17 and age<=21 and data.get("gender").lower() == "female":
         company = "FOXFORD"
-
-    isCountInc = False
+        
     if batch:
-        if int(batch["students_registered"]) <= int(batch["batch_intake"]):
-            sr_no = int(int(batch["students_registered"]))
-            start_date = batch["start_date"]
-            year = start_date[-2:]
-            day = start_date[0:2]
-            batch_name = batch["batch_name"].replace(" ", "")
+        sr_no = int(int(batch["students_registered"]))
+        start_date = batch["start_date"]
+        year = start_date[-2:]
+        day = start_date[0:2]
+        batch_name = batch["batch_name"].replace(" ", "")
 
-            company_sf = str(company[0])+"C"
-            days = str(batch['duration'])+"D"
+        company_sf = str(company[0])+"C"
+        days = str(batch['duration'])+"D"
 
-            sid = str(camp_short)+str(year)+str(days)+str(batch_name)+str(company_sf)+str(sr_no)
+        sid = str(camp_short)+str(year)+str(days)+str(batch_name)+str(company_sf)+str(sr_no)
 
-            stud = students_db.find_one({"sid":sid})
-            if sid != original_sid:
-                while stud:
-                    sr_no = int(int(batch["students_registered"])+1)
-                    isCountInc = True
-                    start_date = batch["start_date"]
-                    year = start_date[-2:]
-                    day = start_date[0:2]
-                    batch_name = batch["batch_name"].replace(" ", "")
+        # stud = students_db.find_one({"sid":sid})
+        if sid != original_sid:
+            sid = sa_module(batch['batch_id'], sid)
+            if sid == -1:
+                return jsonify({"error": "Batch Full, Please add New Batch or move this student to other batch."}), 400
 
-                    company_sf = str(company[0])+"C"
-                    days = str(batch['duration'])+"D"
+        document_med_path = 'medical_certificate.docx'
 
-                    sid = str(camp_short)+str(year)+str(days)+str(batch_name)+str(company_sf)+str(sr_no)
-                    stud = students_db.find_one({"sid":sid})
+        field_values = {
+            'CADET_NAME': str(data["first_name"].upper()+" "+data["last_name"].upper()),
+            'LOC':  str(data["district"]+", "+data["state"]),
+            'DOB':  str(data["dob"]),
+            '121212':  str("__________"),
+            'C_NAME':  str(camp_name),
+            'DATE':  str(start_date),
+            'BATCH':  str(batch_name),
+            'sid': sid
+        }
+        replace_fields_in_document_med(document_med_path, field_values)
 
-            document_med_path = 'medical_certificate.docx'
+        # Load the document template
+        doc1 = Document('visit_card.docx')
 
-            field_values = {
-                'CADET_NAME': str(data["first_name"].upper()+" "+data["last_name"].upper()),
-                'LOC':  str(data["district"]+", "+data["state"]),
-                'DOB':  str(data["dob"]),
-                '121212':  str("__________"),
-                'C_NAME':  str(camp_name),
-                'DATE':  str(start_date),
-                'BATCH':  str(batch_name),
-                'sid': sid
-            }
-            replace_fields_in_document_med(document_med_path, field_values)
+        # Sample student_data
+        student_data1 = {
+            'CADET_NAME': str(data["first_name"].upper()+" "+data["last_name"].upper()),
+            'CAMP_NAME': str(camp_name),
+            'BATCH_NO': str(batch_name),
+            'ADDRESS': data["address"],
+            'CONTACT': data["phn"],
+            'WHATSAPP_NO': data["wp_no"],
+            'CAMP_DATE':start_date,
+            'REG_NO':sid,
+            'PICKUP_POINT':data['pick_up_point'],
+        }
 
-            # Load the document template
-            doc1 = Document('visit_card.docx')
+        for key, value in student_data1.items():
+            find_and_replace_paragraphs_visiting_card(doc1.paragraphs, f'{{MERGEFIELD {key}}}', str(value))
 
-            # Sample student_data
+        try:
+            cadet_photo_url = data["cadetPhoto"]
+            cadet_photo_path = cadet_photo_url.replace(files_url,files_base_dir)
+
+            image_url_guardian = data["parentGurdianPhoto"]
+            image_path_guardian = image_url_guardian.replace(files_url,files_base_dir)
+            
+            replace_image_in_cell(doc1, table_index=0, row_index=0, column_index=3, image_path=cadet_photo_path)
+            replace_image_in_cell(doc1, table_index=0, row_index=0, column_index=4, image_path=image_path_guardian)
+
+            doc1.save(str(str(file_dir)+f"{sid}_visit_card.docx"))
+
+            convert_to_pdf(str(str(file_dir)+f"{sid}_visit_card.docx"), str(str(file_dir)+f"{sid}_visit_card.pdf"))
+
+
+
+            doc = Document('admission_form_new_format.docx')
             student_data1 = {
-                'CADET_NAME': str(data["first_name"].upper()+" "+data["last_name"].upper()),
-                'CAMP_NAME': str(camp_name),
-                'BATCH_NO': str(batch_name),
-                'ADDRESS': data["address"],
-                'CONTACT': data["phn"],
-                'WHATSAPP_NO': data["wp_no"],
-                'CAMP_DATE':start_date,
-                'REG_NO':sid,
-                'PICKUP_POINT':data['pick_up_point'],
+            "REG_NO": sid,
+            "FIRST_NAME": str(data["first_name"].upper()),
+            "MIDDLE_NAME": str(data["middle_name"].upper()),
+            "LAST_NAME": str(data["last_name"].upper()),
+            "EMAIL_ID": str(data["email"]),
+            "CONTACT_NO": str(data["phn"]),
+            "DATE_OF_BIRTH": str(data["dob"]),
+            "ADDRESS": str(data["address"]),
+            "HOW_YOU_GOT_TO_KNOW": str(data["how_you_got_to_know"]),
+            "EMPLOYEE_WHO_REACHED_OUT": str(data["employee_who_reached_out_to_you"]),
+            "DISTRICT": str(data["district"]),
+            "STATE": data["state"],
+            "PINCODE": data["pincode"],
+            "PICKUP_POINT": data["pick_up_point"],
+            "BLOOD_GROUP": data["blood_group"],
+            "SCHOOL_NAME": data["school_name"],
+            "GENDER": data["gender"],
+            "STANDARD": data["standard"],
+            "WHATSAPP_NO": data["wp_no"],
+            "PARENT_NAME":data["middle_name"],
+            "CAMP_NAME":camp_name,
+            "CAMP_DATE":batch["start_date"],
+            "CAMP_DAYS":batch["duration"]
             }
-
             for key, value in student_data1.items():
-                find_and_replace_paragraphs_visiting_card(doc1.paragraphs, f'{{MERGEFIELD {key}}}', str(value))
+                    find_and_replace_tables_admission_form(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
 
-            try:
-                cadet_photo_url = data["cadetPhoto"]
-                cadet_photo_path = cadet_photo_url.replace(files_url,files_base_dir)
+            image_path_sign_url = data["cadetSign"]
+            image_path_sign = image_path_sign_url.replace(files_url,files_base_dir)
 
-                image_url_guardian = data["parentGurdianPhoto"]
-                image_path_guardian = image_url_guardian.replace(files_url,files_base_dir)
-                
-                replace_image_in_cell(doc1, table_index=0, row_index=0, column_index=3, image_path=cadet_photo_path)
-                replace_image_in_cell(doc1, table_index=0, row_index=0, column_index=4, image_path=image_path_guardian)
+            image_url_guardian_sign = data["parentGurdianSign"]
+            image_path_guardian_sign = image_url_guardian_sign.replace(files_url,files_base_dir)
 
-                doc1.save(str(str(file_dir)+f"{sid}_visit_card.docx"))
+            replace_image_in_cell_admission_form(doc, table_index=0, row_index=25, column_index=1, image_path=cadet_photo_path,w=1.4,h=1.6)
+            replace_image_in_cell_admission_form(doc, table_index=0, row_index=25, column_index=12, image_path=image_path_sign,w=1.8,h=1.0)
+            replace_image_in_cell_admission_form(doc, table_index=1, row_index=16, column_index=1, image_path=image_path_guardian,w=1.4,h=1.6)
+            replace_image_in_cell_admission_form(doc, table_index=1, row_index=17, column_index=6, image_path=image_path_guardian_sign,w=1.8,h=1.0)
 
-                convert_to_pdf(str(str(file_dir)+f"{sid}_visit_card.docx"), str(str(file_dir)+f"{sid}_visit_card.pdf"))
+            doc.save(str(str(file_dir)+f"{sid}_admission_form.docx"))
 
+            convert_to_pdf(str(str(file_dir)+f"{sid}_admission_form.docx"), str(str(file_dir)+f"{sid}_admission_form.pdf"))
 
+            final_status = data['status']
+            if float(data['total_amount_paid']) >= float(data['total_amount_payable']):
+                camp_id = data['camp_id']
+                camp_db = db["camps_db"]
+                camp_data = camp_db.find_one({"camp_id":camp_id}, {"_id":0})
+                batch_id = data['batch_id']
+                batch_db = db["batches_db"]
+                batch_data = batch_db.find_one({"batch_id":batch_id}, {"_id":0})
+                payment_db = db["all_payments"]
+                payment_data = payment_db.find({"sid":data['sid']}, {"_id":0})
+                receipt_nos = ""
+                payment_data = list(payment_data)
+                print(len(payment_data))
+                for receipt in payment_data:
+                    receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
+                    print(receipt_nos)
+                receipt_nos = str(receipt_nos)
 
-                doc = Document('admission_form_new_format.docx')
-                student_data1 = {
-                "REG_NO": sid,
-                "FIRST_NAME": str(data["first_name"].upper()),
-                "MIDDLE_NAME": str(data["middle_name"].upper()),
-                "LAST_NAME": str(data["last_name"].upper()),
-                "EMAIL_ID": str(data["email"]),
-                "CONTACT_NO": str(data["phn"]),
-                "DATE_OF_BIRTH": str(data["dob"]),
-                "ADDRESS": str(data["address"]),
-                "HOW_YOU_GOT_TO_KNOW": str(data["how_you_got_to_know"]),
-                "EMPLOYEE_WHO_REACHED_OUT": str(data["employee_who_reached_out_to_you"]),
-                "DISTRICT": str(data["district"]),
-                "STATE": data["state"],
-                "PINCODE": data["pincode"],
-                "PICKUP_POINT": data["pick_up_point"],
-                "BLOOD_GROUP": data["blood_group"],
-                "SCHOOL_NAME": data["school_name"],
-                "GENDER": data["gender"],
-                "STANDARD": data["standard"],
-                "WHATSAPP_NO": data["wp_no"],
-                "PARENT_NAME":data["middle_name"],
-                "CAMP_NAME":camp_name,
-                "CAMP_DATE":batch["start_date"],
-                "CAMP_DAYS":batch["duration"]
-                }
-                for key, value in student_data1.items():
-                        find_and_replace_tables_admission_form(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
-
-                image_path_sign_url = data["cadetSign"]
-                image_path_sign = image_path_sign_url.replace(files_url,files_base_dir)
-
-                image_url_guardian_sign = data["parentGurdianSign"]
-                image_path_guardian_sign = image_url_guardian_sign.replace(files_url,files_base_dir)
-
-                replace_image_in_cell_admission_form(doc, table_index=0, row_index=25, column_index=1, image_path=cadet_photo_path,w=1.4,h=1.6)
-                replace_image_in_cell_admission_form(doc, table_index=0, row_index=25, column_index=12, image_path=image_path_sign,w=1.8,h=1.0)
-                replace_image_in_cell_admission_form(doc, table_index=1, row_index=16, column_index=1, image_path=image_path_guardian,w=1.4,h=1.6)
-                replace_image_in_cell_admission_form(doc, table_index=1, row_index=17, column_index=6, image_path=image_path_guardian_sign,w=1.8,h=1.0)
-
-                doc.save(str(str(file_dir)+f"{sid}_admission_form.docx"))
-
-                convert_to_pdf(str(str(file_dir)+f"{sid}_admission_form.docx"), str(str(file_dir)+f"{sid}_admission_form.pdf"))
-
-                final_status = data['status']
-                if float(data['total_amount_paid']) >= float(data['total_amount_payable']):
-                    camp_id = data['camp_id']
-                    camp_db = db["camps_db"]
-                    camp_data = camp_db.find_one({"camp_id":camp_id}, {"_id":0})
-                    batch_id = data['batch_id']
-                    batch_db = db["batches_db"]
-                    batch_data = batch_db.find_one({"batch_id":batch_id}, {"_id":0})
-                    payment_db = db["all_payments"]
-                    payment_data = payment_db.find({"sid":data['sid']}, {"_id":0})
-                    receipt_nos = ""
-                    payment_data = list(payment_data)
-                    print(len(payment_data))
-                    for receipt in payment_data:
-                        receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
-                        print(receipt_nos)
-                    receipt_nos = str(receipt_nos)
-
-                    student_data_1 = {
-                            'CADET_NAME': str(data["first_name"].upper()+" "+data["last_name"].upper()),
-                            'REGNO': sid,
-                            'RANK': 'CDT',
-                            'C_NAME': camp_data['camp_name'],
-                            'C_BATCH': batch_data['batch_name'],
-                            'C_DAYS': batch_data["duration"],
-                            'COMP_N': data['company'],
-                            'C_DATE': batch_data['start_date'],
-                            'PICKPT': data["pick_up_point"],
-                            'PICK_TIME': '',
-                            'EMP_NAME':  data["employee_who_reached_out_to_you"],
-                            'GAR_NAME': data["middle_name"],
-                            'ADDRESS': data["address"],
-                            'CITY': data["pick_up_city"],
-                            'DISTRICT': data["district"],
-                            'STATE': data['state'],
-                            'PINCODE': data["pincode"],
-                            'EMAIL': data["email"],
-                            'C_NUM': str(data["phn"]),
-                            'WP_NUM': data.get("wp_no", ""),
-                            'FATHER_NUM': '',
-                            'MOTHER_NUM': '',
-                            'DOB': data["dob"],
-                            'BLOOD_GROUP':  data.get("blood_group", ""),
-                            'STD': data.get("standard", ""),
-                            'SCHOOL': data.get("school_name", ""),
-                            'FEE_PAID': data['total_amount_paid'],
-                            'BALANCE': float(data['total_amount_payable']) - float(data['total_amount_paid']),
-                            'RECEIPT_NUM': receipt_nos,
-                            'DATE': '',
-                            'TIME': ''
-                        }
-
-                    doc = Document('mcf_entrance_card.docx')
-
-                    # Replace text fields in paragraphs
-                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD CADET_NAME}', student_data_1['CADET_NAME'])
-                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD DATE}', student_data_1['DATE'])
-                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD TIME}', student_data_1['TIME'])
-
-                    for key, value in student_data_1.items():
-                            find_and_replace_tables_entrance_card(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
-
-                    try:
-                        print("replacing image")
-                        table = doc.tables[0]  # Assuming the first table
-                        cell = table.cell(0, 3)  # Assuming the first cell in the third column
-
-                        # Clear the content of the cell by removing its paragraphs
-                        for paragraph in cell.paragraphs:
-                            paragraph.clear()
-
-                        # Add a new paragraph and insert the image
-                        paragraph = cell.add_paragraph()
-                        run = paragraph.add_run()
-                        cadet_photo_url = data["cadetPhoto"]
-                        cadet_photo_path = cadet_photo_url.replace(files_url,files_base_dir)
-                        run.add_picture(cadet_photo_path, width=Inches(0.9))
-                    except Exception as e:
-                        print("Error : ",str(e))
-
-                    doc.save(str(str(file_dir)+f"{sid}_entrance_card.docx"))
-
-                    convert_to_pdf(str(str(file_dir)+f"{sid}_entrance_card.docx"), str(str(file_dir)+f"{sid}_entrance_card.pdf"))
-
-                    ec = f"{files_base_url}{sid}_entrance_card.pdf"
-
-                    entrance_card = {
-                        "entrence_card" : ec,
-                        "status":"Active"
+                student_data_1 = {
+                        'CADET_NAME': str(data["first_name"].upper()+" "+data["last_name"].upper()),
+                        'REGNO': sid,
+                        'RANK': 'CDT',
+                        'C_NAME': camp_data['camp_name'],
+                        'C_BATCH': batch_data['batch_name'],
+                        'C_DAYS': batch_data["duration"],
+                        'COMP_N': data['company'],
+                        'C_DATE': batch_data['start_date'],
+                        'PICKPT': data["pick_up_point"],
+                        'PICK_TIME': '',
+                        'EMP_NAME':  data["employee_who_reached_out_to_you"],
+                        'GAR_NAME': data["middle_name"],
+                        'ADDRESS': data["address"],
+                        'CITY': data["pick_up_city"],
+                        'DISTRICT': data["district"],
+                        'STATE': data['state'],
+                        'PINCODE': data["pincode"],
+                        'EMAIL': data["email"],
+                        'C_NUM': str(data["phn"]),
+                        'WP_NUM': data.get("wp_no", ""),
+                        'FATHER_NUM': '',
+                        'MOTHER_NUM': '',
+                        'DOB': data["dob"],
+                        'BLOOD_GROUP':  data.get("blood_group", ""),
+                        'STD': data.get("standard", ""),
+                        'SCHOOL': data.get("school_name", ""),
+                        'FEE_PAID': data['total_amount_paid'],
+                        'BALANCE': float(data['total_amount_payable']) - float(data['total_amount_paid']),
+                        'RECEIPT_NUM': receipt_nos,
+                        'DATE': '',
+                        'TIME': ''
                     }
-                    final_status = "Active"
-                    students_db.update_one({"sid": data['sid']}, {"$set": entrance_card})
+
+                doc = Document('mcf_entrance_card.docx')
+
+                # Replace text fields in paragraphs
+                find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD CADET_NAME}', student_data_1['CADET_NAME'])
+                find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD DATE}', student_data_1['DATE'])
+                find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD TIME}', student_data_1['TIME'])
+
+                for key, value in student_data_1.items():
+                        find_and_replace_tables_entrance_card(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+
+                try:
+                    print("replacing image")
+                    table = doc.tables[0]  # Assuming the first table
+                    cell = table.cell(0, 3)  # Assuming the first cell in the third column
+
+                    # Clear the content of the cell by removing its paragraphs
+                    for paragraph in cell.paragraphs:
+                        paragraph.clear()
+
+                    # Add a new paragraph and insert the image
+                    paragraph = cell.add_paragraph()
+                    run = paragraph.add_run()
+                    cadet_photo_url = data["cadetPhoto"]
+                    cadet_photo_path = cadet_photo_url.replace(files_url,files_base_dir)
+                    run.add_picture(cadet_photo_path, width=Inches(0.9))
+                except Exception as e:
+                    print("Error : ",str(e))
+
+                doc.save(str(str(file_dir)+f"{sid}_entrance_card.docx"))
+
+                convert_to_pdf(str(str(file_dir)+f"{sid}_entrance_card.docx"), str(str(file_dir)+f"{sid}_entrance_card.pdf"))
+
+                ec = f"{files_base_url}{sid}_entrance_card.pdf"
+
+                entrance_card = {
+                    "entrence_card" : ec,
+                    "status":"Active"
+                }
+                final_status = "Active"
+                students_db.update_one({"sid": data['sid']}, {"$set": entrance_card})
+            else:
+                if data['status']=="Active" or data['status']=="In Progress":
+                    final_status = "In Progress"
                 else:
-                    if data['status']=="Active" or data['status']=="In Progress":
-                        final_status = "In Progress"
-                    else:
-                        final_status = data['status']
-                                
-            except Exception as e:
-                print("Error : ", str(e))
-            medical_cert_url = f"{files_base_url}{sid}_MEDICAL_CER.pdf"
-            visiting_card_url = f"{files_base_url}{sid}_visit_card.pdf"
-            admission_form = f"{files_base_url}{sid}_admission_form.pdf"
+                    final_status = data['status']
+                            
+        except Exception as e:
+            print("Error : ", str(e))
+        medical_cert_url = f"{files_base_url}{sid}_MEDICAL_CER.pdf"
+        visiting_card_url = f"{files_base_url}{sid}_visit_card.pdf"
+        admission_form = f"{files_base_url}{sid}_admission_form.pdf"
 
         student = {
             "sid": sid,
@@ -537,11 +530,6 @@ def sync_data(original_sid):
         if batch:
             if int(batch["students_registered"]) <= int(batch["batch_intake"]):
                 students_db.update_one({'sid': original_sid},{"$set": student})
-                if isCountInc:
-                    batches_db.update_one({"batch_id": data.get("batch_id")}, {"$set": {"students_registered":int(int(batch["students_registered"])+1)}})
-                else:
-                    pass
-
                 payment_db = db['all_payments']
                 filter_criteria = {'sid': original_sid}
                 update_operation = {'$set': {'sid': sid}}
@@ -1111,119 +1099,120 @@ def register_student():
         sid=""
         medical_cert_url = ""
         if batch:
-            if int(batch["students_registered"]) <= int(batch["batch_intake"]):
-                sr_no = int(int(batch["students_registered"])+1)
-                start_date = batch["start_date"]
-                year = start_date[-2:]
-                day = start_date[0:2]
-                batch_name = batch["batch_name"].replace(" ", "")
+            sr_no = int(int(batch["students_registered"])+1)
+            start_date = batch["start_date"]
+            year = start_date[-2:]
+            day = start_date[0:2]
+            batch_name = batch["batch_name"].replace(" ", "")
 
-                company_sf = str(company[0])+"C"
-                days = str(batch['duration'])+"D"
+            company_sf = str(company[0])+"C"
+            days = str(batch['duration'])+"D"
 
-                sid = str(camp_short)+str(year)+str(days)+str(batch_name)+str(company_sf)+str(sr_no)
+            sid = str(camp_short)+str(year)+str(days)+str(batch_name)+str(company_sf)+str(sr_no)
 
-                document_med_path = 'medical_certificate.docx'
+            sid = sa_module(batch['batch_id'], sid)
 
-                field_values = {
-                    'CADET_NAME': str(data["first_name"].upper()+" "+data["last_name"].upper()),
-                    'LOC':  str(data["district"]+", "+data["state"]),
-                    'DOB':  str(data["dob"]),
-                    '121212':  str("__________"),
-                    'C_NAME':  str(camp_name),
-                    'DATE':  str(start_date),
-                    'BATCH':  str(batch_name),
-                    'sid': sid
-                }
-                replace_fields_in_document_med(document_med_path, field_values)
+            if sid == -1:
+                return jsonify({"error": "Batch Full, Please add New Batch or move this student to other batch."}), 400
 
-                # Load the document template
-                doc1 = Document('visit_card.docx')
+            document_med_path = 'medical_certificate.docx'
 
-                # Sample student_data
+            field_values = {
+                'CADET_NAME': str(data["first_name"].upper()+" "+data["last_name"].upper()),
+                'LOC':  str(data["district"]+", "+data["state"]),
+                'DOB':  str(data["dob"]),
+                '121212':  str("__________"),
+                'C_NAME':  str(camp_name),
+                'DATE':  str(start_date),
+                'BATCH':  str(batch_name),
+                'sid': sid
+            }
+            replace_fields_in_document_med(document_med_path, field_values)
+
+            # Load the document template
+            doc1 = Document('visit_card.docx')
+
+            # Sample student_data
+            student_data1 = {
+                'CADET_NAME': str(data["first_name"].upper()+" "+data["last_name"].upper()),
+                'CAMP_NAME': str(camp_name),
+                'BATCH_NO': str(batch_name),
+                'ADDRESS': data["address"],
+                'CONTACT': data["phn"],
+                'WHATSAPP_NO': data["wp_no"],
+                'CAMP_DATE':start_date,
+                'REG_NO':sid,
+                'PICKUP_POINT':data['pick_up_point'],
+            }
+
+            for key, value in student_data1.items():
+                find_and_replace_paragraphs_visiting_card(doc1.paragraphs, f'{{MERGEFIELD {key}}}', str(value))
+
+            try:
+                cadet_photo_url = data["cadetPhoto"]
+                cadet_photo_path = cadet_photo_url.replace(files_url,files_base_dir)
+
+                image_url_guardian = data["parentGurdianPhoto"]
+                image_path_guardian = image_url_guardian.replace(files_url,files_base_dir)
+                
+                replace_image_in_cell(doc1, table_index=0, row_index=0, column_index=3, image_path=cadet_photo_path)
+                replace_image_in_cell(doc1, table_index=0, row_index=0, column_index=4, image_path=image_path_guardian)
+
+                doc1.save(str(str(file_dir)+f"{sid}_visit_card.docx"))
+
+                convert_to_pdf(str(str(file_dir)+f"{sid}_visit_card.docx"), str(str(file_dir)+f"{sid}_visit_card.pdf"))
+
+
+
+                doc = Document('admission_form_new_format.docx')
                 student_data1 = {
-                    'CADET_NAME': str(data["first_name"].upper()+" "+data["last_name"].upper()),
-                    'CAMP_NAME': str(camp_name),
-                    'BATCH_NO': str(batch_name),
-                    'ADDRESS': data["address"],
-                    'CONTACT': data["phn"],
-                    'WHATSAPP_NO': data["wp_no"],
-                    'CAMP_DATE':start_date,
-                    'REG_NO':sid,
-                    'PICKUP_POINT':data['pick_up_point'],
+                "REG_NO": sid,
+                "FIRST_NAME": str(data["first_name"].upper()),
+                "MIDDLE_NAME": str(data["middle_name"].upper()),
+                "LAST_NAME": str(data["last_name"].upper()),
+                "EMAIL_ID": str(data["email"]),
+                "CONTACT_NO": str(data["phn"]),
+                "DATE_OF_BIRTH": str(data["dob"]),
+                "ADDRESS": str(data["address"]),
+                "HOW_YOU_GOT_TO_KNOW": str(data["how_you_got_to_know"]),
+                "EMPLOYEE_WHO_REACHED_OUT": str(data["employee_who_reached_out_to_you"]),
+                "DISTRICT": str(data["district"]),
+                "STATE": data["state"],
+                "PINCODE": data["pincode"],
+                "PICKUP_POINT": data["pick_up_point"],
+                "BLOOD_GROUP": data["blood_group"],
+                "SCHOOL_NAME": data["school_name"],
+                "GENDER": data["gender"],
+                "STANDARD": data["standard"],
+                "WHATSAPP_NO": data["wp_no"],
+                "PARENT_NAME":data["middle_name"],
+                "CAMP_NAME":camp_name,
+                "CAMP_DATE":batch["start_date"],
+                "CAMP_DAYS":batch["duration"]
                 }
-
                 for key, value in student_data1.items():
-                    find_and_replace_paragraphs_visiting_card(doc1.paragraphs, f'{{MERGEFIELD {key}}}', str(value))
+                        find_and_replace_tables_admission_form(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
 
-                try:
-                    cadet_photo_url = data["cadetPhoto"]
-                    cadet_photo_path = cadet_photo_url.replace(files_url,files_base_dir)
+                image_path_sign_url = data["cadetSign"]
+                image_path_sign = image_path_sign_url.replace(files_url,files_base_dir)
 
-                    image_url_guardian = data["parentGurdianPhoto"]
-                    image_path_guardian = image_url_guardian.replace(files_url,files_base_dir)
-                    
-                    replace_image_in_cell(doc1, table_index=0, row_index=0, column_index=3, image_path=cadet_photo_path)
-                    replace_image_in_cell(doc1, table_index=0, row_index=0, column_index=4, image_path=image_path_guardian)
+                image_url_guardian_sign = data["parentGurdianSign"]
+                image_path_guardian_sign = image_url_guardian_sign.replace(files_url,files_base_dir)
 
-                    doc1.save(str(str(file_dir)+f"{sid}_visit_card.docx"))
+                replace_image_in_cell_admission_form(doc, table_index=0, row_index=25, column_index=1, image_path=cadet_photo_path,w=1.4,h=1.6)
+                replace_image_in_cell_admission_form(doc, table_index=0, row_index=25, column_index=12, image_path=image_path_sign,w=1.8,h=1.0)
+                replace_image_in_cell_admission_form(doc, table_index=1, row_index=16, column_index=1, image_path=image_path_guardian,w=1.4,h=1.6)
+                replace_image_in_cell_admission_form(doc, table_index=1, row_index=17, column_index=6, image_path=image_path_guardian_sign,w=1.8,h=1.0)
 
-                    convert_to_pdf(str(str(file_dir)+f"{sid}_visit_card.docx"), str(str(file_dir)+f"{sid}_visit_card.pdf"))
+                doc.save(str(str(file_dir)+f"{sid}_admission_form.docx"))
 
-
-
-                    doc = Document('admission_form_new_format.docx')
-                    student_data1 = {
-                    "REG_NO": sid,
-                    "FIRST_NAME": str(data["first_name"].upper()),
-                    "MIDDLE_NAME": str(data["middle_name"].upper()),
-                    "LAST_NAME": str(data["last_name"].upper()),
-                    "EMAIL_ID": str(data["email"]),
-                    "CONTACT_NO": str(data["phn"]),
-                    "DATE_OF_BIRTH": str(data["dob"]),
-                    "ADDRESS": str(data["address"]),
-                    "HOW_YOU_GOT_TO_KNOW": str(data["how_you_got_to_know"]),
-                    "EMPLOYEE_WHO_REACHED_OUT": str(data["employee_who_reached_out_to_you"]),
-                    "DISTRICT": str(data["district"]),
-                    "STATE": data["state"],
-                    "PINCODE": data["pincode"],
-                    "PICKUP_POINT": data["pick_up_point"],
-                    "BLOOD_GROUP": data["blood_group"],
-                    "SCHOOL_NAME": data["school_name"],
-                    "GENDER": data["gender"],
-                    "STANDARD": data["standard"],
-                    "WHATSAPP_NO": data["wp_no"],
-                    "PARENT_NAME":data["middle_name"],
-                    "CAMP_NAME":camp_name,
-                    "CAMP_DATE":batch["start_date"],
-                    "CAMP_DAYS":batch["duration"]
-                    }
-                    for key, value in student_data1.items():
-                            find_and_replace_tables_admission_form(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
-
-                    image_path_sign_url = data["cadetSign"]
-                    image_path_sign = image_path_sign_url.replace(files_url,files_base_dir)
-
-                    image_url_guardian_sign = data["parentGurdianSign"]
-                    image_path_guardian_sign = image_url_guardian_sign.replace(files_url,files_base_dir)
-
-                    replace_image_in_cell_admission_form(doc, table_index=0, row_index=25, column_index=1, image_path=cadet_photo_path,w=1.4,h=1.6)
-                    replace_image_in_cell_admission_form(doc, table_index=0, row_index=25, column_index=12, image_path=image_path_sign,w=1.8,h=1.0)
-                    replace_image_in_cell_admission_form(doc, table_index=1, row_index=16, column_index=1, image_path=image_path_guardian,w=1.4,h=1.6)
-                    replace_image_in_cell_admission_form(doc, table_index=1, row_index=17, column_index=6, image_path=image_path_guardian_sign,w=1.8,h=1.0)
-
-                    doc.save(str(str(file_dir)+f"{sid}_admission_form.docx"))
-
-                    convert_to_pdf(str(str(file_dir)+f"{sid}_admission_form.docx"), str(str(file_dir)+f"{sid}_admission_form.pdf"))
-                                   
-                except Exception as e:
-                    print("Error : ", str(e))
-                medical_cert_url = f"{files_base_url}{sid}_MEDICAL_CER.pdf"
-                visiting_card_url = f"{files_base_url}{sid}_visit_card.pdf"
-                admission_form = f"{files_base_url}{sid}_admission_form.pdf"
-
-            else:
-                return jsonify({"message": "Batch is Already Full !"})
+                convert_to_pdf(str(str(file_dir)+f"{sid}_admission_form.docx"), str(str(file_dir)+f"{sid}_admission_form.pdf"))
+                                
+            except Exception as e:
+                print("Error : ", str(e))
+            medical_cert_url = f"{files_base_url}{sid}_MEDICAL_CER.pdf"
+            visiting_card_url = f"{files_base_url}{sid}_visit_card.pdf"
+            admission_form = f"{files_base_url}{sid}_admission_form.pdf"
         
 
         student = {
@@ -1285,22 +1274,18 @@ def register_student():
         batches_db = db["batches_db"]
         batch = batches_db.find_one({"batch_id":data.get("batch_id")}, {"_id":0})
         if batch:
-            if int(batch["students_registered"]) <= int(batch["batch_intake"]):
-                students_db.insert_one(student)
-                batches_db.update_one({"batch_id": data.get("batch_id")}, {"$set": {"students_registered":int(int(batch["students_registered"])+1)}})
-                msg = "Dear Parent, Thank you for registering with MCF Camp, for any registration and payment-related query please visit us at www.mcfcamp.in. Or contact us at 9604087000/9604082000, or email us at mcfcamp@gmail.com MCF Summer Camp"
-                sub = "Registration Successful !"
-                mailToSend = data['email']
-                sendSMS(msg,data["phn"])
-                send_wp(msg,data["wp_no"])
-                send_email(msg, sub, mailToSend)
+            students_db.insert_one(student)
+            msg = "Dear Parent, Thank you for registering with MCF Camp, for any registration and payment-related query please visit us at www.mcfcamp.in. Or contact us at 9604087000/9604082000, or email us at mcfcamp@gmail.com MCF Summer Camp"
+            sub = "Registration Successful !"
+            mailToSend = data['email']
+            sendSMS(msg,data["phn"])
+            send_wp(msg,data["wp_no"])
+            send_email(msg, sub, mailToSend)
 
-                msg2 = f"New Student Registered \n\n Name - {data['first_name']} {data['last_name']} \n Camp Name - {camp_name} \n Batch Name - {batch_name}"
-                send_wp(msg2,"9604084000")
-                send_email(msg2, sub, "infomcfcamp@gmail.com")
-                return jsonify({"message": "Student registered successfully", "sid": sid})
-            else:
-                return jsonify({"message": "Batch is Already Full !"})
+            msg2 = f"New Student Registered \n\n Name - {data['first_name']} {data['last_name']} \n Camp Name - {camp_name} \n Batch Name - {batch_name}"
+            send_wp(msg2,"9604084000")
+            send_email(msg2, sub, "infomcfcamp@gmail.com")
+            return jsonify({"message": "Student registered successfully", "sid": sid})
 
         return jsonify({"message": "Student registered successfully", "sid": sid})
 
@@ -1336,12 +1321,9 @@ def update_student():
         batches_db = db["batches_db"]
         batch = batches_db.find_one({"batch_id":data.get("batch_id")}, {"_id":0})
         if batch:
-            if int(batch["students_registered"]) <= int(batch["batch_intake"]):
-                students_db.update_one({"sid": data['sid']}, {"$set": student})
-                result = sync_data(data['sid'])
-                return jsonify({"message": f"Student with sid {data['sid']} updated successfully"})
-            else:
-                return jsonify({"message": "Batch is Already Full !"}),400
+            students_db.update_one({"sid": data['sid']}, {"$set": student})
+            result = sync_data(data['sid'])
+            return jsonify({"message": f"Student with sid {data['sid']} updated successfully"})
         else:
             return jsonify({"message": "Batch not Found !"}),400
             
