@@ -122,7 +122,7 @@ def sync_data(original_sid):
             sid = str(camp_short)+str(year)+str(days)+str(batch_name)+str(company_sf)+str(sr_no)
 
             stud = students_db.find_one({"sid":sid})
-            if stud:
+            if sid != original_sid:
                 while stud:
                     sr_no = int(int(batch["students_registered"])+1)
                     isCountInc = True
