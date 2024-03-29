@@ -205,6 +205,7 @@ def sync_v2():
         reg_students = 0
         students = students_db.find({"batch_id":batch['batch_id']})
         reg_students = len(students)
+        print(reg_students)
         batch_db.update_one({"batch_id":batch['batch_id']}, {"$set": {"students_registered":reg_students}})
     
 
