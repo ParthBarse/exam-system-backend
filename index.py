@@ -18,7 +18,6 @@ from docx import Document
 from docx.shared import Inches, Pt
 import requests
 from io import BytesIO
-from reportlab.pdfgen import canvas
 from docx.shared import Pt
 import subprocess
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
@@ -110,7 +109,7 @@ def sync_data(original_sid):
 
     if batch:
         if int(batch["students_registered"]) <= int(batch["batch_intake"]):
-            sr_no = int(int(batch["students_registered"])+1)
+            sr_no = int(int(batch["students_registered"]))
             start_date = batch["start_date"]
             year = start_date[-2:]
             day = start_date[0:2]
@@ -120,6 +119,21 @@ def sync_data(original_sid):
             days = str(batch['duration'])+"D"
 
             sid = str(camp_short)+str(year)+str(days)+str(batch_name)+str(company_sf)+str(sr_no)
+
+            stud = students_db.find_one({"sid":sid})
+            if stud:
+                while stud:
+                    sr_no = int(int(batch["students_registered"])+1)
+                    start_date = batch["start_date"]
+                    year = start_date[-2:]
+                    day = start_date[0:2]
+                    batch_name = batch["batch_name"].replace(" ", "")
+
+                    company_sf = str(company[0])+"C"
+                    days = str(batch['duration'])+"D"
+
+                    sid = str(camp_short)+str(year)+str(days)+str(batch_name)+str(company_sf)+str(sr_no)
+                    stud = students_db.find_one({"sid":sid})
 
             document_med_path = 'medical_certificate.docx'
 
@@ -1133,6 +1147,10 @@ def register_student():
                 sendSMS(msg,data["phn"])
                 send_wp(msg,data["wp_no"])
                 send_email(msg, sub, mailToSend)
+
+                msg2 = f"New Student Registered \n\n Name - {data['first_name']} {data['last_name']} \n Camp Name - {camp_name} \n Batch Name - {batch_name}"
+                send_wp(msg2,"9604084000")
+                send_email(msg2, sub, "infomcfcamp@gmail.com")
                 return jsonify({"message": "Student registered successfully", "sid": sid})
             else:
                 return jsonify({"message": "Batch is Already Full !"})
@@ -2573,6 +2591,9 @@ def createPayment():
                     send_email_attachments(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'], files=fns)
                     send_wp(msg,student_data['wp_no'],file_paths=fns)
 
+                    send_wp(msg,"9604084000")
+                    send_email(msg, f"Payment Complete of Student - {student_data['first_name']} {student_data['last_name']}", "infomcfcamp@gmail.com")
+
 
                 all_payments.insert_one({
                 "payment_id": payment_id,
@@ -2702,6 +2723,9 @@ def createPayment():
             
                     send_email_attachments(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'], files=fns)
                     send_wp(msg,student_data['wp_no'],file_paths=fns)
+
+                    send_wp(msg,"9604084000")
+                    send_email(msg, f"Payment Complete of Student - {student_data['first_name']} {student_data['last_name']}", "infomcfcamp@gmail.com")
 
 
                 all_payments.insert_one({
@@ -2833,6 +2857,9 @@ def createPayment():
             
                     send_email_attachments(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'], files=fns)
                     send_wp(msg,student_data['wp_no'],file_paths=fns)
+
+                    send_wp(msg,"9604084000")
+                    send_email(msg, f"Payment Complete of Student - {student_data['first_name']} {student_data['last_name']}", "infomcfcamp@gmail.com")
 
 
                 all_payments.insert_one({
@@ -2997,6 +3024,9 @@ def createPayment():
                     send_email_attachments(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'], files=fns)
                     send_wp(msg,student_data['wp_no'],file_paths=fns)
 
+                    send_wp(msg,"9604084000")
+                    send_email(msg, f"Payment Complete of Student - {student_data['first_name']} {student_data['last_name']}", "infomcfcamp@gmail.com")
+
 
                 all_payments.insert_one({
                 "payment_id": payment_id,
@@ -3127,6 +3157,9 @@ def createPayment():
                     send_email_attachments(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'], files=fns)
                     send_wp(msg,student_data['wp_no'],file_paths=fns)
 
+                    send_wp(msg,"9604084000")
+                    send_email(msg, f"Payment Complete of Student - {student_data['first_name']} {student_data['last_name']}", "infomcfcamp@gmail.com")
+
 
                 all_payments.insert_one({
                 "payment_id": payment_id,
@@ -3254,6 +3287,9 @@ def createPayment():
             
                     send_email_attachments(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'], files=fns)
                     send_wp(msg,student_data['wp_no'],file_paths=fns)
+
+                    send_wp(msg,"9604084000")
+                    send_email(msg, f"Payment Complete of Student - {student_data['first_name']} {student_data['last_name']}", "infomcfcamp@gmail.com")
 
 
                 all_payments.insert_one({
@@ -3667,6 +3703,84 @@ def getAllFeedbacks():
         return jsonify({'success': True, "feedbacks":list(feedbacks)}), 200
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+    
+
+
+#-----------------------------------------------------------------------------------------------------------
+    
+#---------------------------------- Payment Section Start --------------------------------------------
+
+import requests
+import json
+import hashlib
+import uuid
+
+def generate_hash(data, salt):
+    # key|merchant_txn|name|email|phone|amount|udf1|udf2|udf3|udf4|udf5|message|salt
+    concat_string = f"{data[0]}|{data[1]}|{data[2]}|{data[3]}|{data[4]}|{data[5]}|{data[6]}|{data[7]}|{data[8]}|{data[9]}|{data[10]}|{data[11]}|{salt}"
+    hashed = hashlib.sha512(concat_string.encode()).hexdigest()
+    print(hashed)
+    return hashed
+
+def initiate_payment(name, email, phn, camp_name, amt, sid):
+        url = "https://dashboard.easebuzz.in/easycollect/v1/create"
+        msg = camp_name
+        transaction_id = uuid.uuid4().hex
+        key = "1YUG4UBN1Q"
+
+        # Define the data in the specified sequence for hashing
+        data_sequence = [
+            key,
+            transaction_id,
+            name,
+            email,
+            phn,
+            amt,
+            sid,
+            "",
+            "",
+            "",
+            "",
+            msg,
+        ]
+        salt = "KPRYL60DC1"
+
+        # Generate hash using the data sequence and salt
+        hash_value = generate_hash(data_sequence, salt)
+        # key|merchant_txn|name|email|phone|amount|udf1|udf2|udf3|udf4|udf5|message|salt
+        payload = {
+            "key": key,
+            "merchant_txn": transaction_id,
+            "name": name,
+            "email": email,
+            "phone": phn,
+            "amount": amt,
+            "udf1": sid,
+            "udf2": " ",
+            "udf3": " ",
+            "udf4": " ",
+            "udf5": " ",
+            "message": msg,
+            "accept_partial_payment": False,
+            "hash": hash_value  # Include the generated hash in the payload
+        }
+
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        }
+
+        try:
+            response = requests.post(url, headers=headers, json=payload)
+            response_data = response.json()
+            return jsonify({"success":True,"payment_url":response_data['data']['payment_url']}),200
+        except Exception as e:
+            print("Error:", e)
+            return jsonify({"success":False, "error":str(e)}),400
+    
+#---------------------------------- Payment Section End ----------------------------------------------
+
+#-----------------------------------------------------------------------------------------------------------
 
 
     
