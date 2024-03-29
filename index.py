@@ -189,6 +189,17 @@ def sync_v2():
         sac_table = sac_table_db.find_one({"batch_id":batch["batch_id"]})
         if not sac_table:
             sac_table_generator(batch['batch_id'], batch['camp_id'], batch['batch_intake'])
+
+    all_students = students_db.find({})
+
+    for student in all_students:
+        sac_table = sac_table_db.find_one({"batch_id":student["batch_id"]})
+        sid = student['sid']
+        sr_raw = sid.split("C")
+        sr = sr_raw[-1]
+        num = generate_3_digit_number(sr)
+        sac_table[num] = student['sid']
+        sac_table_db.update_one({"batch_id":student['batch_id']}, {"$set": sac_table})
     
 
 @app.route("/sync_v2", methods=["GET"])
