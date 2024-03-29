@@ -48,13 +48,13 @@ files_base_url = "https://files.mcfcamp.in/mcf_files/"
 app = Flask(__name__)
 CORS(app)
 
-client = MongoClient(
-    'mongodb+srv://bnbdevs:feLC7m4jiT9zrmHh@cluster0.fjnp4qu.mongodb.net/?retryWrites=true&w=majority')
-app.config['MONGO_URI'] = 'mongodb+srv://bnbdevs:feLC7m4jiT9zrmHh@cluster0.fjnp4qu.mongodb.net/?retryWrites=true&w=majority'
-
 # client = MongoClient(
-#     'mongodb+srv://mcfcamp:mcf123@mcf.nyh46tl.mongodb.net/')
-# app.config['MONGO_URI'] = 'mongodb+srv://mcfcamp:mcf123@mcf.nyh46tl.mongodb.net/'
+#     'mongodb+srv://bnbdevs:feLC7m4jiT9zrmHh@cluster0.fjnp4qu.mongodb.net/?retryWrites=true&w=majority')
+# app.config['MONGO_URI'] = 'mongodb+srv://bnbdevs:feLC7m4jiT9zrmHh@cluster0.fjnp4qu.mongodb.net/?retryWrites=true&w=majority'
+
+client = MongoClient(
+    'mongodb+srv://mcfcamp:mcf123@mcf.nyh46tl.mongodb.net/')
+app.config['MONGO_URI'] = 'mongodb+srv://mcfcamp:mcf123@mcf.nyh46tl.mongodb.net/'
 
 app.config['SECRET_KEY'] = 'a6d217d048fdcd227661b755'
 db = client['mcf_db']
@@ -98,7 +98,7 @@ def sac_table_generator(batch_id, camp_id, intake):
         "camp_id":camp_id,
     }
     intake = int(intake)
-    for i in range(1, intake+1):
+    for i in range(1, intake):
         num = generate_3_digit_number(i)
         sac_table[num] = "-"
     sac_table_db = db["sac_table_db"]
@@ -112,90 +112,11 @@ def sac_table_generator(batch_id, camp_id, intake):
 
 #-------------- Supporting Functions End ----------------
 
+def sa_module(batch_id, sid):
+    pass
 
 def sac(batch_id, sr):
-    sac_table_db = db['sac_table_db']
-    sac_table = sac_table_db.find_one({"batch_id":batch_id})
-    num = generate_3_digit_number(sr)
-    if sac_table[num] == "-":
-        return 0
-    else:
-        return 1
-
-def sa_module(batch_id, sid):
-    sr_raw = sid.split("C")
-    sr = int(sr_raw[-1])
-    batch_db = db['batches_db']
-    sac_table_db = db["sac_table_db"]
-    sac_table = sac_table_db.find_one({"batch_id":batch_id})
-    batch = batch_db.find_one({"batch_id":batch_id})
-    intake = int(batch['batch_intake'])
-    result = sac(batch_id, sr)
-    if result == 0:
-        num = generate_3_digit_number(sr)
-        sac_table[num] = sid
-        sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table})
-        students_registered = batch['students_registered']
-        batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered+1}})
-        return sid
-    else:
-        for i in range(sr+1, intake+1):
-            result = sac(batch_id, i)
-            if result == 0:
-                num = generate_3_digit_number(i)
-                new_sid = sid.replace(str("C"+str(sr_raw[-1])), str("C"+str(num)))
-                sac_table[num] = new_sid
-                sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table})
-                students_registered = batch['students_registered']
-                batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered+1}})
-                return new_sid
-            
-        for j in range(1, sr):
-            result = sac(batch_id, j)
-            if result == 0:
-                num = generate_3_digit_number(j)
-                new_sid = sid.replace(str("C"+str(sr_raw[-1])), str("C"+str(num)))
-                sac_table[num] = new_sid
-                sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table})
-                students_registered = batch['students_registered']
-                batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered+1}})
-                return new_sid
-    return -1
-
-def bcr():
-    sac_table_db = db['sac_table_db']
-    sac_tables = sac_table_db.find({})
-    batch_db = db['batches_db']
-
-    for sac_table in sac_tables:
-        batch_id = sac_table['batch_id']
-        batch = batch_db.find_one({"batch_id":batch_id})
-        intake = batch['batch_intake']
-        reg_cadets=0
-        for i in range(1, intake+1):
-            num = generate_3_digit_number(i)
-            if sac_table[num] != "-":
-                reg_cadets += 1
-        batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":reg_cadets}})
-
-def sync_v2():
-    students_db = db["students_db"]
-    batch_db = db["batches_db"]
-    sac_table_db = db["sac_table_db"]
-
-    all_batches = batch_db.find({})
-
-    for batch in all_batches:
-        sac_table = sac_table_db.find_one({"batch_id":batch["batch_id"]})
-        if not sac_table:
-            sac_table_generator(batch['batch_id'], batch['camp_id'], batch['batch_intake'])
-    
-
-@app.route("/sync_v2", methods=["GET"])
-def get_sync_v2():
-    sync_v2()
-    return "Started..."
-
+    pass
 
 
 
