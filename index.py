@@ -231,6 +231,7 @@ def sync_v2():
                 sr = int(sr_raw[-1])
                 num_sr = str(generate_3_digit_number(sr))
                 sac_table_new[num_sr] = student['sid']
+                print(sac_table_new[num_sr], "  ->  ", student['sid'])
 
             sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table_new})
                 
