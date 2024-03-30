@@ -32,15 +32,15 @@ import base64
 
 #--------------------------------------------------------------------------------
 
-# file_dir = "/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/"
-# files_url = "https://files.bnbdevelopers.in"
-# files_base_dir = "/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/"
-# files_base_url = "https://files.bnbdevelopers.in/mcf_files/"
-
 file_dir = "/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/"
 files_url = "https://files.bnbdevelopers.in"
 files_base_dir = "/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/"
 files_base_url = "https://files.bnbdevelopers.in/mcf_files/"
+
+# file_dir = "/home/mcfcamp-files/htdocs/files.mcfcamp.in/mcf_files/"
+# files_url = "https://files.mcfcamp.in"
+# files_base_dir = "/home/mcfcamp-files/htdocs/files.mcfcamp.in/"
+# files_base_url = "https://files.mcfcamp.in/mcf_files/"
 
 #----------------------------------------------------------------------------------
 
@@ -328,8 +328,8 @@ def sync_v2_threaded():
 
 @app.route("/sync_v2", methods=["GET"])
 def get_sync_v2():
-    sync_v2_threaded()
-    return "Started..."
+    sync_v2_parallel()
+    return {"msg":"Started"}
 
 
 
