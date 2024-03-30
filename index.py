@@ -24,6 +24,7 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 import threading
+import multiprocessing
 import time
 import zipfile
 import requests
@@ -249,6 +250,17 @@ def sync_v2():
     generateAllSacTableAndRecountRegStudents()
     fillSacTableFromAllStudents()
     syncAllSacTableFromAllStudents()
+
+# import multiprocessing
+def sync_v2_parallel():
+    processes = []
+    processes.append(multiprocessing.Process(target=generateAllSacTableAndRecountRegStudents))
+    processes.append(multiprocessing.Process(target=fillSacTableFromAllStudents))
+    processes.append(multiprocessing.Process(target=syncAllSacTableFromAllStudents))
+    for p in processes:
+        p.start()
+    for p in processes:
+        p.join()
                 
     
 
@@ -259,7 +271,7 @@ def sync_v2():
 
 @app.route("/sync_v2", methods=["GET"])
 def get_sync_v2():
-    sync_v2()
+    sync_v2_parallel()
     return "Started..."
 
 
