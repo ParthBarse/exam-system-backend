@@ -136,7 +136,7 @@ def sa_module(batch_id, sid):
         sac_table[num] = sid
         sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table})
         students_registered = batch['students_registered']
-        batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered+1}})
+        batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered}})
         return sid
     else:
         for i in range(sr, intake+1):
@@ -147,7 +147,7 @@ def sa_module(batch_id, sid):
                 sac_table[num] = new_sid
                 sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table})
                 students_registered = batch['students_registered']
-                batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered+1}})
+                batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered}})
                 return new_sid
             
         for j in range(1, sr):
@@ -158,7 +158,7 @@ def sa_module(batch_id, sid):
                 sac_table[num] = new_sid
                 sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table})
                 students_registered = batch['students_registered']
-                batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered+1}})
+                batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered}})
                 return new_sid
     return -1
 
