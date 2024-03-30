@@ -239,7 +239,7 @@ def sync_v2():
                 print(sac_table_new[num_sr], "  ->  ", student['sid'])
 
             sac_table_db.find_one_and_delete({"batch_id":batch_id})
-            sac_table_db.insert_one(sac_table_new)
+            # sac_table_db.insert_one(sac_table_new)
             print("In Step End -----")
                 
     
