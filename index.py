@@ -238,6 +238,7 @@ def sync_v2():
                 sac_table_new[num_sr] = student['sid']
                 print(sac_table_new[num_sr], "  ->  ", student['sid'])
 
+            print("deleting batch - ",batch_id)
             sac_table_db.find_one_and_delete({"batch_id":batch_id})
             # sac_table_db.insert_one(sac_table_new)
             print("In Step End -----")
