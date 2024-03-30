@@ -659,12 +659,7 @@ def sync_data(original_sid, update_sid):
             update_operation = {'$set': {'sid': sid}}
             payment_db.update_many(filter_criteria, update_operation)
             if update_sid == True:
-                threads = []
-                threads.append(threading.Thread(target=generateAllSacTableAndRecountRegStudents))
-                threads.append(threading.Thread(target=fillSacTableFromAllStudents))
-                threads.append(threading.Thread(target=syncAllSacTableFromAllStudents))
-                for t in threads:
-                    t.start()
+                sync_v2_parallel()
 
 def sendSMS(msg,phn):
     if msg and phn:
