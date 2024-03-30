@@ -238,7 +238,7 @@ def sync_v2():
                 sac_table_new[num_sr] = student['sid']
                 print(sac_table_new[num_sr], "  ->  ", student['sid'])
 
-            sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table_new})
+            sac_table_db.find_one_and_replace({"batch_id":batch_id}, {"$set": sac_table_new})
             print("In Step End -----")
                 
     
