@@ -216,7 +216,7 @@ def sync_v2():
             print(batch_id)
             camp_id = sac_table['camp_id']
             batch = batch_db.find_one({"batch_id": batch_id})
-            students_same_batch = students_db.find({"batch_id": batch_id},{'_id':0})
+            students_same_batch = list(students_db.find({"batch_id": batch_id},{'_id':0}))
 
             print(list(students_same_batch))
             print("In Step 2 -----")
@@ -234,7 +234,7 @@ def sync_v2():
             for student1 in students_same_batch:
                 print(student1)
             print("Printing more..")
-            print(students_same_batch)
+            print(list(students_same_batch))
 
             print("till here --")
             try:
