@@ -225,7 +225,7 @@ def get_sync_v2():
 
 #------------------------------------------------------------------------------------------
 
-def sync_data(original_sid):
+def sync_data(original_sid, update_sid):
     students_db = db["students_db"]
     data = students_db.find_one({"sid":original_sid})
     
@@ -255,26 +255,27 @@ def sync_data(original_sid):
         company = "FOXFORD"
         
     if batch:
-        sr_no = int(int(batch["students_registered"]))
-        start_date = batch["start_date"]
-        year = start_date[-2:]
-        day = start_date[0:2]
-        batch_name = batch["batch_name"].replace(" ", "")
+        if update_sid == True:
+            sr_no = int(int(batch["students_registered"]))
+            start_date = batch["start_date"]
+            year = start_date[-2:]
+            day = start_date[0:2]
+            batch_name = batch["batch_name"].replace(" ", "")
 
-        company_sf = str(company[0])+"C"
-        days = str(batch['duration'])+"D"
+            company_sf = str(company[0])+"C"
+            days = str(batch['duration'])+"D"
 
-        sr_no = generate_3_digit_number(sr_no)
+            sr_no = generate_3_digit_number(sr_no)
 
-        sid = str(camp_short)+str(year)+str(days)+str(batch_name)+str(company_sf)+str(sr_no)
+            sid = str(camp_short)+str(year)+str(days)+str(batch_name)+str(company_sf)+str(sr_no)
 
-        # stud = students_db.find_one({"sid":sid})
-        if str(sid) != str(original_sid):
-            print("------------ Here ----------")
-            print(original_sid,"    -     ", sid)
-            sid = sa_module(batch['batch_id'], sid)
-            if sid == -1:
-                return jsonify({"error": "Batch Full, Please add New Batch or move this student to other batch."}), 400
+            # stud = students_db.find_one({"sid":sid})
+            if str(sid) != str(original_sid):
+                print("------------ Here ----------")
+                print(original_sid,"    -     ", sid)
+                sid = sa_module(batch['batch_id'], sid)
+                if sid == -1:
+                    return jsonify({"error": "Batch Full, Please add New Batch or move this student to other batch."}), 400
 
         document_med_path = 'medical_certificate.docx'
 
@@ -1312,20 +1313,28 @@ def update_student():
         
         students_db = db["students_db"]
         student = students_db.find_one({"sid": data['sid']})
+        student_cp = student
 
         if not student:
             return jsonify({"error": f"No student found with sid: {data['sid']}"}), 404  # Not Found
         
+        update_sid = False
         for key, value in data.items():
             if key != 'sid':
                 student[key] = value
+            if key == "batch_id":
+                if student_cp['batch_id'] != value:
+                    update_sid = True
+            if key == "camp_id":
+                if student_cp['camp_id'] != value:
+                    update_sid = True
 
         # Update the student in the database
         batches_db = db["batches_db"]
         batch = batches_db.find_one({"batch_id":data.get("batch_id")}, {"_id":0})
         if batch:
             students_db.update_one({"sid": data['sid']}, {"$set": student})
-            result = sync_data(data['sid'])
+            result = sync_data(data['sid'],update_sid)
             return jsonify({"message": f"Student with sid {data['sid']} updated successfully"})
         else:
             return jsonify({"message": "Batch not Found !"}),400
