@@ -225,7 +225,7 @@ def get_sync_v2():
 
 #------------------------------------------------------------------------------------------
 
-def sync_data(original_sid, update_sid=False):
+def sync_data(original_sid, update_sid):
     students_db = db["students_db"]
     data = students_db.find_one({"sid":original_sid})
     
@@ -3700,7 +3700,7 @@ def bulkDownloadAdmissionCard():
 def sync_Student():
     try:
         sid = request.args.get('sid')
-        result = sync_data(sid)
+        result = sync_data(sid,False)
         if result == 0:
             return jsonify({'success': True, "msg":'Sync Successful'}), 200
         else:
