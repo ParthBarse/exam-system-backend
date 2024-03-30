@@ -139,7 +139,7 @@ def sa_module(batch_id, sid):
         batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered+1}})
         return sid
     else:
-        for i in range(sr+1, intake+1):
+        for i in range(sr, intake+1):
             result = sac(batch_id, i)
             if result == 0:
                 num = generate_3_digit_number(i)
@@ -264,10 +264,14 @@ def sync_data(original_sid):
         company_sf = str(company[0])+"C"
         days = str(batch['duration'])+"D"
 
+        sr_no = generate_3_digit_number(sr_no)
+
         sid = str(camp_short)+str(year)+str(days)+str(batch_name)+str(company_sf)+str(sr_no)
 
         # stud = students_db.find_one({"sid":sid})
-        if sid != original_sid:
+        if str(sid) != str(original_sid):
+            print("------------ Here ----------")
+            print(original_sid,"    -     ", sid)
             sid = sa_module(batch['batch_id'], sid)
             if sid == -1:
                 return jsonify({"error": "Batch Full, Please add New Batch or move this student to other batch."}), 400
@@ -1104,6 +1108,7 @@ def register_student():
             year = start_date[-2:]
             day = start_date[0:2]
             batch_name = batch["batch_name"].replace(" ", "")
+            sr_no = generate_3_digit_number(sr_no)
 
             company_sf = str(company[0])+"C"
             days = str(batch['duration'])+"D"
@@ -1301,18 +1306,15 @@ def update_student():
     try:
         data = request.form
 
-        # Check if sid is provided
         if 'sid' not in data:
             raise ValueError("Missing 'sid' in the request.")
-
-        # Find the student based on sid
+        
         students_db = db["students_db"]
         student = students_db.find_one({"sid": data['sid']})
 
         if not student:
             return jsonify({"error": f"No student found with sid: {data['sid']}"}), 404  # Not Found
-
-        # Update the student information with the received data
+        
         for key, value in data.items():
             if key != 'sid':
                 student[key] = value
