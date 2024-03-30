@@ -251,7 +251,6 @@ def sync_v2():
     fillSacTableFromAllStudents()
     syncAllSacTableFromAllStudents()
 
-# import multiprocessing
 def sync_v2_parallel():
     processes = []
     processes.append(multiprocessing.Process(target=generateAllSacTableAndRecountRegStudents))
@@ -261,6 +260,17 @@ def sync_v2_parallel():
         p.start()
     for p in processes:
         p.join()
+
+def sync_v2_threaded():
+    threads = []
+    threads.append(threading.Thread(target=generateAllSacTableAndRecountRegStudents))
+    threads.append(threading.Thread(target=fillSacTableFromAllStudents))
+    threads.append(threading.Thread(target=syncAllSacTableFromAllStudents))
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
                 
     
 
@@ -271,7 +281,7 @@ def sync_v2_parallel():
 
 @app.route("/sync_v2", methods=["GET"])
 def get_sync_v2():
-    sync_v2_parallel()
+    sync_v2_threaded()
     return "Started..."
 
 
