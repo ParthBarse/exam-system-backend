@@ -255,6 +255,8 @@ def sync_data(original_sid, update_sid):
         company = "FOXFORD"
 
     start_date = batch["start_date"]
+    sr_no = int(int(batch["students_registered"]))
+    batch_name = batch["batch_name"].replace(" ", "")
     if batch:
         if update_sid == True:
             sr_no = int(int(batch["students_registered"]))
