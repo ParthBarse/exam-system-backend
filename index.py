@@ -211,15 +211,12 @@ def sync_v2():
 
     for sac_table in all_sac_tables:
         try:
-            print("In Step 1 -----")
             batch_id = sac_table['batch_id']
             print(batch_id)
             camp_id = sac_table['camp_id']
             batch = batch_db.find_one({"batch_id": batch_id})
             students_same_batch = list(students_db.find({"batch_id": batch_id},{'_id':0}))
 
-            print(list(students_same_batch))
-            print("In Step 2 -----")
             sac_table_new = {
                 "batch_id": batch_id,
                 "camp_id": camp_id,
@@ -229,28 +226,17 @@ def sync_v2():
             for i in range(1, intake + 1):
                 num = generate_3_digit_number(i)
                 sac_table_new[num] = "-"
-            
-            print("Printing Data -")
-            for student1 in students_same_batch:
-                print(student1)
-            print("Printing more..")
-            print(list(students_same_batch))
 
-            print("till here --")
             try:
                 for student in list(students_same_batch):
-                    print("In Step 4 -----")
                     sr_raw = student['sid'].split("C")
                     sr = int(sr_raw[-1])
                     num_sr = str(generate_3_digit_number(sr))
                     sac_table_new[num_sr] = student['sid']
-                    print(f"{sac_table_new[num_sr]}  ->  {student['sid']}")
             except Exception as e:
                 print(str(e))
 
-            print("Updating..")
             sac_table_db.update_one({"batch_id": batch_id}, {"$set": sac_table_new})
-            print("In Step End -----")
         except Exception as e:
             print(f"Error processing batch {batch_id}: {e}")
                 
