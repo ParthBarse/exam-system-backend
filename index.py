@@ -1329,12 +1329,15 @@ def update_student():
             if key != 'sid':
                 student[key] = value
             if key == "batch_id":
+                print("BATCH ID ---> ",student_cp['batch_id'], " ------ ", value)
                 if student_cp['batch_id'] != value:
                     update_sid = True
             if key == "camp_id":
+                print("CAMP ID ---> ",student_cp['camp_id'], " ------ ", value)
                 if student_cp['camp_id'] != value:
                     update_sid = True
             if key == "company":
+                print("COMPANY ---> ",student_cp['company'], " ------ ", value)
                 if student_cp['company'] != value:
                     update_sid = True
 
