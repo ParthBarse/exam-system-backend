@@ -1288,7 +1288,7 @@ def register_student():
             send_email(msg, sub, mailToSend)
 
             msg2 = f"New Student Registered \n\n Name - {data['first_name']} {data['last_name']} \n Camp Name - {camp_name} \n Batch Name - {batch_name}"
-            send_wp(msg2,"9604084000")
+            # send_wp(msg2,"9604084000")
             send_email(msg2, sub, "infomcfcamp@gmail.com")
             return jsonify({"message": "Student registered successfully", "sid": sid})
 
@@ -2722,7 +2722,7 @@ def createPayment():
                     send_email_attachments(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'], files=fns)
                     send_wp(msg,student_data['wp_no'],file_paths=fns)
 
-                    send_wp(msg,"9604084000")
+                    # send_wp(msg,"9604084000")
                     send_email(msg, f"Payment Complete of Student - {student_data['first_name']} {student_data['last_name']}", "infomcfcamp@gmail.com")
 
 
@@ -2855,7 +2855,7 @@ def createPayment():
                     send_email_attachments(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'], files=fns)
                     send_wp(msg,student_data['wp_no'],file_paths=fns)
 
-                    send_wp(msg,"9604084000")
+                    # send_wp(msg,"9604084000")
                     send_email(msg, f"Payment Complete of Student - {student_data['first_name']} {student_data['last_name']}", "infomcfcamp@gmail.com")
 
 
@@ -2989,7 +2989,7 @@ def createPayment():
                     send_email_attachments(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'], files=fns)
                     send_wp(msg,student_data['wp_no'],file_paths=fns)
 
-                    send_wp(msg,"9604084000")
+                    # send_wp(msg,"9604084000")
                     send_email(msg, f"Payment Complete of Student - {student_data['first_name']} {student_data['last_name']}", "infomcfcamp@gmail.com")
 
 
@@ -3155,7 +3155,7 @@ def createPayment():
                     send_email_attachments(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'], files=fns)
                     send_wp(msg,student_data['wp_no'],file_paths=fns)
 
-                    send_wp(msg,"9604084000")
+                    # send_wp(msg,"9604084000")
                     send_email(msg, f"Payment Complete of Student - {student_data['first_name']} {student_data['last_name']}", "infomcfcamp@gmail.com")
 
 
@@ -3288,7 +3288,7 @@ def createPayment():
                     send_email_attachments(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'], files=fns)
                     send_wp(msg,student_data['wp_no'],file_paths=fns)
 
-                    send_wp(msg,"9604084000")
+                    # send_wp(msg,"9604084000")
                     send_email(msg, f"Payment Complete of Student - {student_data['first_name']} {student_data['last_name']}", "infomcfcamp@gmail.com")
 
 
@@ -3419,7 +3419,7 @@ def createPayment():
                     send_email_attachments(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'], files=fns)
                     send_wp(msg,student_data['wp_no'],file_paths=fns)
 
-                    send_wp(msg,"9604084000")
+                    # send_wp(msg,"9604084000")
                     send_email(msg, f"Payment Complete of Student - {student_data['first_name']} {student_data['last_name']}", "infomcfcamp@gmail.com")
 
 
