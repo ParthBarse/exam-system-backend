@@ -253,11 +253,11 @@ def sync_data(original_sid, update_sid):
         company = "ECO"
     elif age>=17 and age<=21 and data.get("gender").lower() == "female":
         company = "FOXFORD"
-        
+
+    start_date = batch["start_date"]
     if batch:
         if update_sid == True:
             sr_no = int(int(batch["students_registered"]))
-            start_date = batch["start_date"]
             year = start_date[-2:]
             day = start_date[0:2]
             batch_name = batch["batch_name"].replace(" ", "")
@@ -1327,6 +1327,9 @@ def update_student():
                     update_sid = True
             if key == "camp_id":
                 if student_cp['camp_id'] != value:
+                    update_sid = True
+            if key == "company":
+                if student_cp['company'] != value:
                     update_sid = True
 
         # Update the student in the database
