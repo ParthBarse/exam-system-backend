@@ -292,6 +292,7 @@ def sync_data(original_sid):
 
         # Load the document template
         doc1 = Document('visit_card.docx')
+        final_status = data['status']
 
         # Sample student_data
         student_data1 = {
