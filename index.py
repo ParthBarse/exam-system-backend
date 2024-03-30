@@ -1326,8 +1326,6 @@ def update_student():
         
         update_sid = False
         for key, value in data.items():
-            if key != 'sid':
-                student[key] = value
             if key == "batch_id":
                 print("BATCH ID ---> ",student_cp['batch_id'], " ------ ", value)
                 if student_cp['batch_id'] != value:
@@ -1340,6 +1338,8 @@ def update_student():
                 print("COMPANY ---> ",student_cp['company'], " ------ ", value)
                 if student_cp['company'] != value:
                     update_sid = True
+            if key != 'sid':
+                student[key] = value
 
         # Update the student in the database
         batches_db = db["batches_db"]
