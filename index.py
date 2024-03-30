@@ -229,6 +229,9 @@ def sync_v2():
             for i in range(1, intake + 1):
                 num = generate_3_digit_number(i)
                 sac_table_new[num] = "-"
+            
+            for student1 in students_same_batch:
+                print(student1)
 
             print("till here --")
             try:
