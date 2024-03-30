@@ -176,6 +176,35 @@ def syncAllSacTableFromAllStudents():
             sac_table_db.update_one({"batch_id": batch_id}, {"$set": sac_table_new})
         except Exception as e:
             print(f"Error processing batch {batch_id}: {e}")
+
+
+def syncSacTableFromStudent(batch_id):
+    students_db = db["students_db"]
+    batch_db = db["batches_db"]
+    sac_table_db = db["sac_table_db"]
+
+    sac_table = sac_table_db.find({"batch_id":batch_id},{'_id':0})
+    
+    camp_id = sac_table['camp_id']
+    batch = batch_db.find_one({"batch_id": batch_id})
+    students_same_batch = list(students_db.find({"batch_id": batch_id},{'_id':0}))
+    sac_table_new = {
+        "batch_id": batch_id,
+        "camp_id": camp_id,
+    }
+    intake = int(batch['batch_intake'])
+    for i in range(1, intake + 1):
+        num = generate_3_digit_number(i)
+        sac_table_new[num] = "-"
+    try:
+        for student in list(students_same_batch):
+            sr_raw = student['sid'].split("C")
+            sr = int(sr_raw[-1])
+            num_sr = str(generate_3_digit_number(sr))
+            sac_table_new[num_sr] = student['sid']
+    except Exception as e:
+        print(str(e))
+    sac_table_db.update_one({"batch_id": batch_id}, {"$set": sac_table_new})
     
 
 #-------------- Supporting Functions End ----------------
@@ -205,6 +234,12 @@ def sa_module(batch_id, sid):
         sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table})
         students_registered = batch['students_registered']
         batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered}})
+        threads = []
+        threads.append(threading.Thread(target=generateAllSacTableAndRecountRegStudents))
+        threads.append(threading.Thread(target=fillSacTableFromAllStudents))
+        threads.append(threading.Thread(target=syncAllSacTableFromAllStudents))
+        for t in threads:
+            t.start()
         return sid
     else:
         for i in range(sr, intake+1):
@@ -216,6 +251,12 @@ def sa_module(batch_id, sid):
                 sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table})
                 students_registered = batch['students_registered']
                 batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered}})
+                threads = []
+                threads.append(threading.Thread(target=generateAllSacTableAndRecountRegStudents))
+                threads.append(threading.Thread(target=fillSacTableFromAllStudents))
+                threads.append(threading.Thread(target=syncAllSacTableFromAllStudents))
+                for t in threads:
+                    t.start()
                 return new_sid
             
         for j in range(1, sr):
@@ -227,6 +268,12 @@ def sa_module(batch_id, sid):
                 sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table})
                 students_registered = batch['students_registered']
                 batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered}})
+                threads = []
+                threads.append(threading.Thread(target=generateAllSacTableAndRecountRegStudents))
+                threads.append(threading.Thread(target=fillSacTableFromAllStudents))
+                threads.append(threading.Thread(target=syncAllSacTableFromAllStudents))
+                for t in threads:
+                    t.start()
                 return new_sid
     return -1
 
@@ -606,15 +653,18 @@ def sync_data(original_sid, update_sid):
         batches_db = db["batches_db"]
         batch = batches_db.find_one({"batch_id":data.get("batch_id")}, {"_id":0})
         if batch:
-            if int(batch["students_registered"]) <= int(batch["batch_intake"]):
-                students_db.update_one({'sid': original_sid},{"$set": student})
-                payment_db = db['all_payments']
-                filter_criteria = {'sid': original_sid}
-                update_operation = {'$set': {'sid': sid}}
-                payment_db.update_many(filter_criteria, update_operation)
-                return 0
-            else:
-                return 1
+            students_db.update_one({'sid': original_sid},{"$set": student})
+            payment_db = db['all_payments']
+            filter_criteria = {'sid': original_sid}
+            update_operation = {'$set': {'sid': sid}}
+            payment_db.update_many(filter_criteria, update_operation)
+            if update_sid == True:
+                threads = []
+                threads.append(threading.Thread(target=generateAllSacTableAndRecountRegStudents))
+                threads.append(threading.Thread(target=fillSacTableFromAllStudents))
+                threads.append(threading.Thread(target=syncAllSacTableFromAllStudents))
+                for t in threads:
+                    t.start()
 
 def sendSMS(msg,phn):
     if msg and phn:
@@ -1430,20 +1480,22 @@ def update_student():
 def delete_student():
     try:
         students_db = db["students_db"]
-        # Get the sid from request parameters
         sid = request.args.get('sid')
 
         if not sid:
             return jsonify({"error": "Missing 'sid' parameter in the request."}), 400  # Bad Request
-
-        # Find the student based on sid
         student = students_db.find_one({"sid": sid})
 
         if not student:
             return jsonify({"error": f"No student found with sid: {sid}"}), 404  # Not Found
-
-        # Delete the student from the database
         students_db.delete_one({"sid": sid})
+
+        threads = []
+        threads.append(threading.Thread(target=generateAllSacTableAndRecountRegStudents))
+        threads.append(threading.Thread(target=fillSacTableFromAllStudents))
+        threads.append(threading.Thread(target=syncAllSacTableFromAllStudents))
+        for t in threads:
+            t.start()
 
         return jsonify({"message": f"Student with sid {sid} deleted successfully"})
 
@@ -2088,6 +2140,8 @@ def change_student_status():
 
         if not student:
             return jsonify({"error": f"No student found with sid: {data['sid']}"}), 404  # Not Found
+        
+        sid = uuid.uuid4().hex
 
         # Update the status of the student
         students_db.update_one({"sid": data['sid']}, {"$set": {"status": data['new_status'],"reason":data['reason']}})
