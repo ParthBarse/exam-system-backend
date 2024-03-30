@@ -217,6 +217,7 @@ def sync_v2():
         students_same_batch = students_db.find({"batch_id":batch_id})
 
         if len(list(students_same_batch)) > 0:
+            print(list(students_same_batch))
             print("In Step 2 -----")
             sac_table_new = {
             "batch_id":batch_id,
