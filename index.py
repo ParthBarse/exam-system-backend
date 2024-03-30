@@ -210,13 +210,16 @@ def sync_v2():
     all_sac_tables = sac_table_db.find({})
 
     for sac_table in all_sac_tables:
+        print("In Step 1 -----")
         batch_id = sac_table['batch_id']
         print(batch_id)
         camp_id = sac_table['camp_id']
         batch = batch_db.find_one({"batch_id":batch_id})
         students_same_batch = students_db.find({"batch_id":batch_id})
 
+        print(list(students_same_batch))
         if len(list(students_same_batch)) > 0:
+            print("In Step 2 -----")
             sac_table_new = {
             "batch_id":batch_id,
             "camp_id":camp_id,
@@ -228,12 +231,15 @@ def sync_v2():
                 sac_table_new[num] = "-"
 
             for student in list(students_same_batch):
+                print("In Step 4 -----")
                 sr_raw = student['sid'].split("C")
                 sr = int(sr_raw[-1])
                 num_sr = str(generate_3_digit_number(sr))
                 sac_table_new[num_sr] = student['sid']
+                print(sac_table_new[num_sr], "  ->  ", student['sid'])
 
             sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table_new})
+            print("In Step End -----")
                 
     
 
