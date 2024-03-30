@@ -211,13 +211,14 @@ def sync_v2():
 
     for sac_table in all_sac_tables:
         print("In Step 1 -----")
+        print(batch_id)
         batch_id = sac_table['batch_id']
         camp_id = sac_table['camp_id']
         batch = batch_db.find_one({"batch_id":batch_id})
         students_same_batch = students_db.find({"batch_id":batch_id})
 
+        print(list(students_same_batch))
         if len(list(students_same_batch)) > 0:
-            print(list(students_same_batch))
             print("In Step 2 -----")
             sac_table_new = {
             "batch_id":batch_id,
