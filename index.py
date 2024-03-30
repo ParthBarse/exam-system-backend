@@ -109,6 +109,73 @@ def sac_table_generator(batch_id, camp_id, intake):
         sac_table_db.insert_one(sac_table)
         return 0
     
+def generateAllSacTableAndRecountRegStudents():
+    students_db = db["students_db"]
+    batch_db = db["batches_db"]
+    sac_table_db = db["sac_table_db"]
+
+    all_batches = batch_db.find({})
+
+    for batch in all_batches:
+        reg_students = 0
+        students = students_db.find({"batch_id":batch["batch_id"]})
+        reg_students = len(list(students))
+        print(reg_students)
+        batch['students_registered'] = reg_students
+        batch_db.update_one({"batch_id":batch["batch_id"]}, {"$set": batch})
+        sac_table = sac_table_db.find_one({"batch_id":batch["batch_id"]})
+        if not sac_table:
+            sac_table_generator(batch['batch_id'], batch['camp_id'], batch['batch_intake'])
+
+def fillSacTableFromAllStudents():
+    students_db = db["students_db"]
+    sac_table_db = db["sac_table_db"]
+
+    all_students = students_db.find({})
+
+    for student in all_students:
+        sac_table = sac_table_db.find_one({"batch_id":student["batch_id"]})
+        sid = student['sid']
+        sr_raw = sid.split("C")
+        sr = sr_raw[-1]
+        num = generate_3_digit_number(sr)
+        sac_table[num] = student['sid']
+        sac_table_db.update_one({"batch_id":student['batch_id']}, {"$set": sac_table})
+
+def syncAllSacTableFromAllStudents():
+    students_db = db["students_db"]
+    batch_db = db["batches_db"]
+    sac_table_db = db["sac_table_db"]
+
+    all_sac_tables = sac_table_db.find({},{'_id':0})
+
+    for sac_table in all_sac_tables:
+        try:
+            batch_id = sac_table['batch_id']
+            print(batch_id)
+            camp_id = sac_table['camp_id']
+            batch = batch_db.find_one({"batch_id": batch_id})
+            students_same_batch = list(students_db.find({"batch_id": batch_id},{'_id':0}))
+            sac_table_new = {
+                "batch_id": batch_id,
+                "camp_id": camp_id,
+            }
+            intake = int(batch['batch_intake'])
+            for i in range(1, intake + 1):
+                num = generate_3_digit_number(i)
+                sac_table_new[num] = "-"
+            try:
+                for student in list(students_same_batch):
+                    sr_raw = student['sid'].split("C")
+                    sr = int(sr_raw[-1])
+                    num_sr = str(generate_3_digit_number(sr))
+                    sac_table_new[num_sr] = student['sid']
+            except Exception as e:
+                print(str(e))
+            sac_table_db.update_one({"batch_id": batch_id}, {"$set": sac_table_new})
+        except Exception as e:
+            print(f"Error processing batch {batch_id}: {e}")
+    
 
 #-------------- Supporting Functions End ----------------
 
@@ -179,66 +246,9 @@ def bcr():
         batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":reg_cadets}})
 
 def sync_v2():
-    students_db = db["students_db"]
-    batch_db = db["batches_db"]
-    sac_table_db = db["sac_table_db"]
-
-    all_batches = batch_db.find({})
-
-    for batch in all_batches:
-        reg_students = 0
-        students = students_db.find({"batch_id":batch["batch_id"]})
-        reg_students = len(list(students))
-        print(reg_students)
-        batch['students_registered'] = reg_students
-        batch_db.update_one({"batch_id":batch["batch_id"]}, {"$set": batch})
-        sac_table = sac_table_db.find_one({"batch_id":batch["batch_id"]})
-        if not sac_table:
-            sac_table_generator(batch['batch_id'], batch['camp_id'], batch['batch_intake'])
-
-    all_students = students_db.find({})
-
-    for student in all_students:
-        sac_table = sac_table_db.find_one({"batch_id":student["batch_id"]})
-        sid = student['sid']
-        sr_raw = sid.split("C")
-        sr = sr_raw[-1]
-        num = generate_3_digit_number(sr)
-        sac_table[num] = student['sid']
-        sac_table_db.update_one({"batch_id":student['batch_id']}, {"$set": sac_table})
-
-    all_sac_tables = sac_table_db.find({},{'_id':0})
-
-    for sac_table in all_sac_tables:
-        try:
-            batch_id = sac_table['batch_id']
-            print(batch_id)
-            camp_id = sac_table['camp_id']
-            batch = batch_db.find_one({"batch_id": batch_id})
-            students_same_batch = list(students_db.find({"batch_id": batch_id},{'_id':0}))
-
-            sac_table_new = {
-                "batch_id": batch_id,
-                "camp_id": camp_id,
-            }
-
-            intake = int(batch['batch_intake'])
-            for i in range(1, intake + 1):
-                num = generate_3_digit_number(i)
-                sac_table_new[num] = "-"
-
-            try:
-                for student in list(students_same_batch):
-                    sr_raw = student['sid'].split("C")
-                    sr = int(sr_raw[-1])
-                    num_sr = str(generate_3_digit_number(sr))
-                    sac_table_new[num_sr] = student['sid']
-            except Exception as e:
-                print(str(e))
-
-            sac_table_db.update_one({"batch_id": batch_id}, {"$set": sac_table_new})
-        except Exception as e:
-            print(f"Error processing batch {batch_id}: {e}")
+    generateAllSacTableAndRecountRegStudents()
+    fillSacTableFromAllStudents()
+    syncAllSacTableFromAllStudents()
                 
     
 
