@@ -230,8 +230,11 @@ def sync_v2():
                 num = generate_3_digit_number(i)
                 sac_table_new[num] = "-"
             
+            print("Printing Data -")
             for student1 in students_same_batch:
                 print(student1)
+            print("Printing more..")
+            print(students_same_batch)
 
             print("till here --")
             try:
