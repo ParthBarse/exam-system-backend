@@ -206,6 +206,34 @@ def sync_v2():
         num = generate_3_digit_number(sr)
         sac_table[num] = student['sid']
         sac_table_db.update_one({"batch_id":student['batch_id']}, {"$set": sac_table})
+
+    all_sac_tables = sac_table_db.find({})
+
+    for sac_table in all_sac_tables:
+        batch_id = sac_table['batch_id']
+        camp_id = sac_table['camp_id']
+        batch = batch_db.find_one({"batch_id":batch_id})
+        students_same_batch = students_db.find({"batch_id":batch_id})
+
+        if len(list(students_same_batch)) > 0:
+            sac_table_new = {
+            "batch_id":batch_id,
+            "camp_id":camp_id,
+            }
+
+            intake = int(batch['batch_intake'])
+            for i in range(1, intake+1):
+                num = generate_3_digit_number(i)
+                sac_table_new[num] = "-"
+
+            for student in students_same_batch:
+                sr_raw = student['sid'].split("C")
+                sr = int(sr_raw[-1])
+                num_sr = str(generate_3_digit_number(sr))
+                sac_table_new[num_sr] = student['sid']
+
+            sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table_new})
+                
     
 
 
@@ -263,7 +291,7 @@ def sync_data(original_sid, update_sid):
     days = str(batch['duration'])+"D"
     if batch:
         if update_sid == True:
-            sr_no = int(int(batch["students_registered"]))
+            sr_no = int(int(batch["students_registered"])+1)
             year = start_date[-2:]
             day = start_date[0:2]
             batch_name = batch["batch_name"].replace(" ", "")
