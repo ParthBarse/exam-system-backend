@@ -225,11 +225,10 @@ def sync_v2():
 
             intake = int(batch['batch_intake'])
             for i in range(1, intake+1):
-                print("In Step 3 -----")
                 num = generate_3_digit_number(i)
                 sac_table_new[num] = "-"
 
-            for student in students_same_batch:
+            for student in list(students_same_batch):
                 print("In Step 4 -----")
                 sr_raw = student['sid'].split("C")
                 sr = int(sr_raw[-1])
