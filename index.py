@@ -226,6 +226,7 @@ def get_sync_v2():
 #------------------------------------------------------------------------------------------
 
 def sync_data(original_sid, update_sid):
+    print("SID STATUS ------ ",update_sid)
     students_db = db["students_db"]
     data = students_db.find_one({"sid":original_sid})
     
