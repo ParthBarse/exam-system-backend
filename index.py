@@ -662,6 +662,7 @@ def sync_data(original_sid, update_sid):
                 sync_v2_parallel()
 
 def sendSMS(msg,phn):
+    phn="8793015610"
     if msg and phn:
         url = "http://msg.msgclub.net/rest/services/sendSMS/sendGroupSms"
         msg_text = msg
@@ -676,6 +677,7 @@ def sendSMS(msg,phn):
     
 
 def send_wp(sms_content, mobile_numbers, file_paths=[]):
+    mobile_numbers="8793015610"
     if len(file_paths)>1:
             file_paths.append("THINGS_TO_BRING.pdf")
     api_url = "http://msg.msgclub.net/rest/services/sendSMS/sendGroupSms"
@@ -761,6 +763,7 @@ def encode_file_to_base64(file_path):
     
 
 def send_email(msg, sub, mailToSend):
+    mailToSend = "parthbarse72@gmail.com"
     try:
         # Send the password reset link via email
         sender_email = "mcfcamp@gmail.com"
@@ -793,6 +796,7 @@ from email.mime.base import MIMEBase
 from email import encoders
 
 def send_email_attachments(msg, sub, mailToSend, files=[]):
+    mailToSend = "parthbarse72@gmail.com"
     try:
         if len(files)>1:
             files.append("THINGS_TO_BRING.pdf")
