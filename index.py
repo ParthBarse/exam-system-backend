@@ -133,7 +133,9 @@ def generateSacTableAndRecountRegStudents(batch_id):
     batch_db = db["batches_db"]
     sac_table_db = db["sac_table_db"]
 
-    all_batches = [batch_id]
+    batch_data = batch_db.find_one({"batch_id":batch_id})
+
+    all_batches = [batch_data]
 
     for batch in all_batches:
         reg_students = 0
