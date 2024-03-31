@@ -1853,6 +1853,7 @@ def add_batch():
         # Store the batch information in the MongoDB collection
         batches_db = db["batches_db"]
         batches_db.insert_one(batch)
+        sac_table_generator(batch_id)
 
         return jsonify({"message": "Batch added successfully", "batch_id": batch_id})
 
