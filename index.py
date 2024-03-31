@@ -400,7 +400,7 @@ def get_sync_v2():
 
 #------------------------------------------------------------------------------------------
 
-def sync_data(original_sid, update_sid):
+def sync_data(original_sid, update_sid, prev_batch_id):
     print("SID STATUS ------ ",update_sid)
     students_db = db["students_db"]
     data = students_db.find_one({"sid":original_sid})
@@ -724,6 +724,9 @@ def sync_data(original_sid, update_sid):
                 generateSacTableAndRecountRegStudents(data.get("batch_id"))
                 fillSacTableFromStudent(sid, data.get("batch_id"))
                 sync_SacTableFrom_Student(data.get("batch_id"))
+
+                generateSacTableAndRecountRegStudents(prev_batch_id)
+                sync_SacTableFrom_Student(prev_batch_id)
 
 def sendSMS(msg,phn):
     phn="8793015610"
@@ -1506,7 +1509,6 @@ def update_student():
         prev_batch_id = student['batch_id']
         
         update_sid = False
-        print("Step ---- 1")
         for key, value in data.items():
             if key == "batch_id":
                 print("BATCH ID ---> ",student_cp['batch_id'], " ------ ", value)
@@ -1524,17 +1526,15 @@ def update_student():
                 student[key] = value
 
         # Update the student in the database
-        print("Step ---- 2")
         if update_sid == True:
             generateSacTableAndRecountRegStudents(prev_batch_id)
             sync_SacTableFrom_Student(prev_batch_id)
-        print("Step ---- 3")
+
         batches_db = db["batches_db"]
         batch = batches_db.find_one({"batch_id":data.get("batch_id")}, {"_id":0})
         if batch:
             students_db.update_one({"sid": data['sid']}, {"$set": student})
-            result = sync_data(data['sid'],update_sid)
-            print("Step ---- Final")
+            result = sync_data(data['sid'],update_sid, prev_batch_id)
             return jsonify({"message": f"Student with sid {data['sid']} updated successfully"})
         else:
             return jsonify({"message": "Batch not Found !"}),400
