@@ -388,7 +388,7 @@ def sync_v2_sequential():
         syncAllSacTableFromAllStudents
     ]
     for func in functions:
-        func()   
+        func()
 
 
 
@@ -398,7 +398,7 @@ def sync_v2_sequential():
 @app.route("/sync_v2", methods=["GET"])
 def get_sync_v2():
     threading.Thread(target=sync_v2_sequential).start()
-    return jsonify({"msg": "Started"})
+    return jsonify({"msg": "Started"}),200
 
 
 
@@ -3903,7 +3903,7 @@ def bulkDownloadAdmissionCard():
 def sync_Student():
     try:
         sid = request.args.get('sid')
-        result = sync_data(sid,False)
+        result = sync_data(sid,False,"")
         if result == 0:
             return jsonify({'success': True, "msg":'Sync Successful'}), 200
         else:
