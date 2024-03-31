@@ -1509,20 +1509,20 @@ def update_student():
                 print("BATCH ID ---> ",student_cp['batch_id'], " ------ ", value)
                 if student_cp['batch_id'] != value:
                     update_sid = True
-                    generateSacTableAndRecountRegStudents(prev_batch_id)
-                    sync_SacTableFrom_Student(prev_batch_id)
+                    # generateSacTableAndRecountRegStudents(prev_batch_id)
+                    # sync_SacTableFrom_Student(prev_batch_id)
             if key == "camp_id":
                 print("CAMP ID ---> ",student_cp['camp_id'], " ------ ", value)
                 if student_cp['camp_id'] != value:
                     update_sid = True
-                    generateSacTableAndRecountRegStudents(prev_batch_id)
-                    sync_SacTableFrom_Student(prev_batch_id)
+                    # generateSacTableAndRecountRegStudents(prev_batch_id)
+                    # sync_SacTableFrom_Student(prev_batch_id)
             if key == "company":
                 print("COMPANY ---> ",student_cp['company'], " ------ ", value)
                 if student_cp['company'] != value:
                     update_sid = True
-                    generateSacTableAndRecountRegStudents(prev_batch_id)
-                    sync_SacTableFrom_Student(prev_batch_id)
+                    # generateSacTableAndRecountRegStudents(prev_batch_id)
+                    # sync_SacTableFrom_Student(prev_batch_id)
             if key != 'sid':
                 student[key] = value
 
