@@ -381,7 +381,14 @@ def sync_v2_threaded():
         t.join()
 
                 
-    
+def sync_v2_sequential():
+    functions = [
+        generateAllSacTableAndRecountRegStudents,
+        fillSacTableFromAllStudents,
+        syncAllSacTableFromAllStudents
+    ]
+    for func in functions:
+        func()   
 
 
 
@@ -390,9 +397,8 @@ def sync_v2_threaded():
 
 @app.route("/sync_v2", methods=["GET"])
 def get_sync_v2():
-    sync_v2_parallel()
-    return {"msg":"Started"}
-
+    threading.Thread(target=sync_v2_sequential).start()
+    return jsonify({"msg": "Started"})
 
 
 
