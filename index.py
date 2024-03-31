@@ -1504,6 +1504,7 @@ def update_student():
         prev_batch_id = student['batch_id']
         
         update_sid = False
+        print("Step ---- 1")
         for key, value in data.items():
             if key == "batch_id":
                 print("BATCH ID ---> ",student_cp['batch_id'], " ------ ", value)
@@ -1527,11 +1528,13 @@ def update_student():
                 student[key] = value
 
         # Update the student in the database
+        print("Step ---- 2")
         batches_db = db["batches_db"]
         batch = batches_db.find_one({"batch_id":data.get("batch_id")}, {"_id":0})
         if batch:
             students_db.update_one({"sid": data['sid']}, {"$set": student})
             result = sync_data(data['sid'],update_sid)
+            print("Step ---- Final")
             return jsonify({"message": f"Student with sid {data['sid']} updated successfully"})
         else:
             return jsonify({"message": "Batch not Found !"}),400
