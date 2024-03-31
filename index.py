@@ -1510,25 +1510,23 @@ def update_student():
                 print("BATCH ID ---> ",student_cp['batch_id'], " ------ ", value)
                 if student_cp['batch_id'] != value:
                     update_sid = True
-                    generateSacTableAndRecountRegStudents(prev_batch_id)
-                    sync_SacTableFrom_Student(prev_batch_id)
             if key == "camp_id":
                 print("CAMP ID ---> ",student_cp['camp_id'], " ------ ", value)
                 if student_cp['camp_id'] != value:
                     update_sid = True
-                    generateSacTableAndRecountRegStudents(prev_batch_id)
-                    sync_SacTableFrom_Student(prev_batch_id)
             if key == "company":
                 print("COMPANY ---> ",student_cp['company'], " ------ ", value)
                 if student_cp['company'] != value:
                     update_sid = True
-                    generateSacTableAndRecountRegStudents(prev_batch_id)
-                    sync_SacTableFrom_Student(prev_batch_id)
             if key != 'sid':
                 student[key] = value
 
         # Update the student in the database
         print("Step ---- 2")
+        if update_sid == True:
+            generateSacTableAndRecountRegStudents(prev_batch_id)
+            sync_SacTableFrom_Student(prev_batch_id)
+        print("Step ---- 3")
         batches_db = db["batches_db"]
         batch = batches_db.find_one({"batch_id":data.get("batch_id")}, {"_id":0})
         if batch:
