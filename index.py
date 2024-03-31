@@ -128,6 +128,24 @@ def generateAllSacTableAndRecountRegStudents():
         if not sac_table:
             sac_table_generator(batch['batch_id'], batch['camp_id'], batch['batch_intake'])
 
+def generateSacTableAndRecountRegStudents(batch_id):
+    students_db = db["students_db"]
+    batch_db = db["batches_db"]
+    sac_table_db = db["sac_table_db"]
+
+    all_batches = [batch_id]
+
+    for batch in all_batches:
+        reg_students = 0
+        students = students_db.find({"batch_id":batch["batch_id"]})
+        reg_students = len(list(students))
+        print(reg_students)
+        batch['students_registered'] = reg_students
+        batch_db.update_one({"batch_id":batch["batch_id"]}, {"$set": batch})
+        sac_table = sac_table_db.find_one({"batch_id":batch["batch_id"]})
+        if not sac_table:
+            sac_table_generator(batch['batch_id'], batch['camp_id'], batch['batch_intake'])
+
 def fillSacTableFromAllStudents():
     students_db = db["students_db"]
     sac_table_db = db["sac_table_db"]
@@ -143,12 +161,59 @@ def fillSacTableFromAllStudents():
         sac_table[num] = student['sid']
         sac_table_db.update_one({"batch_id":student['batch_id']}, {"$set": sac_table})
 
+def fillSacTableFromStudent(sid, batch_id):
+    sac_table_db = db["sac_table_db"]
+
+    sac_table = sac_table_db.find_one({"batch_id":batch_id})
+    sid = sid
+    sr_raw = sid.split("C")
+    sr = sr_raw[-1]
+    num = generate_3_digit_number(sr)
+    sac_table[num] = sid
+    sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table})
+
 def syncAllSacTableFromAllStudents():
     students_db = db["students_db"]
     batch_db = db["batches_db"]
     sac_table_db = db["sac_table_db"]
 
     all_sac_tables = sac_table_db.find({},{'_id':0})
+
+    for sac_table in all_sac_tables:
+        try:
+            batch_id = sac_table['batch_id']
+            print(batch_id)
+            camp_id = sac_table['camp_id']
+            batch = batch_db.find_one({"batch_id": batch_id})
+            students_same_batch = list(students_db.find({"batch_id": batch_id},{'_id':0}))
+            sac_table_new = {
+                "batch_id": batch_id,
+                "camp_id": camp_id,
+            }
+            intake = int(batch['batch_intake'])
+            for i in range(1, intake + 1):
+                num = generate_3_digit_number(i)
+                sac_table_new[num] = "-"
+            try:
+                for student in list(students_same_batch):
+                    sr_raw = student['sid'].split("C")
+                    sr = int(sr_raw[-1])
+                    num_sr = str(generate_3_digit_number(sr))
+                    sac_table_new[num_sr] = student['sid']
+            except Exception as e:
+                print(str(e))
+            sac_table_db.update_one({"batch_id": batch_id}, {"$set": sac_table_new})
+        except Exception as e:
+            print(f"Error processing batch {batch_id}: {e}")
+
+
+def sync_SacTableFrom_Student(batch_id):
+    students_db = db["students_db"]
+    batch_db = db["batches_db"]
+    sac_table_db = db["sac_table_db"]
+
+    all_sac_tables = sac_table_db.find_one({"batch_id":batch_id},{'_id':0})
+    all_sac_tables = [all_sac_tables]
 
     for sac_table in all_sac_tables:
         try:
@@ -234,12 +299,9 @@ def sa_module(batch_id, sid):
         sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table})
         students_registered = batch['students_registered']
         batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered}})
-        threads = []
-        threads.append(threading.Thread(target=generateAllSacTableAndRecountRegStudents))
-        threads.append(threading.Thread(target=fillSacTableFromAllStudents))
-        threads.append(threading.Thread(target=syncAllSacTableFromAllStudents))
-        for t in threads:
-            t.start()
+        generateSacTableAndRecountRegStudents(batch_id)
+        fillSacTableFromStudent(sid, batch_id)
+        sync_SacTableFrom_Student(batch_id)
         return sid
     else:
         for i in range(sr, intake+1):
@@ -251,12 +313,9 @@ def sa_module(batch_id, sid):
                 sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table})
                 students_registered = batch['students_registered']
                 batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered}})
-                threads = []
-                threads.append(threading.Thread(target=generateAllSacTableAndRecountRegStudents))
-                threads.append(threading.Thread(target=fillSacTableFromAllStudents))
-                threads.append(threading.Thread(target=syncAllSacTableFromAllStudents))
-                for t in threads:
-                    t.start()
+                generateSacTableAndRecountRegStudents(batch_id)
+                fillSacTableFromStudent(sid, batch_id)
+                sync_SacTableFrom_Student(batch_id)
                 return new_sid
             
         for j in range(1, sr):
@@ -268,12 +327,9 @@ def sa_module(batch_id, sid):
                 sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table})
                 students_registered = batch['students_registered']
                 batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered}})
-                threads = []
-                threads.append(threading.Thread(target=generateAllSacTableAndRecountRegStudents))
-                threads.append(threading.Thread(target=fillSacTableFromAllStudents))
-                threads.append(threading.Thread(target=syncAllSacTableFromAllStudents))
-                for t in threads:
-                    t.start()
+                generateSacTableAndRecountRegStudents(batch_id)
+                fillSacTableFromStudent(sid, batch_id)
+                sync_SacTableFrom_Student(batch_id)
                 return new_sid
     return -1
 
@@ -297,6 +353,10 @@ def sync_v2():
     generateAllSacTableAndRecountRegStudents()
     fillSacTableFromAllStudents()
     syncAllSacTableFromAllStudents()
+
+    # generateSacTableAndRecountRegStudents(batch_id)
+    # fillSacTableFromStudent(sid, batch_id)
+    # sync_SacTableFrom_Student(batch_id)
 
 def sync_v2_parallel():
     processes = []
@@ -659,7 +719,9 @@ def sync_data(original_sid, update_sid):
             update_operation = {'$set': {'sid': sid}}
             payment_db.update_many(filter_criteria, update_operation)
             if update_sid == True:
-                sync_v2_parallel()
+                generateSacTableAndRecountRegStudents(data.get("batch_id"))
+                fillSacTableFromStudent(sid, data.get("batch_id"))
+                sync_SacTableFrom_Student(data.get("batch_id"))
 
 def sendSMS(msg,phn):
     phn="8793015610"
@@ -1439,20 +1501,28 @@ def update_student():
         if not student:
             return jsonify({"error": f"No student found with sid: {data['sid']}"}), 404  # Not Found
         
+        prev_batch_id = student['batch_id']
+        
         update_sid = False
         for key, value in data.items():
             if key == "batch_id":
                 print("BATCH ID ---> ",student_cp['batch_id'], " ------ ", value)
                 if student_cp['batch_id'] != value:
                     update_sid = True
+                    generateSacTableAndRecountRegStudents(prev_batch_id)
+                    sync_SacTableFrom_Student(prev_batch_id)
             if key == "camp_id":
                 print("CAMP ID ---> ",student_cp['camp_id'], " ------ ", value)
                 if student_cp['camp_id'] != value:
                     update_sid = True
+                    generateSacTableAndRecountRegStudents(prev_batch_id)
+                    sync_SacTableFrom_Student(prev_batch_id)
             if key == "company":
                 print("COMPANY ---> ",student_cp['company'], " ------ ", value)
                 if student_cp['company'] != value:
                     update_sid = True
+                    generateSacTableAndRecountRegStudents(prev_batch_id)
+                    sync_SacTableFrom_Student(prev_batch_id)
             if key != 'sid':
                 student[key] = value
 
