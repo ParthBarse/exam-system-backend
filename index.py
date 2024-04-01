@@ -329,7 +329,7 @@ def sa_module(batch_id, sid):
                 students_registered = batch['students_registered']
                 batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered}})
                 generateSacTableAndRecountRegStudents(batch_id)
-                fillSacTableFromStudent(sid, batch_id)
+                fillSacTableFromStudent(new_sid, batch_id)
                 sync_SacTableFrom_Student(batch_id)
                 return new_sid
             
@@ -344,7 +344,7 @@ def sa_module(batch_id, sid):
                 students_registered = batch['students_registered']
                 batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered}})
                 generateSacTableAndRecountRegStudents(batch_id)
-                fillSacTableFromStudent(sid, batch_id)
+                fillSacTableFromStudent(new_sid, batch_id)
                 sync_SacTableFrom_Student(batch_id)
                 return new_sid
     return -1
