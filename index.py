@@ -287,6 +287,7 @@ def sac(batch_id, sr):
         return 1
 
 def sa_module(batch_id, sid):
+    students_db = db['students_db']
     sr_raw = sid.split("C")
     sr = int(sr_raw[-1])
     batch_db = db['batches_db']
@@ -295,7 +296,8 @@ def sa_module(batch_id, sid):
     batch = batch_db.find_one({"batch_id":batch_id})
     intake = int(batch['batch_intake'])
     result = sac(batch_id, sr)
-    if result == 0:
+    student_data = students_db.find_one({"sid":sid})
+    if result == 0 and not student_data:
         num = generate_3_digit_number(sr)
         sac_table[num] = sid
         sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table})
@@ -307,10 +309,11 @@ def sa_module(batch_id, sid):
         return sid
     else:
         for i in range(sr, intake+1):
+            num = generate_3_digit_number(i)
+            new_sid = sid.replace(str("C"+str(sr_raw[-1])), str("C"+str(num)))
+            student_data = students_db.find_one({"sid":new_sid})
             result = sac(batch_id, i)
-            if result == 0:
-                num = generate_3_digit_number(i)
-                new_sid = sid.replace(str("C"+str(sr_raw[-1])), str("C"+str(num)))
+            if result == 0 and not student_data:
                 sac_table[num] = new_sid
                 sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table})
                 students_registered = batch['students_registered']
@@ -321,10 +324,11 @@ def sa_module(batch_id, sid):
                 return new_sid
             
         for j in range(1, sr):
+            num = generate_3_digit_number(j)
+            new_sid = sid.replace(str("C"+str(sr_raw[-1])), str("C"+str(num)))
+            student_data = students_db.find_one({"sid":new_sid})
             result = sac(batch_id, j)
-            if result == 0:
-                num = generate_3_digit_number(j)
-                new_sid = sid.replace(str("C"+str(sr_raw[-1])), str("C"+str(num)))
+            if result == 0 and not student_data:
                 sac_table[num] = new_sid
                 sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table})
                 students_registered = batch['students_registered']

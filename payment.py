@@ -113,10 +113,10 @@ def get_easycollect_list(s_date, e_date):
 def create_easycollect_link(mode):
     if mode == "post":
         url = "https://dashboard.easebuzz.in/easycollect/v1/create"
-        name = "Parth"
-        email = "parthbarse72@gmail.com"
-        phn = "8793015610"
-        msg = "Demo Payment"
+        name = "Dheeraj Chingunde"
+        email = "dheeraj989055217@gmail.com"
+        phn = "9890937685"
+        msg = "Test Payment"
         amt = "1.00"
         sid = "ADFSD0930220FVS9012"
         transaction_id = uuid.uuid4().hex
@@ -190,7 +190,7 @@ def create_easycollect_link(mode):
         get_easycollect_list(s_date, e_date)
 
     elif mode == "get2":
-        merchant_txn = "7ac648b629604a5393c3054f4870100d"
+        merchant_txn = "9eec7ba1498244ae8bc86aad419776f3"
         get2_easycollect_link(merchant_txn)
 
 if __name__ == "__main__":
