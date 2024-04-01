@@ -313,9 +313,6 @@ def sa_module(batch_id, sid):
         sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table})
         students_registered = batch['students_registered']
         batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered+1}})
-        generateSacTableAndRecountRegStudents(batch_id)
-        fillSacTableFromStudent(sid, batch_id)
-        sync_SacTableFrom_Student(batch_id)
         return sid
     else:
         for i in range(sr, intake+1):
@@ -329,9 +326,6 @@ def sa_module(batch_id, sid):
                 sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table})
                 students_registered = batch['students_registered']
                 batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered+1}})
-                generateSacTableAndRecountRegStudents(batch_id)
-                fillSacTableFromStudent(new_sid, batch_id)
-                sync_SacTableFrom_Student(batch_id)
                 return new_sid
             
         for j in range(1, sr):
@@ -345,9 +339,6 @@ def sa_module(batch_id, sid):
                 sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table})
                 students_registered = batch['students_registered']
                 batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered+1}})
-                generateSacTableAndRecountRegStudents(batch_id)
-                fillSacTableFromStudent(new_sid, batch_id)
-                sync_SacTableFrom_Student(batch_id)
                 return new_sid
     return -1
 
@@ -2819,7 +2810,7 @@ def createPayment():
         camp_db = db["camps_db"]
         camp_data = camp_db.find_one({"camp_id":camp_id}, {"_id":0})
 
-        if "7" in batch_dur or "5" in batch_dur or "3" in batch_dur:
+        if "7" == batch_dur.strip() or "5" == batch_dur.strip() or "3" == batch_dur.strip():
             doc = Document('fee_receipt_7.docx')
             final_data = {
                 "REG_NO": student_data['sid'],
