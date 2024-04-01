@@ -280,18 +280,28 @@ def syncSacTableFromStudent(batch_id):
 def sac(batch_id, sr):
     sac_table_db = db['sac_table_db']
     sac_table = sac_table_db.find_one({"batch_id":batch_id})
+    students_db = db['students_db']
+    students_in_same_batch = students_db.find({"batch_id":batch_id})
     num = generate_3_digit_number(sr)
-    if sac_table[num] == "-":
+    res = []
+    for student in students_in_same_batch:
+        sid = student['sid']
+        sr_raw = sid.split("C")
+        sr = int(sr_raw[-1])
+        new_num = generate_3_digit_number(sr)
+        if num == new_num:
+            res.append(1)
+    if sac_table[num] == "-" and 1 not in res:
         return 0
     else:
         return 1
 
 def sa_module(batch_id, sid):
     students_db = db['students_db']
-    sr_raw = sid.split("C")
-    sr = int(sr_raw[-1])
     batch_db = db['batches_db']
     sac_table_db = db["sac_table_db"]
+    sr_raw = sid.split("C")
+    sr = int(sr_raw[-1])
     sac_table = sac_table_db.find_one({"batch_id":batch_id})
     batch = batch_db.find_one({"batch_id":batch_id})
     intake = int(batch['batch_intake'])
