@@ -220,7 +220,6 @@ def sync_SacTableFrom_Student(batch_id):
     for sac_table in all_sac_tables:
         try:
             batch_id = sac_table['batch_id']
-            print(batch_id)
             camp_id = sac_table['camp_id']
             batch = batch_db.find_one({"batch_id": batch_id})
             students_same_batch = list(students_db.find({"batch_id": batch_id},{'_id':0}))
@@ -310,9 +309,10 @@ def sa_module(batch_id, sid):
     if result == 0 and not student_data:
         num = generate_3_digit_number(sr)
         sac_table[num] = sid
+        print("Updating in SAC Table ----> ", sid)
         sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table})
         students_registered = batch['students_registered']
-        batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered}})
+        batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered+1}})
         generateSacTableAndRecountRegStudents(batch_id)
         fillSacTableFromStudent(sid, batch_id)
         sync_SacTableFrom_Student(batch_id)
@@ -325,9 +325,10 @@ def sa_module(batch_id, sid):
             result = sac(batch_id, i)
             if result == 0 and not student_data:
                 sac_table[num] = new_sid
+                print("Updating in SAC Table ----> ", new_sid)
                 sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table})
                 students_registered = batch['students_registered']
-                batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered}})
+                batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered+1}})
                 generateSacTableAndRecountRegStudents(batch_id)
                 fillSacTableFromStudent(new_sid, batch_id)
                 sync_SacTableFrom_Student(batch_id)
@@ -340,9 +341,10 @@ def sa_module(batch_id, sid):
             result = sac(batch_id, j)
             if result == 0 and not student_data:
                 sac_table[num] = new_sid
+                print("Updating in SAC Table ----> ", new_sid)
                 sac_table_db.update_one({"batch_id":batch_id}, {"$set": sac_table})
                 students_registered = batch['students_registered']
-                batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered}})
+                batch_db.update_one({"batch_id":batch_id}, {"$set": {"students_registered":students_registered+1}})
                 generateSacTableAndRecountRegStudents(batch_id)
                 fillSacTableFromStudent(new_sid, batch_id)
                 sync_SacTableFrom_Student(batch_id)
