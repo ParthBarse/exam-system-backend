@@ -1492,6 +1492,9 @@ def register_student():
         batch = batches_db.find_one({"batch_id":data.get("batch_id")}, {"_id":0})
         if batch:
             students_db.insert_one(student)
+            generateSacTableAndRecountRegStudents(student['batch_id'])
+            fillSacTableFromStudent(sid, student['batch_id'])
+            sync_SacTableFrom_Student(student['batch_id'])
             msg = "Dear Parent, Thank you for registering with MCF Camp, for any registration and payment-related query please visit us at www.mcfcamp.in. Or contact us at 9604087000/9604082000, or email us at mcfcamp@gmail.com MCF Summer Camp"
             sub = "Registration Successful !"
             mailToSend = data['email']
