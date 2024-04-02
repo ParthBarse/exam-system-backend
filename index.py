@@ -4135,10 +4135,29 @@ def initiate_payment(name, email, phn, camp_name, amt, sid):
         try:
             response = requests.post(url, headers=headers, json=payload)
             response_data = response.json()
-            return jsonify({"success":True,"payment_url":response_data['data']['payment_url']}),200
+            return {"success":True,"payment_url":response_data['data']['payment_url']}
         except Exception as e:
             print("Error:", e)
-            return jsonify({"success":False, "error":str(e)}),400
+            return {"success":False, "error":str(e)}
+        
+@app.route("/generatePaymentLink", methods=["GET"])
+def generatePaymentLink():
+    try:
+        sid = request.args.get("sid")
+        students_db = db['students_db']
+        camps_db = db['camps_db']
+        student = students_db.find_one({"sid":sid})
+        name = str(student['first_name']+" "+student['last_name'])
+        camp = camps_db.find_one({"camp_id":student['camp_id']})
+        resp = initiate_payment(name, student['email'], student['wp_no'], camp['camp_name'], student['total_amount_payable'], sid)
+        if resp['success'] == True:
+            return jsonify({'success': True, "payment_url":resp['payment_url']}), 200
+        else:
+            return jsonify({'success': False, "error":"Payment Link Not Generated."}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+
+
     
 #---------------------------------- Payment Section End ----------------------------------------------
 
