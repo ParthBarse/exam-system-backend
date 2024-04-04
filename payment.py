@@ -10,6 +10,13 @@ def generate_hash(data, salt):
     print(hashed)
     return hashed
 
+def generate_hash_2(data, salt):
+    # key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5|udf6|udf7|udf8|udf9|udf10|salt
+    concat_string = f"{data[0]}|{data[1]}|{data[2]}|{data[3]}|{data[4]}|{data[5]}|{data[6]}|{data[7]}|{data[8]}|{data[9]}|{data[10]}|{data[11]}|{data[12]}|{data[13]}|{data[14]}|{data[15]}|{salt}"
+    hashed = hashlib.sha512(concat_string.encode()).hexdigest()
+    print(hashed)
+    return hashed
+
 def generate_hash_get(data, salt):
     concat_string = f"{data[0]}|{data[1]}|{salt}"
     hashed = hashlib.sha512(concat_string.encode()).hexdigest()
@@ -109,14 +116,82 @@ def get_easycollect_list(s_date, e_date):
     except Exception as e:
         print("Error:", e)
 
+def generate_hash_latest(key, txnid, amount, productinfo, firstname, email, udf1, salt):
+    hash_str = f"{key}|{txnid}|{amount}|{productinfo}|{firstname}|{email}|{udf1}||||||||||{salt}"
+    hash_obj = hashlib.sha512(hash_str.encode())
+    return hash_obj.hexdigest()
 
 def create_easycollect_link(mode):
     if mode == "post":
+        url = "https://pay.easebuzz.in/payment/initiateLink"
+        name = "Parth Barse"
+        email = "parthbarse72@gmail.com"
+        phn = "8793015610"
+        prod_info = "Test Payment Gateway"
+        amt = "1.00"
+        sid = "ADFSD0930220FVS9012"
+        transaction_id = uuid.uuid4().hex
+        key = "1YUG4UBN1Q"
+        salt = "KPRYL60DC1"
+        sid = "000001"
+
+        udf1 = sid
+
+        surl = 'https://youtube.com/'
+        furl = 'https://google.com/'
+
+        # Example parameters
+
+        # Generate the hash
+        hash_value = generate_hash_latest(key, transaction_id, amt, prod_info, name, email, udf1, salt)
+
+
+        # Define the data in the specified sequence for hashing
+        # key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5|udf6|udf7|udf8|udf9|udf10|salt
+        # Define the API endpoint
+        url = "https://pay.easebuzz.in/payment/initiateLink"
+
+        # Define the request parameters
+        payload = {
+            'key': key,
+            'txnid': transaction_id,
+            'amount': amt,
+            'productinfo': prod_info,
+            'firstname': name,
+            'phone': phn,
+            'email': email,
+            'surl': surl,
+            'furl': furl,
+            'hash': hash_value,  # Calculate and provide the hash value if required
+            'udf1': sid,
+            'udf2': "",
+            'udf3': "",
+            'udf4': "",
+            'udf5': "",
+            'udf6': "",
+            'udf7': "",
+        }
+
+        # Send POST request
+        response = requests.post(url, data=payload)
+
+        print("Transaction Id - ",transaction_id)
+
+        # Print response status code and content
+        print("Response Status Code:", response.status_code)
+        print("Response Content:", response.json())
+
+        # if response.json()['status'] == 1:
+        #     return {}
+        # else:
+        #     return {}
+    
+    elif mode == "post2":
         url = "https://dashboard.easebuzz.in/easycollect/v1/create"
-        name = "Dheeraj Chingunde"
-        email = "dheeraj989055217@gmail.com"
-        phn = "9890937685"
-        msg = "Test Payment"
+        name = "Parth Barse"
+        email = "parthbarse72@gmail.com"
+        phn = "8793015610"
+        msg = "Test Payment Gateway"
         amt = "1.00"
         sid = "ADFSD0930220FVS9012"
         transaction_id = uuid.uuid4().hex
@@ -190,12 +265,12 @@ def create_easycollect_link(mode):
         get_easycollect_list(s_date, e_date)
 
     elif mode == "get2":
-        merchant_txn = "9eec7ba1498244ae8bc86aad419776f3"
+        merchant_txn = "b253241c40aa4b72904853fadbfb50cc"
         get2_easycollect_link(merchant_txn)
 
 if __name__ == "__main__":
-    # create_easycollect_link("post")
-    create_easycollect_link("get2")
+    create_easycollect_link("post")
+    # create_easycollect_link("get2")
 
 
 

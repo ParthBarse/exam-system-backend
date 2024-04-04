@@ -79,6 +79,10 @@ def hello_world():
 def home():
     return 'home page'
 
+def generate_new_receipt_no():
+    count_db = db['count_db']
+    pass
+
 
 #-----------------------------------------------------------------------------------------
 
@@ -1128,7 +1132,7 @@ def generate_certificate_cert(sid):
             'CADET_NAME': str(student_data['first_name']+" "+student_data['last_name']),
             'START_DATE': batch_data['start_date'],
             'END_DATE':batch_data['end_date'],
-            'CQY': ''
+            'CQY': ""
         }
 
         for key, value in student_data1.items():
@@ -2788,7 +2792,7 @@ def createPayment():
         if payment:
             return jsonify({"message": f"Payment with transaction_id - {data['transaction_id']} already exist."}), 400
         payment_id = str(uuid.uuid4().hex)
-        receipt_no = str(uuid.uuid4().hex)[:10]
+        receipt_no = generate_new_receipt_no()
         all_payments = db["all_payments"]
         students_db = db['students_db']
         student_data = students_db.find_one({"sid":data['sid']}, {"_id":0})
@@ -3687,7 +3691,7 @@ def createPayment_func(data):
         if payment:
             return jsonify({"message": f"Payment with transaction_id - {data['transaction_id']} already exist."}), 400
         payment_id = str(uuid.uuid4().hex)
-        receipt_no = str(uuid.uuid4().hex)[:10]
+        receipt_no = generate_new_receipt_no()
         all_payments = db["all_payments"]
         students_db = db['students_db']
         student_data = students_db.find_one({"sid":data['sid']}, {"_id":0})
@@ -4982,58 +4986,76 @@ def generate_hash(data, salt):
     print(hashed)
     return hashed
 
+def generate_hash_latest(key, txnid, amount, productinfo, firstname, email, udf1, salt):
+    hash_str = f"{key}|{txnid}|{amount}|{productinfo}|{firstname}|{email}|{udf1}||||||||||{salt}"
+    hash_obj = hashlib.sha512(hash_str.encode())
+    return hash_obj.hexdigest()
+
 def initiate_payment(name, email, phn, camp_name, amt, sid):
-        url = "https://dashboard.easebuzz.in/easycollect/v1/create"
-        msg = camp_name
+        url = "https://pay.easebuzz.in/payment/initiateLink"
+        name = name
+        email = email
+        phn = phn
+        prod_info = camp_name
+        amt = amt
+        sid = sid
         transaction_id = uuid.uuid4().hex
         key = "1YUG4UBN1Q"
+        salt = "KPRYL60DC1"
+        sid = "000001"
+
+        udf1 = sid
+
+        surl = 'https://youtube.com/'
+        furl = 'https://google.com/'
+
+        # Example parameters
+
+        # Generate the hash
+        hash_value = generate_hash_latest(key, transaction_id, amt, prod_info, name, email, udf1, salt)
+
 
         # Define the data in the specified sequence for hashing
-        data_sequence = [
-            key,
-            transaction_id,
-            name,
-            email,
-            phn,
-            amt,
-            sid,
-            "",
-            "",
-            "",
-            "",
-            msg,
-        ]
-        salt = "KPRYL60DC1"
+        # key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5|udf6|udf7|udf8|udf9|udf10|salt
+        # Define the API endpoint
+        url = "https://pay.easebuzz.in/payment/initiateLink"
 
-        # Generate hash using the data sequence and salt
-        hash_value = generate_hash(data_sequence, salt)
-        # key|merchant_txn|name|email|phone|amount|udf1|udf2|udf3|udf4|udf5|message|salt
+        # Define the request parameters
         payload = {
-            "key": key,
-            "merchant_txn": transaction_id,
-            "name": name,
-            "email": email,
-            "phone": phn,
-            "amount": amt,
-            "udf1": sid,
-            "udf2": " ",
-            "udf3": " ",
-            "udf4": " ",
-            "udf5": " ",
-            "message": msg,
-            "accept_partial_payment": False,
-            "hash": hash_value  # Include the generated hash in the payload
+            'key': key,
+            'txnid': transaction_id,
+            'amount': amt,
+            'productinfo': prod_info,
+            'firstname': name,
+            'phone': phn,
+            'email': email,
+            'surl': surl,
+            'furl': furl,
+            'hash': hash_value,  # Calculate and provide the hash value if required
+            'udf1': sid,
+            'udf2': "",
+            'udf3': "",
+            'udf4': "",
+            'udf5': "",
+            'udf6': "",
+            'udf7': "",
         }
 
-        headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-        }
+        # Send POST request
+        response = requests.post(url, data=payload)
+
+        print("Transaction Id - ",transaction_id)
+
+        # Print response status code and content
+        print("Response Status Code:", response.status_code)
+        print("Response Content:", response.text)
 
         try:
-            response = requests.post(url, headers=headers, json=payload)
-            response_data = response.json()
-            return {"success":True,"payment_url":response_data['data']['payment_url'], "complete_resp":response_data['data']}
+            if response.json()['status'] == 1:
+                payment_url = str(str("https://pay.easebuzz.in/pay/")+str(response.json()['data']))
+                return {"success":True,"payment_url":payment_url, "transaction_id":transaction_id}
+            else:
+                return {"success":False, "msg":"Try Again"}
         except Exception as e:
             print("Error:", e)
             return {"success":False, "error":str(e)}
@@ -5133,17 +5155,26 @@ def generatePaymentLink():
         resp = initiate_payment(name, student['email'], student['wp_no'], camp['camp_name'], student['total_amount_payable'], sid)
         if resp['success'] == True:
             payment_links_db = db['payment_links_db']
-            payment_links_db.insert_one(resp['complete_resp'])
+            payment_data = {
+                "sid":sid,
+                "name": name,
+                "camp_name":camp['camp_name'],
+                "wp_no": student['wp_no'],
+                'email':student['email'],
+                "payment_link":resp['payment_url'],
+                "transaction_id":resp['transaction_id']
+            }
+            payment_links_db.insert_one(payment_data)
+
             # students_db.update_one({"sid":sid}, {"$set": {"payment_details":resp['complete_resp']}})
-            # Run subprocess here independantly and return response without waiting for process to complete
 
             # Create a new process for the payment receipt check
             # Update here ---------------------------------------------------
 
 
-            # p = multiprocessing.Process(target=run_check_payment_receipt, args=(resp['complete_resp']['merchant_txn'],))
-            # p.daemon = True  # Set the process as a daemon (runs independently)
-            # p.start()  # Start the process
+            p = multiprocessing.Process(target=run_check_payment_receipt, args=(resp["transaction_id"],))
+            p.daemon = True  # Set the process as a daemon (runs independently)
+            p.start()  # Start the process
 
 
             return jsonify({'success': True, "payment_url":resp['payment_url']}), 200
@@ -5155,13 +5186,16 @@ def generatePaymentLink():
 @app.route("/webhook_acc_1", methods=["POST"])
 def webhook_acc_1():
     try:
-        data = request.get_json()
         students_db = db['students_db']
         camps_db = db['camps_db']
+        form_data = request.form
+        print("Received form data:", form_data)
+
+        # Convert form data to JSON (if needed)
+        json_data = {key: form_data[key] for key in form_data}
+        print("Form data as JSON:", json_data)
         eb_payments_logs = db['eb_payments_logs']
-        # payment_log = eb_payments_logs.find_one({""})
-        eb_payments_logs.insert_one(data)
-        # student = students_db.find_one({"sid":sid})
+        eb_payments_logs.insert_one(form_data)
 
 
         return jsonify({'success': True, "payment_url":""}), 200
