@@ -4991,7 +4991,7 @@ def generate_hash_latest(key, txnid, amount, productinfo, firstname, email, udf1
     hash_obj = hashlib.sha512(hash_str.encode())
     return hash_obj.hexdigest()
 
-def initiate_payment(name, email, phn, camp_name, amt, sid):
+def initiate_payment(name, email, phn, camp_name, amt, sid, route):
         url = "https://pay.easebuzz.in/payment/initiateLink"
         name = name
         email = email
@@ -4999,8 +4999,13 @@ def initiate_payment(name, email, phn, camp_name, amt, sid):
         camp_name = "MCF CAMPS"
         amt = amt
         transaction_id = uuid.uuid4().hex
-        key = "1YUG4UBN1Q"
-        salt = "KPRYL60DC1"
+
+        if route == "r2":
+            key = "1YUG4UBN1Q"
+            salt = "KPRYL60DC1"
+        else:
+            key = "LTHNEOBZVH"
+            salt = "7TGBSUKDN9"
 
         udf1 = sid
 
@@ -5158,12 +5163,19 @@ def generatePaymentLink():
     try:
         sid = request.args.get("sid")
         students_db = db['students_db']
+        batch_db = db['batches_db']
         camps_db = db['camps_db']
         student = students_db.find_one({"sid":sid})
         name = str(student['first_name']+" "+student['last_name'])
         camp = camps_db.find_one({"camp_id":student['camp_id']})
+        batch = batch_db.find_one({"batch_id":student['batch_id']})
         print(camp['camp_name'])
-        resp = initiate_payment(name, student['email'], student['wp_no'], camp['camp_name'], student['total_amount_payable'], sid)
+        route = "r1"
+        if "15" in batch['duration'] or "30" in batch['duration']:
+            route = "r2"
+        else:
+            route= "r1"
+        resp = initiate_payment(name, student['email'], student['wp_no'], camp['camp_name'], student['total_amount_payable'], sid, route)
         if resp['success'] == True:
             payment_links_db = db['payment_links_db']
             payment_data = {
@@ -5176,12 +5188,6 @@ def generatePaymentLink():
                 "transaction_id":resp['transaction_id']
             }
             payment_links_db.insert_one(payment_data)
-
-            # students_db.update_one({"sid":sid}, {"$set": {"payment_details":resp['complete_resp']}})
-
-            # Create a new process for the payment receipt check
-            # Update here ---------------------------------------------------
-
 
             p = multiprocessing.Process(target=run_check_payment_receipt, args=(resp["transaction_id"],))
             p.daemon = True  # Set the process as a daemon (runs independently)
