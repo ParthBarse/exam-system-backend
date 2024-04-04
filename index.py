@@ -4996,7 +4996,7 @@ def initiate_payment(name, email, phn, camp_name, amt, sid):
         name = name
         email = email
         phn = phn
-        prod_info = camp_name
+        camp_name = "Test Camp"
         amt = amt
         sid = sid
         transaction_id = uuid.uuid4().hex
@@ -5012,7 +5012,7 @@ def initiate_payment(name, email, phn, camp_name, amt, sid):
         # Example parameters
 
         # Generate the hash
-        hash_value = generate_hash_latest(key, transaction_id, amt, prod_info, name, email, udf1, salt)
+        hash_value = generate_hash_latest(key, transaction_id, amt, camp_name, name, email, udf1, salt)
 
 
         # Define the data in the specified sequence for hashing
@@ -5025,7 +5025,7 @@ def initiate_payment(name, email, phn, camp_name, amt, sid):
             'key': key,
             'txnid': transaction_id,
             'amount': amt,
-            'productinfo': prod_info,
+            'productinfo': camp_name,
             'firstname': name,
             'phone': phn,
             'email': email,
@@ -5152,6 +5152,7 @@ def generatePaymentLink():
         student = students_db.find_one({"sid":sid})
         name = str(student['first_name']+" "+student['last_name'])
         camp = camps_db.find_one({"camp_id":student['camp_id']})
+        print(camp['camp_name'])
         resp = initiate_payment(name, student['email'], student['wp_no'], camp['camp_name'], student['total_amount_payable'], sid)
         if resp['success'] == True:
             payment_links_db = db['payment_links_db']
