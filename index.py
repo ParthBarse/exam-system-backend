@@ -5197,14 +5197,11 @@ def generatePaymentLink():
 @app.route("/webhook_acc_1", methods=["POST"])
 def webhook_acc_1():
     try:
+        print("Webhook Recieved ----------------------")
         students_db = db['students_db']
         camps_db = db['camps_db']
-        form_data = request.form
+        form_data = request.form.to_dict()
         print("Received form data:", form_data)
-
-        # Convert form data to JSON (if needed)
-        json_data = {key: form_data[key] for key in form_data}
-        print("Form data as JSON:", json_data)
         eb_payments_logs = db['eb_payments_logs']
         eb_payments_logs.insert_one(form_data)
 
