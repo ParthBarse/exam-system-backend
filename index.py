@@ -4189,14 +4189,18 @@ def generate_hash_get2(data, salt):
     hashed = hashlib.sha512(concat_string.encode()).hexdigest()
     return hashed
         
-def get2_easycollect_link(merchant_txn):
+def get2_easycollect_link(merchant_txn,route):
     url = f"https://dashboard.easebuzz.in/transaction/v2/retrieve"
-    key = "1YUG4UBN1Q"
+    if route == 'r2':
+        key = "1YUG4UBN1Q"
+        salt = "KPRYL60DC1"
+    else:
+        key= 'LTHNEOBZVH'
+        salt = "7TGBSUKDN9"
     data_sequence = [
             key,
             merchant_txn
         ]
-    salt = "KPRYL60DC1"
     hash = generate_hash_get2(data_sequence, salt)
 
     payload = {
@@ -4219,12 +4223,12 @@ def get2_easycollect_link(merchant_txn):
         print("Error:", e)
         return {"success":False, "data":{}}
         
-def check_payment_receipt(trx_id):
+def check_payment_receipt(trx_id, route):
     eb_paymets_db = db["ez_payment_db"]
     status = "In Progress"
     for i in range(300):
         try:
-            resp = get2_easycollect_link(trx_id)
+            resp = get2_easycollect_link(trx_id,route)
             if resp['success'] == True:
                 print("Response - ",resp)
                 print("Type - ",type(resp))
@@ -4283,8 +4287,8 @@ def check_payment_receipt(trx_id):
         time.sleep(2)
     # print("Payment Updated with status - ", status)
         
-def run_check_payment_receipt(trx_id):
-    check_payment_receipt(trx_id)  # Call your existing function here
+def run_check_payment_receipt(trx_id, route):
+    check_payment_receipt(trx_id, route)  # Call your existing function here
 
 @app.route("/generatePaymentLink", methods=["GET"])
 def generatePaymentLink():
@@ -4317,7 +4321,7 @@ def generatePaymentLink():
             }
             payment_links_db.insert_one(payment_data)
 
-            p = multiprocessing.Process(target=run_check_payment_receipt, args=(resp["transaction_id"],))
+            p = multiprocessing.Process(target=run_check_payment_receipt, args=(resp["transaction_id"], route,))
             p.daemon = True  # Set the process as a daemon (runs independently)
             p.start()  # Start the process
 
