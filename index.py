@@ -5004,8 +5004,8 @@ def initiate_payment(name, email, phn, camp_name, amt, sid):
 
         udf1 = sid
 
-        surl = 'https://youtube.com/'
-        furl = 'https://google.com/'
+        surl = 'https://admission.mcfcamp.in/FailedPayment'
+        furl = 'https://admission.mcfcamp.in/SuccessPayment'
 
         # Example parameters
 
@@ -5130,6 +5130,18 @@ def check_payment_receipt(trx_id):
                     }
                     createPayment_func(payment_data)
                     break
+            elif data['status'] == "failure":
+                if not eb_paymets_db.find_one({"txnid":data['txnid']}):
+                    eb_paymets_db.insert_one(data)
+                else:
+                    eb_paymets_db.update_one({"txnid":data['txnid']},{"$set": data})
+                break
+            elif data['status'] == "dropped":
+                if not eb_paymets_db.find_one({"txnid":data['txnid']}):
+                    eb_paymets_db.insert_one(data)
+                else:
+                    eb_paymets_db.update_one({"txnid":data['txnid']},{"$set": data})
+                break
             else:
                 if not eb_paymets_db.find_one({"txnid":data['txnid']}):
                     eb_paymets_db.insert_one(data)
