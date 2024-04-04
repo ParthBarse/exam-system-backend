@@ -2789,11 +2789,11 @@ def createPayment_func(data):
     try:
         data = data
         if 'payment_option' not in data or 'payment_amount' not in data or 'sid' not in data:
-            return jsonify({"error": "Both 'payment_option' and 'payment_amount' and 'sid' are required."}), 400
+            return {"error": "Both 'payment_option' and 'payment_amount' and 'sid' are required."}
         payment_db = db["all_payments"]
         payment = payment_db.find_one({"transaction_id":data['transaction_id']})
         if payment:
-            return jsonify({"message": f"Payment with transaction_id - {data['transaction_id']} already exist."}), 400
+            return {"message": f"Payment with transaction_id - {data['transaction_id']} already exist."}
         payment_id = str(uuid.uuid4().hex)
         receipt_no = generate_new_receipt_no()
         all_payments = db["all_payments"]
@@ -3247,7 +3247,7 @@ def createPayment_func(data):
             else:
                 return {"error":"Please Specify Payment Option"}
 
-            return jsonify({"message": f"Payment added successfully.", "payment_id": payment_id})
+            return {"message": f"Payment added successfully.", "payment_id": payment_id}
         
         elif "15" in batch_dur or "30" in batch_dur:
             doc = Document('fee_receipt_15_30.docx')
@@ -3676,19 +3676,24 @@ def createPayment_func(data):
             else:
                 return {"error":"Please Specify Payment Option"}
 
-            return jsonify({"message": f"Payment added successfully.", "payment_id": payment_id})
+            return {"message": f"Payment added successfully.", "payment_id": payment_id}
         else:
             return {"error":"Invalid Batch Duration"}
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500  # Internal Server Error
+        return {"error": str(e)}
 
 
 @app.route('/createPayment', methods=['POST'])
 def createPayment():
     try:
         data = request.get_json()
-        createPayment_func(data)
+        resp = createPayment_func(data)
+
+        if resp['payment_id']:
+            return jsonify({"message": f"Payment added successfully.", "payment_id": resp['payment_id']}), 200
+        else:
+            return jsonify({"error":"Invalid Batch Duration"}),400
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
