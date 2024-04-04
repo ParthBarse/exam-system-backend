@@ -4996,13 +4996,11 @@ def initiate_payment(name, email, phn, camp_name, amt, sid):
         name = name
         email = email
         phn = phn
-        camp_name = "Test Camp"
+        # camp_name = "Test Camp"
         amt = amt
-        sid = sid
         transaction_id = uuid.uuid4().hex
         key = "1YUG4UBN1Q"
         salt = "KPRYL60DC1"
-        sid = "000001"
 
         udf1 = sid
 
