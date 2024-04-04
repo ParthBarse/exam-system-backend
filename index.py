@@ -4258,7 +4258,7 @@ def check_payment_receipt(trx_id, route):
                             "sid":data['udf1'],
                             "transaction_id":data['txnid']
                         }
-                        resp_new = createPayment_func(payment_data)
+                        # resp_new = createPayment_func(payment_data)
                         break
                     else:
                         eb_paymets_db.update_one({"txnid":data['txnid']},{"$set": data})
@@ -4272,7 +4272,7 @@ def check_payment_receipt(trx_id, route):
                             "sid":data['udf1'],
                             "transaction_id":data['txnid']
                         }
-                        createPayment_func(payment_data)
+                        # createPayment_func(payment_data)
                         break
                 elif data['status'] == "failure":
                     if not eb_paymets_db.find_one({"txnid":data['txnid']}):
