@@ -4226,6 +4226,8 @@ def check_payment_receipt(trx_id):
         try:
             resp = get2_easycollect_link(trx_id)
             if resp['success'] == True:
+                print("Response - ",resp)
+                print("Type - ",type(resp))
                 data = resp['data']
                 # status = data['status']
                 if data['status'] == "success":
