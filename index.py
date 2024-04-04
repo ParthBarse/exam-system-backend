@@ -1105,7 +1105,7 @@ def find_and_replace_paragraphs_cert(paragraphs, field, replacement, specific_fo
             if specific_font is not None:
                 set_paragraph_font_cert(paragraph, *specific_font)
 
-def generate_certificate_cert(sid):
+def generate_certificate_cert(sid,cqy):
     students_db = db["students_db"]
     student_data = students_db.find_one({"sid":sid})
     camp_db = db["camps_db"]
@@ -1136,7 +1136,7 @@ def generate_certificate_cert(sid):
             'CADET_NAME': str(student_data['first_name']+" "+student_data['last_name']),
             'START_DATE': batch_data['start_date'],
             'END_DATE':batch_data['end_date'],
-            'CQY': ""
+            'CQY': cqy
         }
 
         for key, value in student_data1.items():
@@ -4041,7 +4041,8 @@ def submit_feedback():
 def generate_camp_certificates():
     try:
         sid = request.args.get('sid')
-        result = generate_certificate_cert(sid)
+        cqy = request.args.get('cqy')
+        result = generate_certificate_cert(sid,cqy)
         if result == 0:
             return jsonify({'success': True, "msg":'Generate Successful'}), 200
         else:
@@ -4053,7 +4054,7 @@ def generate_camp_certificates():
 
 def bulk_generate_cert(data):
     for dt in data:
-        generate_certificate_cert(dt['sid'])
+        generate_certificate_cert(dt['sid'],"")
 
 
 @app.route("/bulkGenerateCampCertificate", methods=["POST"])
@@ -4230,13 +4231,9 @@ def check_payment_receipt(trx_id, route):
         try:
             resp = get2_easycollect_link(trx_id,route)
             if resp['success'] == True:
-                print("Response - ",resp)
-                print("Type - ",type(resp))
                 data = resp['data']
                 # status = data['status']
                 if data['status'] == "success":
-                    print("Data -------> ",data)
-                    print("Type ------> ",type(data))
                     if not eb_paymets_db.find_one({"txnid":data['txnid']}):
                         eb_paymets_db.insert_one(data)
                         payment_date_raw = data["addedon"]
@@ -4249,7 +4246,7 @@ def check_payment_receipt(trx_id, route):
                             "sid":data['udf1'],
                             "transaction_id":data['txnid']
                         }
-                        createPayment_func(payment_data)
+                        resp_new = createPayment_func(payment_data)
                         break
                     else:
                         eb_paymets_db.update_one({"txnid":data['txnid']},{"$set": data})
@@ -4335,16 +4332,56 @@ def generatePaymentLink():
 @app.route("/webhook_acc_1", methods=["POST"])
 def webhook_acc_1():
     try:
-        print("Webhook Recieved ----------------------")
-        students_db = db['students_db']
-        camps_db = db['camps_db']
-        form_data = request.form.to_dict()
-        print("Received form data:", form_data)
         eb_payments_logs = db['eb_payments_logs']
+        print("Webhook Recieved ----------------------")
+        form_data = request.form.to_dict()
+        data = form_data
         eb_payments_logs.insert_one(form_data)
+        if data['status'] == "success":
+            payment_date_raw = data["addedon"]
+            payment_date = payment_date_raw.split(" ")[0]
+            payment_data = {
+                "payment_amount":data['net_amount_debit'],
+                "payment_date":payment_date,
+                "payment_mode": data['mode'],
+                "payment_option":"totalPayment",
+                "sid":data['udf1'],
+                "transaction_id":data['txnid']
+            }
+            resp_new = createPayment_func(payment_data)
+            print("Added ------------------>", resp_new)
+        else:
+            print("Leaving without saving...")
 
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+    
+@app.route("/webhook_acc_2", methods=["POST"])
+def webhook_acc_2():
+    try:
+        eb_payments_logs = db['eb_payments_logs']
+        print("Webhook Recieved ----------------------")
+        form_data = request.form.to_dict()
+        data = form_data
+        eb_payments_logs.insert_one(form_data)
+        if data['status'] == "success":
+            payment_date_raw = data["addedon"]
+            payment_date = payment_date_raw.split(" ")[0]
+            payment_data = {
+                "payment_amount":data['net_amount_debit'],
+                "payment_date":payment_date,
+                "payment_mode": data['mode'],
+                "payment_option":"totalPayment",
+                "sid":data['udf1'],
+                "transaction_id":data['txnid']
+            }
+            resp_new = createPayment_func(payment_data)
+            print("Added ------------------>", resp_new)
+        else:
+            print("Leaving without saving...")
 
-        return jsonify({'success': True, "payment_url":""}), 200
+        return jsonify({'success': True}), 200
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
 
