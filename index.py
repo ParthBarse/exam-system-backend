@@ -1211,11 +1211,23 @@ def number_to_words(num):
     if num == 0:
         return 'Zero'
 
-    words = ''
+    # Separate integer and fractional parts
+    integer_part = int(num)
+    fractional_part = int((num - integer_part) * 100)
+
+    integer_words = ''
     for i in range(len(thousands)):
-        if num % 1000 != 0:
-            words = helper(num % 1000) + thousands[i] + ' ' + words
-        num //= 1000
+        if integer_part % 1000 != 0:
+            integer_words = helper(integer_part % 1000) + thousands[i] + ' ' + integer_words
+        integer_part //= 1000
+
+    fractional_words = ''
+    if fractional_part > 0:
+        fractional_words = 'Point ' + helper(fractional_part)
+
+    words = integer_words.strip()
+    if fractional_words:
+        words += ' ' + fractional_words
 
     return words.strip()
 
