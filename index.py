@@ -4223,56 +4223,59 @@ def check_payment_receipt(trx_id):
     eb_paymets_db = db["ez_payment_db"]
     status = "In Progress"
     for i in range(300):
-        resp = get2_easycollect_link(trx_id)
-        if resp['success'] == True:
-            data = resp['data']
-            status = data['status']
-            if data['status'] == "success":
-                if not eb_paymets_db.find_one({"txnid":data['txnid']}):
-                    eb_paymets_db.insert_one(data)
-                    payment_date_raw = data["addedon"]
-                    payment_date = payment_date_raw.split(" ")[0]
-                    payment_data = {
-                        "payment_amount":data['net_amount_debit'],
-                        "payment_date":payment_date,
-                        "payment_mode": data['mode'],
-                        "payment_option":"totalPayment",
-                        "sid":data['udf1'],
-                        "transaction_id":data['txnid']
-                    }
-                    createPayment_func(payment_data)
+        try:
+            resp = get2_easycollect_link(trx_id)
+            if resp['success'] == True:
+                data = resp['data']
+                # status = data['status']
+                if data['status'] == "success":
+                    if not eb_paymets_db.find_one({"txnid":data['txnid']}):
+                        eb_paymets_db.insert_one(data)
+                        payment_date_raw = data["addedon"]
+                        payment_date = payment_date_raw.split(" ")[0]
+                        payment_data = {
+                            "payment_amount":data['net_amount_debit'],
+                            "payment_date":payment_date,
+                            "payment_mode": data['mode'],
+                            "payment_option":"totalPayment",
+                            "sid":data['udf1'],
+                            "transaction_id":data['txnid']
+                        }
+                        createPayment_func(payment_data)
+                        break
+                    else:
+                        eb_paymets_db.update_one({"txnid":data['txnid']},{"$set": data})
+                        payment_date_raw = data["addedon"]
+                        payment_date = payment_date_raw.split(" ")[0]
+                        payment_data = {
+                            "payment_amount":data['net_amount_debit'],
+                            "payment_date":payment_date,
+                            "payment_mode": data['mode'],
+                            "payment_option":"totalPayment",
+                            "sid":data['udf1'],
+                            "transaction_id":data['txnid']
+                        }
+                        createPayment_func(payment_data)
+                        break
+                elif data['status'] == "failure":
+                    if not eb_paymets_db.find_one({"txnid":data['txnid']}):
+                        eb_paymets_db.insert_one(data)
+                    else:
+                        eb_paymets_db.update_one({"txnid":data['txnid']},{"$set": data})
+                    break
+                elif data['status'] == "dropped":
+                    if not eb_paymets_db.find_one({"txnid":data['txnid']}):
+                        eb_paymets_db.insert_one(data)
+                    else:
+                        eb_paymets_db.update_one({"txnid":data['txnid']},{"$set": data})
                     break
                 else:
-                    eb_paymets_db.update_one({"txnid":data['txnid']},{"$set": data})
-                    payment_date_raw = data["addedon"]
-                    payment_date = payment_date_raw.split(" ")[0]
-                    payment_data = {
-                        "payment_amount":data['net_amount_debit'],
-                        "payment_date":payment_date,
-                        "payment_mode": data['mode'],
-                        "payment_option":"totalPayment",
-                        "sid":data['udf1'],
-                        "transaction_id":data['txnid']
-                    }
-                    createPayment_func(payment_data)
-                    break
-            elif data['status'] == "failure":
-                if not eb_paymets_db.find_one({"txnid":data['txnid']}):
-                    eb_paymets_db.insert_one(data)
-                else:
-                    eb_paymets_db.update_one({"txnid":data['txnid']},{"$set": data})
-                break
-            elif data['status'] == "dropped":
-                if not eb_paymets_db.find_one({"txnid":data['txnid']}):
-                    eb_paymets_db.insert_one(data)
-                else:
-                    eb_paymets_db.update_one({"txnid":data['txnid']},{"$set": data})
-                break
-            else:
-                if not eb_paymets_db.find_one({"txnid":data['txnid']}):
-                    eb_paymets_db.insert_one(data)
-                else:
-                    eb_paymets_db.update_one({"txnid":data['txnid']},{"$set": data})
+                    if not eb_paymets_db.find_one({"txnid":data['txnid']}):
+                        eb_paymets_db.insert_one(data)
+                    else:
+                        eb_paymets_db.update_one({"txnid":data['txnid']},{"$set": data})
+        except Exception as e:
+            print(str(e))
         time.sleep(2)
     # print("Payment Updated with status - ", status)
         
