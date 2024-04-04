@@ -4231,6 +4231,8 @@ def check_payment_receipt(trx_id):
                 data = resp['data']
                 # status = data['status']
                 if data['status'] == "success":
+                    print("Data -------> ",data)
+                    print("Type ------> ",type(data))
                     if not eb_paymets_db.find_one({"txnid":data['txnid']}):
                         eb_paymets_db.insert_one(data)
                         payment_date_raw = data["addedon"]
