@@ -81,7 +81,11 @@ def home():
 
 def generate_new_receipt_no():
     count_db = db['count_db']
-    pass
+    c_data = count_db.find_one({"found":"1"})
+    sr_no = int(c_data['sr_no'])
+    count_db.update_one({"found":"1"}, {"$set": {"sr_no":int(sr_no+1)}})
+    new_receipt_no = str("2024-"+str(int(sr_no+1)))
+    return new_receipt_no
 
 
 #-----------------------------------------------------------------------------------------
@@ -5009,8 +5013,8 @@ def initiate_payment(name, email, phn, camp_name, amt, sid, route):
 
         udf1 = sid
 
-        surl = 'https://admission.mcfcamp.in/FailedPayment'
-        furl = 'https://admission.mcfcamp.in/SuccessPayment'
+        surl = 'https://admission.mcfcamp.in/SuccessPayment'
+        furl = 'https://admission.mcfcamp.in/FailedPayment'
 
         # Example parameters
 
