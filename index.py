@@ -4447,7 +4447,9 @@ def verifyPayment():
         easycollect_links_db = db['easycollect_links_db']
         all_links = easycollect_links_db.find({"udf1":data['udf1']})
 
-        return jsonify({'success': True, "all_links":all_links}), 200
+        print(data)
+
+        return jsonify({'success': True, 'msg':'ghghghghg'}), 200
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
 
