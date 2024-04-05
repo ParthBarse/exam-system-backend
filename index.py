@@ -1953,6 +1953,31 @@ def get_batches():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
+
+@app.route('/getActiveBatches', methods=['GET'])
+def get_active_batches():
+    try:
+        camp_id = request.args.get('camp_id')
+
+        if not camp_id:
+            return jsonify({"error": "Missing 'camp_id' parameter in the request."}), 400  # Bad Request
+        
+        batches_db = db["batches_db"]
+        batches = batches_db.find({"camp_id": camp_id}, {"_id": 0})  # Exclude the _id field from the response
+
+        # Convert the cursor to a list of dictionaries for easier serialization
+        batch_list = list(batches)
+
+        new_batch_list = []
+
+        for batch in batch_list:
+            if batch["batch_intake"] > batch['students_registered']:
+                new_batch_list.append(batch)
+
+        return jsonify({"batches": new_batch_list})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
     
 @app.route('/getBatch', methods=['GET'])
 def get_batch():
