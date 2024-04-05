@@ -4433,7 +4433,10 @@ def getStudentsPaymentUrlDetails():
         easycollect_links_db = db['easycollect_links_db']
         all_links = easycollect_links_db.find({"udf1":sid})
 
-        return jsonify({'success': True, "all_links":all_links}), 200
+        if all_links:
+            return jsonify({'success': True, "all_links":list(all_links)}), 200
+        else:
+            return jsonify({'success': False, "error":"No Links Found"})
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
 
