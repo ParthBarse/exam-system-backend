@@ -32,15 +32,15 @@ import base64
 
 #--------------------------------------------------------------------------------
 
-file_dir = "/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/"
-files_url = "https://files.bnbdevelopers.in"
-files_base_dir = "/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/"
-files_base_url = "https://files.bnbdevelopers.in/mcf_files/"
+# file_dir = "/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/"
+# files_url = "https://files.bnbdevelopers.in"
+# files_base_dir = "/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/"
+# files_base_url = "https://files.bnbdevelopers.in/mcf_files/"
 
-# file_dir = "/home/mcfcamp-files/htdocs/files.mcfcamp.in/mcf_files/"
-# files_url = "https://files.mcfcamp.in"
-# files_base_dir = "/home/mcfcamp-files/htdocs/files.mcfcamp.in/"
-# files_base_url = "https://files.mcfcamp.in/mcf_files/"
+file_dir = "/home/mcfcamp-files/htdocs/files.mcfcamp.in/mcf_files/"
+files_url = "https://files.mcfcamp.in"
+files_base_dir = "/home/mcfcamp-files/htdocs/files.mcfcamp.in/"
+files_base_url = "https://files.mcfcamp.in/mcf_files/"
 
 #----------------------------------------------------------------------------------
 
@@ -49,13 +49,13 @@ files_base_url = "https://files.bnbdevelopers.in/mcf_files/"
 app = Flask(__name__)
 CORS(app)
 
-client = MongoClient(
-    'mongodb+srv://bnbdevs:feLC7m4jiT9zrmHh@cluster0.fjnp4qu.mongodb.net/?retryWrites=true&w=majority')
-app.config['MONGO_URI'] = 'mongodb+srv://bnbdevs:feLC7m4jiT9zrmHh@cluster0.fjnp4qu.mongodb.net/?retryWrites=true&w=majority'
-
 # client = MongoClient(
-#     'mongodb+srv://mcfcamp:mcf123@mcf.nyh46tl.mongodb.net/')
-# app.config['MONGO_URI'] = 'mongodb+srv://mcfcamp:mcf123@mcf.nyh46tl.mongodb.net/'
+#     'mongodb+srv://bnbdevs:feLC7m4jiT9zrmHh@cluster0.fjnp4qu.mongodb.net/?retryWrites=true&w=majority')
+# app.config['MONGO_URI'] = 'mongodb+srv://bnbdevs:feLC7m4jiT9zrmHh@cluster0.fjnp4qu.mongodb.net/?retryWrites=true&w=majority'
+
+client = MongoClient(
+    'mongodb+srv://mcfcamp:mcf123@mcf.nyh46tl.mongodb.net/')
+app.config['MONGO_URI'] = 'mongodb+srv://mcfcamp:mcf123@mcf.nyh46tl.mongodb.net/'
 
 app.config['SECRET_KEY'] = 'a6d217d048fdcd227661b755'
 db = client['mcf_db']
@@ -750,7 +750,7 @@ def sync_data(original_sid, update_sid, prev_batch_id):
                 sync_SacTableFrom_Student(prev_batch_id)
 
 def sendSMS(msg,phn):
-    phn="8793015610"
+    # phn="8793015610"
     if msg and phn:
         url = "http://msg.msgclub.net/rest/services/sendSMS/sendGroupSms"
         msg_text = msg
@@ -765,7 +765,7 @@ def sendSMS(msg,phn):
     
 
 def send_wp(sms_content, mobile_numbers, file_paths=[]):
-    mobile_numbers="8793015610"
+    # mobile_numbers="8793015610"
     if len(file_paths)>1:
             file_paths.append("THINGS_TO_BRING.pdf")
     api_url = "http://msg.msgclub.net/rest/services/sendSMS/sendGroupSms"
@@ -851,7 +851,7 @@ def encode_file_to_base64(file_path):
     
 
 def send_email(msg, sub, mailToSend):
-    mailToSend = "parthbarse72@gmail.com"
+    # mailToSend = "parthbarse72@gmail.com"
     try:
         # Send the password reset link via email
         sender_email = "mcfcamp@gmail.com"
@@ -884,7 +884,7 @@ from email.mime.base import MIMEBase
 from email import encoders
 
 def send_email_attachments(msg, sub, mailToSend, files=[]):
-    mailToSend = "parthbarse72@gmail.com"
+    # mailToSend = "parthbarse72@gmail.com"
     try:
         if len(files)>1:
             files.append("THINGS_TO_BRING.pdf")
