@@ -1134,7 +1134,7 @@ def generate_certificate_cert(sid,cqy):
         student_data1 = {
             'REG_NO': sid,
             'CADET_NAME': str(student_data['first_name']+" "+student_data['last_name']),
-            'START_DATE': batch_data['start_date'],
+            'START_DATE': str(batch_data['start_date']+" To "+batch_data['end_date']),
             'END_DATE':batch_data['end_date'],
             'CQY': cqy
         }
@@ -1143,7 +1143,7 @@ def generate_certificate_cert(sid,cqy):
             if key == 'CADET_NAME':
                 find_and_replace_paragraphs_cert(doc.paragraphs, f'{{MERGEFIELD {key}}}', str(value), specific_font=('Times New Roman', 18, True))
             else:
-                find_and_replace_paragraphs_cert(doc.paragraphs, f'{{MERGEFIELD {key}}}', str(value), specific_font=('Times New Roman', 14, True))
+                find_and_replace_paragraphs_cert(doc.paragraphs, f'{{MERGEFIELD {key}}}', str(value), specific_font=('Times New Roman', 14, False))
                 
         # doc.save(f"{student_data['REG_NO']}_CER_{student_data['CAMP_NAME']}.docx")
         doc.save(str(str(file_dir)+f"{sid}_Certificate.docx"))
@@ -2902,9 +2902,10 @@ def createPayment_func(data):
                     receipt_nos = ""
                     payment_data = list(payment_data)
                     print(len(payment_data))
+                    last_payment_date = ""
                     for receipt in payment_data:
                         receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
-                        print(receipt_nos)
+                        last_payment_date = str(receipt['payment_date'])
                     receipt_nos = str(receipt_nos + receipt_no)
 
                     student_data_1 = {
@@ -2937,7 +2938,7 @@ def createPayment_func(data):
                             'FEE_PAID': student_data['total_amount_paid'],
                             'BALANCE': float(student_data['total_amount_payable']) - float(student_data['total_amount_paid']),
                             'RECEIPT_NUM': receipt_nos,
-                            'DATE': '',
+                            'DATE': str(last_payment_date),
                             'TIME': ''
                         }
 
@@ -4323,6 +4324,129 @@ def check_payment_receipt(trx_id, route):
         
 def run_check_payment_receipt(trx_id, route):
     check_payment_receipt(trx_id, route)  # Call your existing function here
+
+def createNewPaymentLink(name, email, phn, msg, amt, sid, route):
+    url = "https://dashboard.easebuzz.in/easycollect/v1/create"
+    # name = "Parth Barse"
+    # email = "parthbarse72@gmail.com"
+    # phn = "8793015610"
+    # msg = "Test Payment Gateway"
+    # amt = "1.00"
+    # sid = "ADFSD0930220FVS9012"
+
+    if route == "r2":
+        key = "1YUG4UBN1Q"
+        salt = "KPRYL60DC1"
+    else:
+        key = "LTHNEOBZVH"
+        salt = "7TGBSUKDN9"
+
+    transaction_id = uuid.uuid4().hex
+
+    # Define the data in the specified sequence for hashing
+    data_sequence = [
+        key,
+        transaction_id,
+        name,
+        email,
+        phn,
+        amt,
+        sid,
+        "",
+        "",
+        "",
+        "",
+        msg,
+    ]
+
+    # Generate hash using the data sequence and salt
+    hash_value = generate_hash(data_sequence, salt)
+    # key|merchant_txn|name|email|phone|amount|udf1|udf2|udf3|udf4|udf5|message|salt
+    payload = {
+        "key": key,
+        "merchant_txn": transaction_id,
+        "name": name,
+        "email": email,
+        "phone": phn,
+        "amount": amt,
+        "udf1": sid,
+        "udf2": " ",
+        "udf3": " ",
+        "udf4": " ",
+        "udf5": " ",
+        "message": msg,
+        "accept_partial_payment": False,
+        "hash": hash_value  # Include the generated hash in the payload
+    }
+
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+    }
+
+    try:
+        response = requests.post(url, headers=headers, json=payload)
+        response_data = response.json()
+        if response_data['status'] == True:
+            return {"success":True, "payment_url":response_data['data']['payment_url'], "all_data":response_data['data']}
+        else:
+            return {"success":False, "error":"Error Generating Payment Link"}
+    except Exception as e:
+        print("Error:", e)
+
+
+@app.route("/createNewPaymentUrl", methods=["GET"])
+def createNewPaymentUrl():
+    try:
+        sid = request.args.get("sid")
+        payment_amt = request.args.get("payment_amt")
+        payment_option = request.args.get("payment_option")
+        students_db = db['students_db']
+        batch_db = db['batches_db']
+        camps_db = db['camps_db']
+        student = students_db.find_one({"sid":sid})
+        name = str(student['first_name']+" "+student['last_name'])
+        camp = camps_db.find_one({"camp_id":student['camp_id']})
+        batch = batch_db.find_one({"batch_id":student['batch_id']})
+        msg = camp['camp_name']
+        route = "r1"
+        if "15" in batch['duration'] or "30" in batch['duration']:
+            route = "r2"
+        else:
+            route= "r1"
+        resp = createNewPaymentLink(name, student['email'], student['wp_no'], msg, payment_amt, sid, route)
+        if resp['success'] == True:
+            all_data = resp['all_data']
+            all_data['payment_option'] = payment_option
+            easycollect_links_db = db['easycollect_links_db']
+            easycollect_links_db.insert_one(all_data)
+            return jsonify({'success': True, "payment_url":resp['payment_url']}), 200
+        else:
+            return jsonify({'success': False, "error":"Payment Link Not Generated."}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+    
+@app.route("/getStudentsPaymentUrlDetails", methods=["GET"])
+def getStudentsPaymentUrlDetails():
+    try:
+        sid = request.args.get("sid")
+        easycollect_links_db = db['easycollect_links_db']
+        all_links = easycollect_links_db.find({"udf1":sid})
+
+        return jsonify({'success': True, "all_links":all_links}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+
+@app.route("/verifyPayment", methods=["post"])
+def verifyPayment():
+    try:
+        data = request.get_json()
+        easycollect_links_db = db['easycollect_links_db']
+        all_links = easycollect_links_db.find({"udf1":data['udf1']})
+
+        return jsonify({'success': True, "all_links":all_links}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
 
 @app.route("/generatePaymentLink", methods=["GET"])
 def generatePaymentLink():
