@@ -1971,7 +1971,7 @@ def get_active_batches():
         new_batch_list = []
 
         for batch in batch_list:
-            if batch["batch_intake"] > batch['students_registered']:
+            if int(batch["batch_intake"]) > int(batch['students_registered']):
                 new_batch_list.append(batch)
 
         return jsonify({"batches": new_batch_list})
