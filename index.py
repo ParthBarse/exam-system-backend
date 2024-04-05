@@ -4431,7 +4431,7 @@ def getStudentsPaymentUrlDetails():
     try:
         sid = request.args.get("sid")
         easycollect_links_db = db['easycollect_links_db']
-        all_links = easycollect_links_db.find({"udf1":sid})
+        all_links = easycollect_links_db.find({"udf1":sid},{"_id":0})
 
         if all_links:
             return jsonify({'success': True, "all_links":list(all_links)}), 200
