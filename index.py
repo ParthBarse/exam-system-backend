@@ -32,15 +32,15 @@ import base64
 
 #--------------------------------------------------------------------------------
 
-file_dir = "/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/"
-files_url = "https://files.bnbdevelopers.in"
-files_base_dir = "/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/"
-files_base_url = "https://files.bnbdevelopers.in/mcf_files/"
+# file_dir = "/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/mcf_files/"
+# files_url = "https://files.bnbdevelopers.in"
+# files_base_dir = "/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/"
+# files_base_url = "https://files.bnbdevelopers.in/mcf_files/"
 
-# file_dir = "/home/mcfcamp-files/htdocs/files.mcfcamp.in/mcf_files/"
-# files_url = "https://files.mcfcamp.in"
-# files_base_dir = "/home/mcfcamp-files/htdocs/files.mcfcamp.in/"
-# files_base_url = "https://files.mcfcamp.in/mcf_files/"
+file_dir = "/home/mcfcamp-files/htdocs/files.mcfcamp.in/mcf_files/"
+files_url = "https://files.mcfcamp.in"
+files_base_dir = "/home/mcfcamp-files/htdocs/files.mcfcamp.in/"
+files_base_url = "https://files.mcfcamp.in/mcf_files/"
 
 #----------------------------------------------------------------------------------
 
@@ -49,13 +49,13 @@ files_base_url = "https://files.bnbdevelopers.in/mcf_files/"
 app = Flask(__name__)
 CORS(app)
 
-client = MongoClient(
-    'mongodb+srv://bnbdevs:feLC7m4jiT9zrmHh@cluster0.fjnp4qu.mongodb.net/?retryWrites=true&w=majority')
-app.config['MONGO_URI'] = 'mongodb+srv://bnbdevs:feLC7m4jiT9zrmHh@cluster0.fjnp4qu.mongodb.net/?retryWrites=true&w=majority'
-
 # client = MongoClient(
-#     'mongodb+srv://mcfcamp:mcf123@mcf.nyh46tl.mongodb.net/')
-# app.config['MONGO_URI'] = 'mongodb+srv://mcfcamp:mcf123@mcf.nyh46tl.mongodb.net/'
+#     'mongodb+srv://bnbdevs:feLC7m4jiT9zrmHh@cluster0.fjnp4qu.mongodb.net/?retryWrites=true&w=majority')
+# app.config['MONGO_URI'] = 'mongodb+srv://bnbdevs:feLC7m4jiT9zrmHh@cluster0.fjnp4qu.mongodb.net/?retryWrites=true&w=majority'
+
+client = MongoClient(
+    'mongodb+srv://mcfcamp:mcf123@mcf.nyh46tl.mongodb.net/')
+app.config['MONGO_URI'] = 'mongodb+srv://mcfcamp:mcf123@mcf.nyh46tl.mongodb.net/'
 
 app.config['SECRET_KEY'] = 'a6d217d048fdcd227661b755'
 db = client['mcf_db']
