@@ -2519,7 +2519,7 @@ def send_visiting_card():
 
 
 @app.route("/sendReportCard", methods=["GET"])
-def send_():
+def send_report_card():
     try:
         # collection = db["students_db"]
         sid = request.args.get('sid')
@@ -2543,11 +2543,6 @@ def send_():
 
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
-    
-
-
-
-
 
 
 # Endpoint for requesting password reset (for admin)
