@@ -586,9 +586,11 @@ def sync_data(original_sid, update_sid, prev_batch_id):
                 receipt_nos = ""
                 payment_data = list(payment_data)
                 print(len(payment_data))
+                last_payment_date = ""
                 for receipt in payment_data:
                     receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
                     print(receipt_nos)
+                    last_payment_date = receipt['payment_date']
                 receipt_nos = str(receipt_nos)
 
                 student_data_1 = {
@@ -621,7 +623,7 @@ def sync_data(original_sid, update_sid, prev_batch_id):
                         'FEE_PAID': data['total_amount_paid'],
                         'BALANCE': float(data['total_amount_payable']) - float(data['total_amount_paid']),
                         'RECEIPT_NUM': receipt_nos,
-                        'DATE': '',
+                        'DATE': last_payment_date,
                         'TIME': ''
                     }
 
@@ -2900,10 +2902,10 @@ def createPayment_func(data):
                     receipt_nos = ""
                     payment_data = list(payment_data)
                     print(len(payment_data))
-                    last_payment_date = ""
+                    last_payment_date = data['payment_date']
                     for receipt in payment_data:
                         receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
-                        last_payment_date = str(receipt['payment_date'])
+                        # last_payment_date = str(receipt['payment_date'])
                     receipt_nos = str(receipt_nos + receipt_no)
 
                     student_data_1 = {
@@ -3034,6 +3036,7 @@ def createPayment_func(data):
                     receipt_nos = ""
                     payment_data = list(payment_data)
                     print(len(payment_data))
+                    last_payment_date = data['payment_date']
                     for receipt in payment_data:
                         receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
                         print(receipt_nos)
@@ -3069,7 +3072,7 @@ def createPayment_func(data):
                             'FEE_PAID': student_data['total_amount_paid'],
                             'BALANCE': float(student_data['total_amount_payable']) - float(student_data['total_amount_paid']),
                             'RECEIPT_NUM': receipt_nos,
-                            'DATE': '',
+                            'DATE': last_payment_date,
                             'TIME': ''
                         }
 
@@ -3168,6 +3171,7 @@ def createPayment_func(data):
                     receipt_nos = ""
                     payment_data = list(payment_data)
                     print(len(payment_data))
+                    last_payment_date = data['payment_date']
                     for receipt in payment_data:
                         receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
                         print(receipt_nos)
@@ -3203,7 +3207,7 @@ def createPayment_func(data):
                             'FEE_PAID': student_data['total_amount_paid'],
                             'BALANCE': float(student_data['total_amount_payable']) - float(student_data['total_amount_paid']),
                             'RECEIPT_NUM': receipt_nos,
-                            'DATE': '',
+                            'DATE': last_payment_date,
                             'TIME': ''
                         }
 
@@ -3334,6 +3338,7 @@ def createPayment_func(data):
                     receipt_nos = ""
                     payment_data = list(payment_data)
                     print(len(payment_data))
+                    last_payment_date = data['payment_date']
                     for receipt in payment_data:
                         receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
                         print(receipt_nos)
@@ -3369,7 +3374,7 @@ def createPayment_func(data):
                             'FEE_PAID': student_data['total_amount_paid'],
                             'BALANCE': float(student_data['total_amount_payable']) - float(student_data['total_amount_paid']),
                             'RECEIPT_NUM': receipt_nos,
-                            'DATE': '',
+                            'DATE': last_payment_date,
                             'TIME': ''
                         }
 
@@ -3467,6 +3472,7 @@ def createPayment_func(data):
                     receipt_nos = ""
                     payment_data = list(payment_data)
                     print(len(payment_data))
+                    last_payment_date = data['payment_date']
                     for receipt in payment_data:
                         receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
                         print(receipt_nos)
@@ -3502,7 +3508,7 @@ def createPayment_func(data):
                             'FEE_PAID': student_data['total_amount_paid'],
                             'BALANCE': float(student_data['total_amount_payable']) - float(student_data['total_amount_paid']),
                             'RECEIPT_NUM': receipt_nos,
-                            'DATE': '',
+                            'DATE': last_payment_date,
                             'TIME': ''
                         }
 
@@ -3600,6 +3606,7 @@ def createPayment_func(data):
                     receipt_nos = ""
                     payment_data = list(payment_data)
                     print(len(payment_data))
+                    last_payment_date = data['payment_date']
                     for receipt in payment_data:
                         receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
                         print(receipt_nos)
@@ -3635,7 +3642,7 @@ def createPayment_func(data):
                             'FEE_PAID': student_data['total_amount_paid'],
                             'BALANCE': float(student_data['total_amount_payable']) - float(student_data['total_amount_paid']),
                             'RECEIPT_NUM': receipt_nos,
-                            'DATE': '',
+                            'DATE': last_payment_date,
                             'TIME': ''
                         }
 
