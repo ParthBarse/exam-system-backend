@@ -2058,16 +2058,32 @@ def activate_student():
 from reports_generator.generate_report import generate_report
 
 @app.route('/generateReport', methods=['POST'])
-def generate_report():
+def generate_report_card():
     try:
         data = request.get_json()
         sid = request.args.get("sid")
 
         if not sid:
             return jsonify({"success":False, "error":"SID not found."})
+        
+        student_db = db['students_db']
+        batch_db = db['batches_db']
+        student = student_db.find_one({"sid":sid})
+        batch = batch_db.find_one({"batch_id":student['batch_id']})
 
-        print(sid)
-        print(data)
+        cadet_photo_raw = student['cadetPhoto']
+        image_path_photo = cadet_photo_raw.replace(files_url,files_base_dir)
+
+        docx_path = f"{file_dir}{sid}_report_card.docx"
+        output_path = f"{file_dir}{sid}_report_card.pdf"
+
+        # generate_report(sid, data, image_path_photo, batch['duration'], batch['start_date'], batch['batch_name'], docx_path, output_path)
+
+        p = multiprocessing.Process(target=run_generate_report, args=(sid, data, image_path_photo, batch['duration'], batch['start_date'], batch['batch_name'], docx_path, output_path,))
+        p.daemon = True  # Set the process as a daemon (runs independently)
+        p.start()  # Start the process
+
+        return jsonify({"success":True, "msg":"Generating Report Card..."})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
@@ -4283,6 +4299,15 @@ def check_payment_receipt(trx_id, route):
         
 def run_check_payment_receipt(trx_id, route):
     check_payment_receipt(trx_id, route)  # Call your existing function here
+
+def run_generate_report(sid, data, image_path_photo, duration, start_date, batch_name, docx_path, output_path):
+    resp = generate_report(sid, data, image_path_photo, duration, start_date, batch_name, docx_path, output_path)
+    if resp == 0:
+        report_card_url = f"{files_base_url}{sid}_report_card.pdf"
+        students_db = db['students_db']
+        students_db.update_one({"sid":sid}, {"$set": {"report_card":report_card_url}})
+    else:
+        pass
 
 def createNewPaymentLink(name, email, phn, msg, amt, sid, route):
     url = "https://dashboard.easebuzz.in/easycollect/v1/create"
