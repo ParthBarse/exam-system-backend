@@ -2518,6 +2518,34 @@ def send_visiting_card():
     
 
 
+@app.route("/sendReportCard", methods=["GET"])
+def send_():
+    try:
+        # collection = db["students_db"]
+        sid = request.args.get('sid')
+        students_db = db["students_db"]
+        student_data = students_db.find_one({"sid":sid}, {"_id":0})
+        mailToSend = student_data['email']
+
+        message_text = f"Hello {student_data['first_name']}, \n\n You can download your Report Card from below Link. \n {student_data['report_card']}"
+
+        report_card = student_data['report_card']
+
+        if not report_card:
+            return jsonify({"success":False,"msg":"Report Card does not Exist."})
+        
+        file_path = report_card.replace(files_url,files_base_dir)
+
+        send_email_attachments(message_text, "Report Card of MCF CAMP.",mailToSend, [file_path])
+        send_wp(message_text, student_data['wp_no'],file_paths=[file_path])
+
+        return jsonify({'success': True, 'msg': 'Mail Send'}), 200
+
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+    
+
+
 
 
 
