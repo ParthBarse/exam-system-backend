@@ -3,6 +3,8 @@ from docx.shared import Pt ,Inches
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 import subprocess
 
+base_file_path = '/home/mcfcamp-apis/htdocs/apis.mcfcamp.in/mcf-backend-flask/reports_generator/'
+
 def set_paragraph_font(paragraph, font_name, font_size,):
     for run in paragraph.runs:
         font = run.font
@@ -73,7 +75,7 @@ def generate_report(sid, data, image_path_photo, days, camp_date, batch_name, do
             }
     
         if 'SMTC' in Report_Data["CAMP_NAME"] or 'smtc' in Report_Data["CAMP_NAME"]:
-            doc = Document('report_card_SMTC.docx')
+            doc = Document(f'{base_file_path}report_card_SMTC.docx')
             camp_report_data ={
                 #skill_activities
                 "ARCHERY_TTR" : data["activities"]["skill_activities"][0]["TIMES TO REPEAT"],
@@ -235,7 +237,7 @@ def generate_report(sid, data, image_path_photo, days, camp_date, batch_name, do
 
                 }
         elif 'CTC' in Report_Data["CAMP_NAME"] or 'ctc' in Report_Data["CAMP_NAME"] :
-            doc = Document('report_card_CTC.docx')
+            doc = Document(f'{base_file_path}report_card_CTC.docx')
             camp_report_data ={
                 "ARCHERY_TTR" : data["activities"]["skill_activities"][0]["TIMES TO REPEAT"] ,
                 "ARCHERY_TBI" : data["activities"]["skill_activities"][0]["TRAINED BY INS"] ,
@@ -369,7 +371,7 @@ def generate_report(sid, data, image_path_photo, days, camp_date, batch_name, do
                 "RANK" : data["final_remarks"]["rank"],
                 }
         elif 'ATC' in Report_Data["CAMP_NAME"] or 'atc' in Report_Data["CAMP_NAME"]:
-            doc = Document('report_card_ATC.docx')
+            doc = Document(f'{base_file_path}report_card_ATC.docx')
             camp_report_data = {
                     "ARCHERY_TTR" : data["activities"]["skill_activities"][0]["TIMES TO REPEAT"] ,
                     "ARCHERY_TBI" : data["activities"]["skill_activities"][0]["TRAINED BY INS"] ,
@@ -428,7 +430,7 @@ def generate_report(sid, data, image_path_photo, days, camp_date, batch_name, do
 
             }
         elif 'PDC' in Report_Data["CAMP_NAME"] or 'pdc' in Report_Data["CAMP_NAME"] :
-            doc = Document('report_card_PDC.docx')
+            doc = Document(f'{base_file_path}report_card_PDC.docx')
             camp_report_data ={
                 "ARCHERY_TTR" : data["activities"]["skill_activities"][0]["TIMES TO REPEAT"] ,
                 "ARCHERY_TBI" : data["activities"]["skill_activities"][0]["TRAINED BY INS"] ,
