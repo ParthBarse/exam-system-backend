@@ -4444,12 +4444,36 @@ def getStudentsPaymentUrlDetails():
 def verifyPayment():
     try:
         data = request.get_json()
-        easycollect_links_db = db['easycollect_links_db']
-        all_links = easycollect_links_db.find({"udf1":data['udf1']})
+        student_db = db['students_db']
+        batch_db = db['batches_db']
+        sid = ['udf1']
+        student = student_db.find_one({"sid":sid})
+        batch_id = student['batch_id']
+        batch = batch_db.find_one({"batch_id":batch_id})
+        if "15" in batch['duration'] or "30" in batch['duration']:
+            route = "r2"
+        else:
+            route= "r1"
+        transaction_id = data['merchant_txn']
+        res = get2_easycollect_link(transaction_id, route)
 
-        print(data)
-
-        return jsonify({'success': True, 'msg':'ghghghghg'}), 200
+        if res['success'] == True:
+            data = res['data']
+            if data['status'] == 'success':
+                payment_date_raw = data["addedon"]
+                payment_date = payment_date_raw.split(" ")[0]
+                payment_data = {
+                    "payment_amount":data['net_amount_debit'],
+                    "payment_date":payment_date,
+                    "payment_mode": data['mode'],
+                    "payment_option":"totalPayment",
+                    "sid":data['udf1'],
+                    "transaction_id":data['txnid']
+                }
+                resp_new = createPayment_func(payment_data)
+                return jsonify({'success': True, 'msg':'Payment Successfully Verified.'}), 200
+        else:
+            return jsonify({'success': False, 'msg':'Payment Cannot be Verified.'}), 200
     except Exception as e:
         return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
 
