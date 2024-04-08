@@ -5331,6 +5331,7 @@ def generatePaymentLink_booking():
                 "wp_no": student['wp_no'],
                 'email':student['email'],
                 'payment_option':'booking',
+                "amount":booking_amt,
                 "payment_link":resp['payment_url'],
                 "transaction_id":resp['transaction_id']
             }
@@ -5404,6 +5405,7 @@ def generatePaymentLink_installments():
                 "wp_no": student['wp_no'],
                 'email':student['email'],
                 "payment_option":installment,
+                "amount":final_amount,
                 "payment_link":resp['payment_url'],
                 "transaction_id":resp['transaction_id']
             }
