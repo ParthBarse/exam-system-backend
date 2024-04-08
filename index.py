@@ -5330,6 +5330,7 @@ def generatePaymentLink_booking():
                 "camp_name":camp['camp_name'],
                 "wp_no": student['wp_no'],
                 'email':student['email'],
+                'payment_option':'booking',
                 "payment_link":resp['payment_url'],
                 "transaction_id":resp['transaction_id']
             }
@@ -5402,6 +5403,7 @@ def generatePaymentLink_installments():
                 "camp_name":camp['camp_name'],
                 "wp_no": student['wp_no'],
                 'email':student['email'],
+                "payment_option":installment,
                 "payment_link":resp['payment_url'],
                 "transaction_id":resp['transaction_id']
             }
