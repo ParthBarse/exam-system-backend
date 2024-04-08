@@ -4671,6 +4671,347 @@ def register_parent():
         return jsonify({"error": str(e)}), 500  # Internal Server Error
 
 
+@app.route('/registerSibling', methods=['POST'])
+def register_sibling():
+    try:
+        data = request.form
+
+        student_raw_data = {
+            "first_name": data["first_name"],
+            "middle_name": data.get("middle_name", ""),
+            "last_name": data["last_name"],
+            "email": data["email"],
+            "phn": str(data["phn"]),
+            "dob": data["dob"],
+            "address": data["address"],
+            "fathers_occupation": data["fathers_occupation"],
+            "mothers_occupation": data["mothers_occupation"],
+            "how_you_got_to_know": data["how_you_got_to_know"],
+            "employee_who_reached_out_to_you": data["employee_who_reached_out_to_you"],
+            "district": data["district"],
+            "state": data["state"],
+            "pincode": str(data["pincode"]),
+            "camp_id": data.get("camp_id", ""),
+            "camp_category": data.get("camp_category", ""),
+            "batch_id": data.get("batch_id", ""),
+            "food_option": data.get("food_option", ""),
+            "pick_up_city": data.get("pick_up_city", ""),
+            "pick_up_point": data.get("pick_up_point", ""),
+            "height": data.get("height", ""),
+            "weight": data.get("weight", ""),
+            "blood_group": data.get("blood_group", ""),
+            "school_name": data.get("school_name", ""),
+            "gender": data.get("gender", ""),
+            "standard": data.get("standard", ""),
+            "wp_no": data.get("wp_no", ""),
+            "medication_physical":data.get("medication_physical"),
+            "other_problem":data.get("other_problem"),
+            "physical_problem":data.get("physical_problem",""),
+            "medication_allergy":data.get("medication_allergy",""),
+            "medication_other":data.get("medication_other",""),
+            "allergy":data.get("allergy",""),
+            "cadetPhoto":data.get("cadetPhoto",""),
+            "cadetSign":data.get("cadetSign",""),
+            "parentGurdianPhoto":data.get("parentGurdianPhoto",""),
+            "parentGurdianSign":data.get("parentGurdianSign",""),
+            "payment_status": data.get("payment_status", "Pending"),
+            'total_amount_payable':int(data.get("total_amount_payable", 0)),
+        }
+
+        all_keys = student_raw_data.keys()
+        required_keys = list(all_keys)
+        for key in required_keys:
+            if not student_raw_data.get(key) or student_raw_data[key] == "":
+                return jsonify({"error": f"Please fill in the '{key}' field."}), 400
+
+        # Check if email and phn are not repeating
+        students_db = db["students_db"]
+        # existing_student_email = students_db.find_one({"email": data["email"]})
+        # existing_student_phn = students_db.find_one({"phn": data["phn"]})
+
+        # if existing_student_email:
+        #     raise ValueError(f"Email '{data['email']}' is already registered.")
+
+        # if existing_student_phn:
+        #     raise ValueError(f"Phone number '{data['phn']}' is already registered.")
+
+        # Generate a unique ID for the student using UUID
+        sid = str(uuid.uuid4().hex)
+
+        company = ""
+        # Calculate age based on the provided date of birth
+        age = calculate_age(data["dob"])
+        if age>=7 and age<=11 and data.get("gender") == "male":
+            company = "ALPHA"
+        elif age>=12 and age<=16 and data.get("gender") == "male":
+            company = "BRAVO"
+        elif age>=17 and age<=21 and data.get("gender") == "male":
+            company = "DELTA"
+        elif age>=7 and age<=11 and data.get("gender") == "female":
+            company = "CHARLEY"
+        elif age>=12 and age<=16 and data.get("gender") == "female":
+            company = "ECO"
+        elif age>=17 and age<=21 and data.get("gender") == "female":
+            company = "FOXFORD"
+
+        batches_db = db["batches_db"]
+        batch = batches_db.find_one({"batch_id":data.get("batch_id")}, {"_id":0})
+        camps_db = db["camps_db"]
+        camp = camps_db.find_one({"camp_id":data.get("camp_id")}, {"_id":0})
+        camp_name = camp["camp_name"]
+        camp_short = camp_name.split(" ")[-1].replace("(", "").replace(")", "")
+        sid=""
+        medical_cert_url = ""
+        if batch:
+            sr_no = int(int(batch["students_registered"])+1)
+            start_date = batch["start_date"]
+            year = start_date[-2:]
+            day = start_date[0:2]
+            batch_name = batch["batch_name"].replace(" ", "")
+            sr_no = generate_3_digit_number(sr_no)
+
+            company_sf = str(company[0])+"C"
+            days = str(batch['duration'])+"D"
+
+            sid = str(camp_short)+str(year)+str(days)+str(batch_name)+str(company_sf)+str(sr_no)
+
+            sid = sa_module(batch['batch_id'], sid)
+
+            if sid == -1:
+                return jsonify({"error": "Batch Full, Please add New Batch or move this student to other batch."}), 400
+
+            document_med_path = 'medical_certificate.docx'
+
+            field_values = {
+                'CADET_NAME': str(data["first_name"].upper()+" "+data["last_name"].upper()),
+                'LOC':  str(data["district"]+", "+data["state"]),
+                'DOB':  str(data["dob"]),
+                '121212':  str("__________"),
+                'C_NAME':  str(camp_name),
+                'DATE':  str(start_date),
+                'BATCH':  str(batch_name),
+                'sid': sid
+            }
+            replace_fields_in_document_med(document_med_path, field_values)
+
+            # Load the document template
+            doc1 = Document('visit_card.docx')
+
+            # Sample student_data
+            student_data1 = {
+                'CADET_NAME': str(data["first_name"].upper()+" "+data["last_name"].upper()),
+                'CAMP_NAME': str(camp_name),
+                'BATCH_NO': str(batch_name),
+                'ADDRESS': data["address"],
+                'CONTACT': data["phn"],
+                'WHATSAPP_NO': data["wp_no"],
+                'CAMP_DATE':start_date,
+                'REG_NO':sid,
+                'PICKUP_POINT':data['pick_up_point'],
+            }
+
+            for key, value in student_data1.items():
+                find_and_replace_paragraphs_visiting_card(doc1.paragraphs, f'{{MERGEFIELD {key}}}', str(value))
+
+            try:
+                cadet_photo_url = data["cadetPhoto"]
+                cadet_photo_path = cadet_photo_url.replace(files_url,files_base_dir)
+
+                image_url_guardian = data["parentGurdianPhoto"]
+                image_path_guardian = image_url_guardian.replace(files_url,files_base_dir)
+                
+                replace_image_in_cell(doc1, table_index=0, row_index=0, column_index=3, image_path=cadet_photo_path)
+                replace_image_in_cell(doc1, table_index=0, row_index=0, column_index=4, image_path=image_path_guardian)
+
+                doc1.save(str(str(file_dir)+f"{sid}_visit_card.docx"))
+
+                convert_to_pdf(str(str(file_dir)+f"{sid}_visit_card.docx"), str(str(file_dir)+f"{sid}_visit_card.pdf"))
+
+
+
+                doc = Document('admission_form_new_format.docx')
+                student_data1 = {
+                "REG_NO": sid,
+                "FIRST_NAME": str(data["first_name"].upper()),
+                "MIDDLE_NAME": str(data["middle_name"].upper()),
+                "LAST_NAME": str(data["last_name"].upper()),
+                "EMAIL_ID": str(data["email"]),
+                "CONTACT_NO": str(data["phn"]),
+                "DATE_OF_BIRTH": str(data["dob"]),
+                "ADDRESS": str(data["address"]),
+                "HOW_YOU_GOT_TO_KNOW": str(data["how_you_got_to_know"]),
+                "EMPLOYEE_WHO_REACHED_OUT": str(data["employee_who_reached_out_to_you"]),
+                "DISTRICT": str(data["district"]),
+                "STATE": data["state"],
+                "PINCODE": data["pincode"],
+                "PICKUP_POINT": data["pick_up_point"],
+                "BLOOD_GROUP": data["blood_group"],
+                "SCHOOL_NAME": data["school_name"],
+                "GENDER": data["gender"],
+                "STANDARD": data["standard"],
+                "WHATSAPP_NO": data["wp_no"],
+                "PARENT_NAME":data["middle_name"],
+                "CAMP_NAME":camp_name,
+                "CAMP_DATE":batch["start_date"],
+                "CAMP_DAYS":batch["duration"]
+                }
+                for key, value in student_data1.items():
+                        find_and_replace_tables_admission_form(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+
+                image_path_sign_url = data["cadetSign"]
+                image_path_sign = image_path_sign_url.replace(files_url,files_base_dir)
+
+                image_url_guardian_sign = data["parentGurdianSign"]
+                image_path_guardian_sign = image_url_guardian_sign.replace(files_url,files_base_dir)
+
+                replace_image_in_cell_admission_form(doc, table_index=0, row_index=25, column_index=1, image_path=cadet_photo_path,w=1.4,h=1.6)
+                replace_image_in_cell_admission_form(doc, table_index=0, row_index=25, column_index=12, image_path=image_path_sign,w=1.8,h=1.0)
+                replace_image_in_cell_admission_form(doc, table_index=1, row_index=16, column_index=1, image_path=image_path_guardian,w=1.4,h=1.6)
+                replace_image_in_cell_admission_form(doc, table_index=1, row_index=17, column_index=6, image_path=image_path_guardian_sign,w=1.8,h=1.0)
+
+                doc.save(str(str(file_dir)+f"{sid}_admission_form.docx"))
+
+                convert_to_pdf(str(str(file_dir)+f"{sid}_admission_form.docx"), str(str(file_dir)+f"{sid}_admission_form.pdf"))
+                                
+            except Exception as e:
+                print("Error : ", str(e))
+            medical_cert_url = f"{files_base_url}{sid}_MEDICAL_CER.pdf"
+            visiting_card_url = f"{files_base_url}{sid}_visit_card.pdf"
+            admission_form = f"{files_base_url}{sid}_admission_form.pdf"
+        
+
+        student = {
+            "sid": sid,
+            "first_name": data["first_name"].upper(),
+            "middle_name": data.get("middle_name", "").upper(),
+            "last_name": data["last_name"].upper(),
+            "email": data["email"],
+            "phn": str(data["phn"]),
+            "dob": data["dob"],
+            "age": str(age),
+            "company":company,
+            "address": data["address"].upper(),
+            "fathers_occupation": data["fathers_occupation"].upper(),
+            "mothers_occupation": data["mothers_occupation"].upper(),
+            "how_you_got_to_know": data["how_you_got_to_know"].upper(),
+            "employee_who_reached_out_to_you": data["employee_who_reached_out_to_you"].upper(),
+            "district": data["district"].upper(),
+            "state": data["state"].upper(),
+            "pincode": str(data["pincode"]),
+            "status": "In Progress",
+            "camp_id": data.get("camp_id", ""),
+            "camp_category": data.get("camp_category", "").upper(),
+            "batch_id": data.get("batch_id", ""),
+            "food_option": data.get("food_option", "").upper(),
+            # "dress_code": data.get("dress_code", ""),
+            "pick_up_city": data.get("pick_up_city", "").upper(),
+            "pick_up_point": data.get("pick_up_point", "").upper(),
+            "height": data.get("height", ""),
+            "weight": data.get("weight", ""),
+            "blood_group": data.get("blood_group", ""),
+            "payment_option": data.get("payment_option", ""),
+            "school_name": data.get("school_name", "").upper(),
+            "gender": data.get("gender", "").upper(),
+            "standard": data.get("standard", ""),
+            "wp_no": data.get("wp_no", ""),
+            "medication_physical":data.get("medication_physical"),
+            "other_problem":data.get("other_problem"),
+            "physical_problem":data.get("physical_problem",""),
+            "medication_allergy":data.get("medication_allergy",""),
+            "medication_other":data.get("medication_other",""),
+            "allergy":data.get("allergy",""),
+            "medicalCertificate":medical_cert_url,
+            "cadetPhoto":data.get("cadetPhoto",""),
+            "cadetSign":data.get("cadetSign",""),
+            "parentGurdianPhoto":data.get("parentGurdianPhoto",""),
+            "parentGurdianSign":data.get("parentGurdianSign",""),
+            "payment_status": data.get("payment_status", "Pending"),
+            "visiting_card":visiting_card_url,
+            "admission_form":admission_form,
+            'total_amount_payable':int(data.get("total_amount_payable", 0)),
+            "total_amount_paid":0,
+            "discount_code":data.get("discount_code", ""),
+            "discount_amount":data.get("discount_amount", 0),
+            "camp_year":str("20"+str(year))
+        }
+
+        # Store the student information in the MongoDB collection
+        batches_db = db["batches_db"]
+        batch = batches_db.find_one({"batch_id":data.get("batch_id")}, {"_id":0})
+        if batch:
+            students_db.insert_one(student)
+            generateSacTableAndRecountRegStudents(student['batch_id'])
+            fillSacTableFromStudent(sid, student['batch_id'])
+            sync_SacTableFrom_Student(student['batch_id'])
+            msg = "Dear Parent, Thank you for registering with MCF Camp, for any registration and payment-related query please visit us at www.mcfcamp.in. Or contact us at 9604087000/9604082000, or email us at mcfcamp@gmail.com MCF Summer Camp"
+            sub = "Registration Successful !"
+            mailToSend = data['email']
+            sendSMS(msg,data["phn"])
+            send_wp(msg,data["wp_no"])
+            send_email(msg, sub, mailToSend)
+
+            msg2 = f"New Student Registered \n\n Name - {data['first_name']} {data['last_name']} \n Camp Name - {camp_name} \n Batch Name - {batch_name}"
+            # send_wp(msg2,"9604084000")
+            send_email(msg2, sub, "infomcfcamp@gmail.com")
+            return jsonify({"message": "Student registered successfully", "sid": sid})
+
+        return jsonify({"message": "Student registered successfully", "sid": sid})
+
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400  # Bad Request
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+
+
+@app.route('/getStudentsByEmail', methods=['GET'])
+def get_student_by_email():
+    try:
+        # Get the sid from request parameters
+        email = request.args.get('email')
+
+        if not email:
+            return jsonify({"error": "Missing 'email' parameter in the request."}), 400  # Bad Request
+
+        # Find the student based on sid
+        students_db = db["students_db"]
+        students = list(students_db.find({"email": email}, {"_id": 0}))  # Exclude the _id field from the response
+
+        if not student:
+            return jsonify({"error": f"No student found with email: {email}"}), 404  # Not Found
+        
+        all_students = []
+        
+        for student in list(students):
+            # If camp_id and batch_id are available in the student data, fetch additional information
+            camp_id = student.get("camp_id", "")
+            batch_id = student.get("batch_id", "")
+
+            # Fetch camp details if camp_id is present
+            camp_details = {}
+            if camp_id:
+                camps_db = db["camps_db"]
+                camp_details = camps_db.find_one({"camp_id": camp_id}, {"_id": 0})
+
+            # Fetch batch details if batch_id is present
+            batch_details = {}
+            if batch_id:
+                batches_db = db["batches_db"]
+                batch_details = batches_db.find_one({"batch_id": batch_id}, {"_id": 0})
+
+            # Combine student, camp, and batch details
+            response_data = {
+                "student": student,
+                "camp_details": camp_details,
+                "batch_details": batch_details
+            }
+
+            all_students.append(response_data)
+
+        return jsonify(response_data)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
     
 
 
