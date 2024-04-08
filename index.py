@@ -3418,7 +3418,18 @@ def createPayment_func(data):
                 "receipt_no":receipt_no,
                 "receipt_url":f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
             })
-                
+
+            elif 'booking' in data['payment_option']:
+                all_payments.insert_one({
+                "payment_id": payment_id,
+                "payment_option": data['payment_option'],
+                "payment_amount": data['payment_amount'],
+                "payment_date":data["payment_date"],
+                "transaction_id":data["transaction_id"],
+                "payment_mode":data["payment_mode"],
+                "sid":data['sid'],
+                "receipt_no":receipt_no,})
+               
 
             else:
                 return {"error":"Please Specify Payment Option"}
@@ -3986,6 +3997,16 @@ def createPayment_func(data):
                 "receipt_url":f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
             })
               
+            elif 'booking' in data['payment_option']:
+                all_payments.insert_one({
+                "payment_id": payment_id,
+                "payment_option": data['payment_option'],
+                "payment_amount": data['payment_amount'],
+                "payment_date":data["payment_date"],
+                "transaction_id":data["transaction_id"],
+                "payment_mode":data["payment_mode"],
+                "sid":data['sid'],
+                "receipt_no":receipt_no,})
             else:
                 return {"error":"Please Specify Payment Option"}
 
