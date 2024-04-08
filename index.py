@@ -4619,7 +4619,7 @@ def login_user():
         # Generate JWT token
         token = create_jwt_token(user['user_id'])
 
-        return jsonify({"message": "Login successful.", "success": True, "user_id": user['user_id'], "token": token})
+        return jsonify({"message": "Login successful.", "success": True, "parent_name":user['parent_name'], "phn":user['phn'], "email":user['email'], "user_id": user['user_id'], "token": token})
 
     except Exception as e:
         return jsonify({"error": str(e), "success": False}), 500  # Internal Server Error
