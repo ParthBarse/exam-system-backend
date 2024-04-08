@@ -5008,7 +5008,7 @@ def get_student_by_email():
 
             all_students.append(response_data)
 
-        return jsonify(response_data)
+        return jsonify(all_students)
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
