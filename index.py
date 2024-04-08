@@ -4596,6 +4596,81 @@ def webhook_acc_2():
 #-----------------------------------------------------------------------------------------------------------
 
 
+@app.route('/loginUser', methods=['POST'])
+def login_user():
+    try:
+        data = request.get_json()
+
+        # Get parameters from the JSON data
+        email = data.get('email')
+        pwd = data.get('pwd')
+
+        # Check if username and password are provided
+        if not email or not pwd:
+            return jsonify({"error": "Email and Password. are required.", "success": False}), 400  # Bad Request
+
+        # Find the admin based on username
+        user_db = db["user_db"]
+        user = user_db.find_one({"email": email}, {"_id": 0})
+
+        if not user or not check_password_hash(user.get("pwd", ""), pwd):
+            return jsonify({"error": "Invalid email or password.", "success": False}), 401  # Unauthorized
+
+        # Generate JWT token
+        token = create_jwt_token(user['user_id'])
+
+        return jsonify({"message": "Login successful.", "success": True, "user_id": user['user_id'], "token": token})
+
+    except Exception as e:
+        return jsonify({"error": str(e), "success": False}), 500  # Internal Server Error
+
+    
+@app.route('/getAllUsers', methods=['GET'])
+def get_all_users():
+    try:
+        # Retrieve all admin records from the MongoDB collection
+        admins_db = db["admins_db"]
+        admins = list(admins_db.find({}, {"_id": 0}))
+
+        return jsonify({"admins": admins})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+
+@app.route('/register_parent', methods=['POST'])
+def register_parent():
+    try:
+        data = request.get_json()
+
+        # Get parameters from the JSON data
+        user_db = db['user_db']
+        email = data.get('email')
+        password = data.get('phn')
+        phn = data.get('phn')
+        parent_name = data.get('parent_name')
+        user_id = str(uuid.uuid4().hex)
+        user = user_db.find_one({"email": email}, {"_id": 0})
+        if user:
+            return jsonify({"success":False,"error":"email Already Exist"})
+
+        # Check if email and password are provided
+        if not email or not password:
+            return jsonify({"error": "email and password are required."}), 400  # Bad Request
+
+        # Hash the password before storing it
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+
+        # Store user information in the MongoDB collection
+        user_db = db['user_db']
+        user_db.insert_one({"email": email, "pwd": hashed_password, "phn":phn, "parent_name":parent_name, "user_id":user_id})
+
+        return jsonify({"message": "User added successfully.","success":True, "user_id":user_id})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+
+
     
 
 
