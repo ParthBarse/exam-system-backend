@@ -4962,6 +4962,11 @@ def register_parent():
         user_db = db['user_db']
         user_db.insert_one({"email": email, "pwd": hashed_password, "phn":phn, "parent_name":parent_name, "user_id":user_id})
 
+        msg = f'Hello, {parent_name} \n\n Your Registration for MCF User Panel is Completed Successfully ! \n Please fill the Admission form in User Panel to get Admission in MCF CAMPS. For Payment related queries contact MCF STAFF. \n\n Following are Login Details for User Panel -\n Username - {email}\n Password - {phn} \n\n Thanks.'
+
+        send_email(msg, "Parent Registration Successful !", email)
+        send_wp(msg, phn, [])
+
         return jsonify({"message": "User added successfully.","success":True, "user_id":user_id})
 
     except Exception as e:
