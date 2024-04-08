@@ -2879,7 +2879,9 @@ def createPayment_func(data):
                 "1_INST_AMT":"-",
                 "1_INST_DT":"-",
                 "2_INST_AMT":"-",
-                "2_INST_DT":"-"
+                "2_INST_DT":"-",
+                "3_INST_AMT":"-",
+                "3_INST_DT":"-"
                 }
             
             if "totalPayment" in data['payment_option']:
@@ -3283,6 +3285,140 @@ def createPayment_func(data):
                 "receipt_url":f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
             })
                 
+            elif '3installment' in data['payment_option']:
+                final_data['3_INST_AMT'] = data['payment_amount']
+                final_data['3_INST_DT'] = data["payment_date"]
+                for key, value in final_data.items():
+                        find_and_replace_tables_fee_receipt(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+                doc.save(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
+
+                convert_to_pdf(str(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
+
+
+                if float(total_paid) >= float(student_data['total_amount_payable']):
+                    camp_id = student_data['camp_id']
+                    camp_db = db["camps_db"]
+                    camp_data = camp_db.find_one({"camp_id":camp_id}, {"_id":0})
+                    batch_id = student_data['batch_id']
+                    batch_db = db["batches_db"]
+                    batch_data = batch_db.find_one({"batch_id":batch_id}, {"_id":0})
+                    payment_db = db["all_payments"]
+                    payment_data = payment_db.find({"sid":data['sid']}, {"_id":0})
+                    receipt_nos = ""
+                    payment_data = list(payment_data)
+                    print(len(payment_data))
+                    last_payment_date = data['payment_date']
+                    for receipt in payment_data:
+                        receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
+                        print(receipt_nos)
+                    receipt_nos = str(receipt_nos + receipt_no)
+
+                    student_data_1 = {
+                            'CADET_NAME': str(student_data["first_name"].upper()+" "+student_data["last_name"].upper()),
+                            'REGNO': data['sid'],
+                            'RANK': 'CDT',
+                            'C_NAME': camp_data['camp_name'],
+                            'C_BATCH': batch_data['batch_name'],
+                            'C_DAYS': batch_data["duration"],
+                            'COMP_N': student_data['company'],
+                            'C_DATE': batch_data['start_date'],
+                            'PICKPT': student_data["pick_up_point"],
+                            'PICK_TIME': '',
+                            'EMP_NAME':  student_data["employee_who_reached_out_to_you"],
+                            'GAR_NAME': student_data["middle_name"],
+                            'ADDRESS': student_data["address"],
+                            'CITY': student_data["pick_up_city"],
+                            'DISTRICT': student_data["district"],
+                            'STATE': student_data['state'],
+                            'PINCODE': student_data["pincode"],
+                            'EMAIL': student_data["email"],
+                            'C_NUM': str(student_data["phn"]),
+                            'WP_NUM': student_data.get("wp_no", ""),
+                            'FATHER_NUM': '',
+                            'MOTHER_NUM': '',
+                            'DOB': student_data["dob"],
+                            'BLOOD_GROUP':  student_data.get("blood_group", ""),
+                            'STD': student_data.get("standard", ""),
+                            'SCHOOL': student_data.get("school_name", ""),
+                            'FEE_PAID': student_data['total_amount_paid'],
+                            'BALANCE': float(student_data['total_amount_payable']) - float(student_data['total_amount_paid']),
+                            'RECEIPT_NUM': receipt_nos,
+                            'DATE': last_payment_date,
+                            'TIME': ''
+                        }
+
+                    doc = Document('mcf_entrance_card.docx')
+
+                    # Replace text fields in paragraphs
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD CADET_NAME}', student_data_1['CADET_NAME'])
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD DATE}', student_data_1['DATE'])
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD TIME}', student_data_1['TIME'])
+
+                    for key, value in student_data_1.items():
+                            find_and_replace_tables_entrance_card(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+
+                    try:
+                        print("replacing image")
+                        table = doc.tables[0]  # Assuming the first table
+                        cell = table.cell(0, 3)  # Assuming the first cell in the third column
+
+                        # Clear the content of the cell by removing its paragraphs
+                        for paragraph in cell.paragraphs:
+                            paragraph.clear()
+
+                        # Add a new paragraph and insert the image
+                        paragraph = cell.add_paragraph()
+                        run = paragraph.add_run()
+                        cadet_photo_url = student_data["cadetPhoto"]
+                        cadet_photo_path = cadet_photo_url.replace(files_url,files_base_dir)
+                        run.add_picture(cadet_photo_path, width=Inches(0.9))
+                    except Exception as e:
+                        print("Error : ",str(e))
+
+                    doc.save(str(str(file_dir)+f"{data['sid']}_entrance_card.docx"))
+
+                    convert_to_pdf(str(str(file_dir)+f"{data['sid']}_entrance_card.docx"), str(str(file_dir)+f"{data['sid']}_entrance_card.pdf"))
+
+                    ec = f"{files_base_url}{data['sid']}_entrance_card.pdf"
+
+                    entrance_card = {
+                        "entrence_card" : ec
+                    }
+                    
+
+                    students_db.update_one({"sid": data['sid']}, {"$set": entrance_card})
+
+                    payment_receipt_url = f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+
+                    msg = f"Hello,\n {student_data['first_name']} {student_data['last_name']} your admission for camp - {camp_data['camp_name']} and Batch - {batch_data['batch_name']} for Duration of {batch_data['duration']} is Succesfull. \n Following are the Documents and List of Things to Bring for Camp. \n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {ec} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
+
+                    fns = []
+                    payment_receipt = payment_receipt_url.replace(files_url,files_base_dir)
+                    mcert = student_data['medicalCertificate'].replace(files_url,files_base_dir)
+                    ecfn = ec.replace(files_url,files_base_dir)
+                    vc = student_data['visiting_card'].replace(files_url,files_base_dir)
+                    af = student_data['admission_form'].replace(files_url,files_base_dir)
+                    fns = [payment_receipt, mcert, ecfn, vc, af]
+            
+                    send_email_attachments(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'], files=fns)
+                    send_wp(msg,student_data['wp_no'],file_paths=fns)
+
+                    # send_wp(msg,"9604084000")
+                    send_email(msg, f"Payment Complete of Student - {student_data['first_name']} {student_data['last_name']}", "infomcfcamp@gmail.com")
+
+
+                all_payments.insert_one({
+                "payment_id": payment_id,
+                "payment_option": data['payment_option'],
+                "payment_amount": data['payment_amount'],
+                "payment_date":data["payment_date"],
+                "transaction_id":data["transaction_id"],
+                "payment_mode":data["payment_mode"],
+                "sid":data['sid'],
+                "receipt_no":receipt_no,
+                "receipt_url":f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+            })
+                
 
             else:
                 return {"error":"Please Specify Payment Option"}
@@ -3315,7 +3451,9 @@ def createPayment_func(data):
                 "1_INST_AMT":"-",
                 "1_INST_DT":"-",
                 "2_INST_AMT":"-",
-                "2_INST_DT":"-"
+                "2_INST_DT":"-",
+                "3_INST_AMT":"-",
+                "3_INST_DT":"-"
                 }
             
             if "totalPayment" in data['payment_option']:
@@ -3716,6 +3854,138 @@ def createPayment_func(data):
                 "receipt_url":f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
             })
                 
+            elif '3installment' in data['payment_option']:
+                final_data['3_INST_AMT'] = data['payment_amount']
+                final_data['3_INST_DT'] = data["payment_date"]
+                for key, value in final_data.items():
+                        find_and_replace_tables_fee_receipt(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+                doc.save(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx"))
+
+                convert_to_pdf(str(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.docx")), str(str(file_dir)+str(f"{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf")))
+
+
+                if float(total_paid) >= float(student_data['total_amount_payable']):
+                    camp_id = student_data['camp_id']
+                    camp_db = db["camps_db"]
+                    camp_data = camp_db.find_one({"camp_id":camp_id}, {"_id":0})
+                    batch_id = student_data['batch_id']
+                    batch_db = db["batches_db"]
+                    batch_data = batch_db.find_one({"batch_id":batch_id}, {"_id":0})
+                    payment_db = db["all_payments"]
+                    payment_data = payment_db.find({"sid":data['sid']}, {"_id":0})
+                    receipt_nos = ""
+                    payment_data = list(payment_data)
+                    print(len(payment_data))
+                    last_payment_date = data['payment_date']
+                    for receipt in payment_data:
+                        receipt_nos = str(receipt_nos + str(str(receipt['receipt_no'])+ " , "))
+                        print(receipt_nos)
+                    receipt_nos = str(receipt_nos + receipt_no)
+
+                    student_data_1 = {
+                            'CADET_NAME': str(student_data["first_name"].upper()+" "+student_data["last_name"].upper()),
+                            'REGNO': data['sid'],
+                            'RANK': 'CDT',
+                            'C_NAME': camp_data['camp_name'],
+                            'C_BATCH': batch_data['batch_name'],
+                            'C_DAYS': batch_data["duration"],
+                            'COMP_N': student_data['company'],
+                            'C_DATE': batch_data['start_date'],
+                            'PICKPT': student_data["pick_up_point"],
+                            'PICK_TIME': '',
+                            'EMP_NAME':  student_data["employee_who_reached_out_to_you"],
+                            'GAR_NAME': student_data["middle_name"],
+                            'ADDRESS': student_data["address"],
+                            'CITY': student_data["pick_up_city"],
+                            'DISTRICT': student_data["district"],
+                            'STATE': student_data['state'],
+                            'PINCODE': student_data["pincode"],
+                            'EMAIL': student_data["email"],
+                            'C_NUM': str(student_data["phn"]),
+                            'WP_NUM': student_data.get("wp_no", ""),
+                            'FATHER_NUM': '',
+                            'MOTHER_NUM': '',
+                            'DOB': student_data["dob"],
+                            'BLOOD_GROUP':  student_data.get("blood_group", ""),
+                            'STD': student_data.get("standard", ""),
+                            'SCHOOL': student_data.get("school_name", ""),
+                            'FEE_PAID': student_data['total_amount_paid'],
+                            'BALANCE': float(student_data['total_amount_payable']) - float(student_data['total_amount_paid']),
+                            'RECEIPT_NUM': receipt_nos,
+                            'DATE': last_payment_date,
+                            'TIME': ''
+                        }
+
+                    doc = Document('mcf_entrance_card.docx')
+
+                    # Replace text fields in paragraphs
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD CADET_NAME}', student_data_1['CADET_NAME'])
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD DATE}', student_data_1['DATE'])
+                    find_and_replace_paragraphs_entrance_card(doc.paragraphs, '{MERGEFIELD TIME}', student_data_1['TIME'])
+
+                    for key, value in student_data_1.items():
+                            find_and_replace_tables_entrance_card(doc.tables, f'{{MERGEFIELD {key}}}', str(value))
+
+                    try:
+                        print("replacing image")
+                        table = doc.tables[0]  # Assuming the first table
+                        cell = table.cell(0, 3)  # Assuming the first cell in the third column
+
+                        # Clear the content of the cell by removing its paragraphs
+                        for paragraph in cell.paragraphs:
+                            paragraph.clear()
+
+                        # Add a new paragraph and insert the image
+                        paragraph = cell.add_paragraph()
+                        run = paragraph.add_run()
+                        cadet_photo_url = student_data["cadetPhoto"]
+                        cadet_photo_path = cadet_photo_url.replace(files_url,files_base_dir)
+                        run.add_picture(cadet_photo_path, width=Inches(0.9))
+                    except Exception as e:
+                        print("Error : ",str(e))
+
+                    doc.save(str(str(file_dir)+f"{data['sid']}_entrance_card.docx"))
+
+                    convert_to_pdf(str(str(file_dir)+f"{data['sid']}_entrance_card.docx"), str(str(file_dir)+f"{data['sid']}_entrance_card.pdf"))
+
+                    ec = f"{files_base_url}{data['sid']}_entrance_card.pdf"
+
+                    entrance_card = {
+                        "entrence_card" : ec
+                    }
+                    
+                    payment_receipt_url = f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+
+                    students_db.update_one({"sid": data['sid']}, {"$set": entrance_card})
+                    msg = f"Hello,\n {student_data['first_name']} {student_data['last_name']} your admission for camp - {camp_data['camp_name']} and Batch - {batch_data['batch_name']} for Duration of {batch_data['duration']} is Succesfull. \n Following are the Documents and List of Things to Bring for Camp. \n Download Links for Your Documents are Shared Below : \nPayment Receipt - {payment_receipt_url}\n Medical Certificate - {student_data['medicalCertificate']} \nEntrance Card - {ec} \nVisiting Card - {student_data['visiting_card']} \nAdmission Form - {student_data['admission_form']}\n\nTeam MCF Camp"
+
+                    fns = []
+                    payment_receipt = payment_receipt_url.replace(files_url,files_base_dir)
+                    mcert = student_data['medicalCertificate'].replace(files_url,files_base_dir)
+                    ecfn = ec.replace(files_url,files_base_dir)
+                    vc = student_data['visiting_card'].replace(files_url,files_base_dir)
+                    af = student_data['admission_form'].replace(files_url,files_base_dir)
+                    fns = [payment_receipt, mcert, ecfn, vc, af]
+            
+                    send_email_attachments(msg=msg, sub="Payment Receipt and Other Documents", mailToSend=student_data['email'], files=fns)
+                    send_wp(msg,student_data['wp_no'],file_paths=fns)
+
+                    # send_wp(msg,"9604084000")
+                    send_email(msg, f"Payment Complete of Student - {student_data['first_name']} {student_data['last_name']}", "infomcfcamp@gmail.com")
+
+
+                all_payments.insert_one({
+                "payment_id": payment_id,
+                "payment_option": data['payment_option'],
+                "payment_amount": data['payment_amount'],
+                "payment_date":data["payment_date"],
+                "transaction_id":data["transaction_id"],
+                "payment_mode":data["payment_mode"],
+                "sid":data['sid'],
+                "receipt_no":receipt_no,
+                "receipt_url":f"{files_base_url}{student_data['sid']}_fee_receipt_{data['payment_option']}.pdf"
+            })
+              
             else:
                 return {"error":"Please Specify Payment Option"}
 
@@ -4151,12 +4421,12 @@ def generate_hash(data, salt):
     print(hashed)
     return hashed
 
-def generate_hash_latest(key, txnid, amount, productinfo, firstname, email, udf1, salt):
-    hash_str = f"{key}|{txnid}|{amount}|{productinfo}|{firstname}|{email}|{udf1}||||||||||{salt}"
+def generate_hash_latest(key, txnid, amount, productinfo, firstname, email, udf1, udf2, salt):
+    hash_str = f"{key}|{txnid}|{amount}|{productinfo}|{firstname}|{email}|{udf1}|{udf2}|||||||||{salt}"
     hash_obj = hashlib.sha512(hash_str.encode())
     return hash_obj.hexdigest()
 
-def initiate_payment(name, email, phn, camp_name, amt, sid, route):
+def initiate_payment(name, email, phn, camp_name, amt, sid, inst, route):
         url = "https://pay.easebuzz.in/payment/initiateLink"
         name = name
         email = email
@@ -4173,6 +4443,7 @@ def initiate_payment(name, email, phn, camp_name, amt, sid, route):
             salt = "7TGBSUKDN9"
 
         udf1 = sid
+        udf2 = inst
 
         surl = 'https://admission.mcfcamp.in/SuccessPayment'
         furl = 'https://admission.mcfcamp.in/FailedPayment'
@@ -4180,7 +4451,7 @@ def initiate_payment(name, email, phn, camp_name, amt, sid, route):
         # Example parameters
 
         # Generate the hash
-        hash_value = generate_hash_latest(key, transaction_id, amt, camp_name, name, email, udf1, salt)
+        hash_value = generate_hash_latest(key, transaction_id, amt, camp_name, name, email, udf1, udf2, salt)
 
 
         # Define the data in the specified sequence for hashing
@@ -4201,7 +4472,7 @@ def initiate_payment(name, email, phn, camp_name, amt, sid, route):
             'furl': furl,
             'hash': hash_value,  # Calculate and provide the hash value if required
             'udf1': sid,
-            'udf2': "",
+            'udf2': inst,
             'udf3': "",
             'udf4': "",
             'udf5': "",
@@ -4285,7 +4556,7 @@ def check_payment_receipt(trx_id, route):
                             "payment_amount":data['net_amount_debit'],
                             "payment_date":payment_date,
                             "payment_mode": data['mode'],
-                            "payment_option":"totalPayment",
+                            "payment_option":data['udf2'],
                             "sid":data['udf1'],
                             "transaction_id":data['txnid']
                         }
@@ -4299,7 +4570,7 @@ def check_payment_receipt(trx_id, route):
                             "payment_amount":data['net_amount_debit'],
                             "payment_date":payment_date,
                             "payment_mode": data['mode'],
-                            "payment_option":"totalPayment",
+                            "payment_option":data['udf2'],
                             "sid":data['udf1'],
                             "transaction_id":data['txnid']
                         }
@@ -4480,7 +4751,7 @@ def verifyPayment():
                     "payment_amount":data['net_amount_debit'],
                     "payment_date":payment_date,
                     "payment_mode": data['mode'],
-                    "payment_option":"totalPayment",
+                    "payment_option":data['udf2'],
                     "sid":data['udf1'],
                     "transaction_id":data['txnid']
                 }
@@ -4508,7 +4779,7 @@ def generatePaymentLink():
             route = "r2"
         else:
             route= "r1"
-        resp = initiate_payment(name, student['email'], student['wp_no'], camp['camp_name'], student['total_amount_payable'], sid, route)
+        resp = initiate_payment(name, student['email'], student['wp_no'], camp['camp_name'], student['total_amount_payable'], sid, 'totalPayment', route)
         if resp['success'] == True:
             payment_links_db = db['payment_links_db']
             payment_data = {
@@ -4548,7 +4819,7 @@ def webhook_acc_1():
                 "payment_amount":data['net_amount_debit'],
                 "payment_date":payment_date,
                 "payment_mode": data['mode'],
-                "payment_option":"totalPayment",
+                "payment_option":data['udf2'],
                 "sid":data['udf1'],
                 "transaction_id":data['txnid']
             }
@@ -4576,7 +4847,7 @@ def webhook_acc_2():
                 "payment_amount":data['net_amount_debit'],
                 "payment_date":payment_date,
                 "payment_mode": data['mode'],
-                "payment_option":"totalPayment",
+                "payment_option":data['udf2'],
                 "sid":data['udf1'],
                 "transaction_id":data['txnid']
             }
@@ -4595,6 +4866,11 @@ def webhook_acc_2():
 
 #-----------------------------------------------------------------------------------------------------------
 
+
+
+#-----------------------------------------------------------------------------------------------------------
+
+#--------------------------------------------- User Panel  Start ------------------------------------------
 
 @app.route('/loginUser', methods=['POST'])
 def login_user():
@@ -5014,6 +5290,139 @@ def get_student_by_email():
         return jsonify({"error": str(e)}), 500  # Internal Server Error
     
 
+@app.route("/generatePaymentLink_booking", methods=["GET"])
+def generatePaymentLink_booking():
+    try:
+        sid = request.args.get("sid")
+        students_db = db['students_db']
+        batch_db = db['batches_db']
+        camps_db = db['camps_db']
+        student = students_db.find_one({"sid":sid})
+        name = str(student['first_name']+" "+student['last_name'])
+        camp = camps_db.find_one({"camp_id":student['camp_id']})
+        batch = batch_db.find_one({"batch_id":student['batch_id']})
+        print(camp['camp_name'])
+
+        if "30" in batch['duration']:
+            booking_amt = 10000
+        elif "15" in batch['duration']:
+            booking_amt = 5000
+        elif "7" in batch['duration']:
+            booking_amt = 3000
+        elif "5" in batch['duration']:
+            booking_amt = 2000
+        elif "3" in batch['duration']:
+            booking_amt = 1000
+        else:
+            return jsonify({'success': False, "error":"Payment Link Not Generated."}), 400
+        
+        route = "r1"
+        if "15" in batch['duration'] or "30" in batch['duration']:
+            route = "r2"
+        else:
+            route= "r1"
+        resp = initiate_payment(name, student['email'], student['wp_no'], camp['camp_name'], booking_amt, sid, "booking", route)
+        if resp['success'] == True:
+            payment_links_db = db['payment_links_db']
+            payment_data = {
+                "sid":sid,
+                "name": name,
+                "camp_name":camp['camp_name'],
+                "wp_no": student['wp_no'],
+                'email':student['email'],
+                "payment_link":resp['payment_url'],
+                "transaction_id":resp['transaction_id']
+            }
+            payment_links_db.insert_one(payment_data)
+
+            p = multiprocessing.Process(target=run_check_payment_receipt, args=(resp["transaction_id"], route,))
+            p.daemon = True  # Set the process as a daemon (runs independently)
+            p.start()  # Start the process
+
+
+            return jsonify({'success': True, "payment_url":resp['payment_url']}), 200
+        else:
+            return jsonify({'success': False, "error":"Payment Link Not Generated."}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+
+@app.route("/generatePaymentLink_installments", methods=["GET"])
+def generatePaymentLink_installments():
+    try:
+        sid = request.args.get("sid")
+        installment = request.args.get("installment")
+        students_db = db['students_db']
+        batch_db = db['batches_db']
+        camps_db = db['camps_db']
+        student = students_db.find_one({"sid":sid})
+        name = str(student['first_name']+" "+student['last_name'])
+        camp = camps_db.find_one({"camp_id":student['camp_id']})
+        batch = batch_db.find_one({"batch_id":student['batch_id']})
+        print(camp['camp_name'])
+        
+        route = "r1"
+        if "15" in batch['duration'] or "30" in batch['duration']:
+            route = "r2"
+        else:
+            route= "r1"
+
+        if installment == "totalPayment":
+            final_amount = student['total_amount_payable']
+        elif installment == "1installment":
+            if student['payment_option'] == "2installment":
+                div_by = 2
+            elif student['payment_option'] == "3installment":
+                div_by = 3
+            else:
+                div_by = 1
+            final_amount = float(student['total_amount_payable']) / float(div_by)
+        elif installment == "2installment":
+            if student['payment_option'] == "2installment":
+                div_by = 2
+            elif student['payment_option'] == "3installment":
+                div_by = 3
+            else:
+                div_by = 1
+            final_amount = float(student['total_amount_payable']) / float(div_by)
+        elif installment == "3installment":
+            if student['payment_option'] == "2installment":
+                div_by = 2
+            elif student['payment_option'] == "3installment":
+                div_by = 3
+            else:
+                div_by = 1
+            final_amount = float(student['total_amount_payable']) / float(div_by)
+
+        resp = initiate_payment(name, student['email'], student['wp_no'], camp['camp_name'], final_amount, sid, installment, route)
+        if resp['success'] == True:
+            payment_links_db = db['payment_links_db']
+            payment_data = {
+                "sid":sid,
+                "name": name,
+                "camp_name":camp['camp_name'],
+                "wp_no": student['wp_no'],
+                'email':student['email'],
+                "payment_link":resp['payment_url'],
+                "transaction_id":resp['transaction_id']
+            }
+            payment_links_db.insert_one(payment_data)
+
+            p = multiprocessing.Process(target=run_check_payment_receipt, args=(resp["transaction_id"], route,))
+            p.daemon = True  # Set the process as a daemon (runs independently)
+            p.start()  # Start the process
+
+
+            return jsonify({'success': True, "payment_url":resp['payment_url']}), 200
+        else:
+            return jsonify({'success': False, "error":"Payment Link Not Generated."}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'msg': 'Something Went Wrong.', 'reason': str(e)}), 500
+
+
+
+#--------------------------------------------- User Panel End ---------------------------------------------------
+
+#-----------------------------------------------------------------------------------------------------------
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0")
