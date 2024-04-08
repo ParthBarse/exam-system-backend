@@ -5321,6 +5321,7 @@ def generatePaymentLink_booking():
             route = "r2"
         else:
             route= "r1"
+        print("Amount ----> ",booking_amt)
         resp = initiate_payment(name, student['email'], student['wp_no'], camp['camp_name'], booking_amt, sid, "booking", route)
         if resp['success'] == True:
             payment_links_db = db['payment_links_db']
@@ -5395,6 +5396,7 @@ def generatePaymentLink_installments():
                 div_by = 1
             final_amount = float(student['total_amount_payable']) / float(div_by)
 
+        print("Amount ----> ", final_amount)
         resp = initiate_payment(name, student['email'], student['wp_no'], camp['camp_name'], final_amount, sid, installment, route)
         if resp['success'] == True:
             payment_links_db = db['payment_links_db']
