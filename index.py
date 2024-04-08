@@ -4977,7 +4977,7 @@ def get_student_by_email():
         students_db = db["students_db"]
         students = list(students_db.find({"email": email}, {"_id": 0}))  # Exclude the _id field from the response
 
-        if not student:
+        if not students:
             return jsonify({"error": f"No student found with email: {email}"}), 404  # Not Found
         
         all_students = []
