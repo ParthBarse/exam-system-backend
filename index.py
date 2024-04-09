@@ -2153,7 +2153,7 @@ def login_admin():
         # Generate JWT token
         token = create_jwt_token(admin['admin_id'])
 
-        return jsonify({"message": "Login successful.", "success": True, "admin_id": admin['admin_id'], "token": token})
+        return jsonify({"message": "Login successful.", "success": True,"admin_name":username, "admin_id": admin['admin_id'], "token": token})
 
     except Exception as e:
         return jsonify({"error": str(e), "success": False}), 500  # Internal Server Error
