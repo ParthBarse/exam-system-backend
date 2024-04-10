@@ -2157,7 +2157,7 @@ def login_admin():
         username = data.get('username')
         password = data.get('password')
 
-        client_ip = request.remote_addr
+        client_ip = request.environ['REMOTE_ADDR']
         print(client_ip)
         raw_location = get_location_from_ip_local(client_ip)
         print(raw_location)
