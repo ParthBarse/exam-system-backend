@@ -2158,14 +2158,14 @@ def login_admin():
         password = data.get('password')
 
         client_ip = request.remote_addr
+        print(client_ip)
         raw_location = get_location_from_ip_local(client_ip)
         print(raw_location)
-        raw_location = json.loads(raw_location)
-        print(type(raw_location))
         location = ""
         lat = ""
         long = ""
-        if raw_location['city']:
+        if raw_location != "IP address not found in the database":
+            raw_location = json.loads(raw_location)
             location = str(str(raw_location['city']) + " , " + str(raw_location['region'])+ " , "+ str(raw_location['country']))
             lat = str(raw_location['latitude'])
             long = str(raw_location['longitude'])
