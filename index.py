@@ -2159,6 +2159,7 @@ def login_admin():
 
         client_ip = request.remote_addr
         raw_location = get_location_from_ip_local(client_ip)
+        print(raw_location)
         raw_location = json.loads(raw_location)
         print(type(raw_location))
         location = ""
