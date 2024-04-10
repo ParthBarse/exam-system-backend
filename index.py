@@ -2148,6 +2148,22 @@ def get_location_from_ip_local(ip):
     finally:
         reader.close()
 
+import datetime
+import pytz
+
+def get_current_time_ist():
+    # Get the current time in UTC
+    server_time = datetime.datetime.utcnow()
+
+    # Specify the time zone of the server
+    server_timezone = pytz.utc
+
+    # Convert server time to IST
+    ist_timezone = pytz.timezone('Asia/Kolkata')
+    ist_time = server_timezone.localize(server_time).astimezone(ist_timezone)
+
+    return ist_time
+
 @app.route('/loginAdmin', methods=['POST'])
 def login_admin():
     try:
@@ -2193,7 +2209,13 @@ def login_admin():
 
         logs_db.insert_one({})
 
-        msg = f"Hello Super Admin, \nNew Login Detected to Account - {username} \nFrom IP Address - {client_ip}\nLocation - {location}"
+        # Get current time in IST
+        current_time_ist = get_current_time_ist()
+
+        # Format the time as required (e.g., YYYY-MM-DD HH:MM:SS)
+        formatted_time = current_time_ist.strftime('%Y-%m-%d %H:%M:%S')
+
+        msg = f"Hello Super Admin, \nNew Login Detected to Account - {username} \nFrom IP Address - {client_ip}\nLocation - {location}\n Timestamp - {formatted_time}"
         # send_email(msg, "New Login Detected to Admin Panel !", "infomcfcamp@gmail.com")
         send_email(msg, "New Login Detected to Admin Panel !", "parthbarse72@gmail.com")
 
@@ -2202,8 +2224,10 @@ def login_admin():
             "location" : location,
             "lat": lat,
             "long": long,
-            "ip": client_ip
+            "ip": client_ip,
+            "dt":formatted_time
         })
+
 
         return jsonify({"message": "Login successful.", "success": True,"admin_name":username, "admin_id": admin['admin_id'], "token": token})
 
