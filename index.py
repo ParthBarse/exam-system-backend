@@ -2130,6 +2130,24 @@ def create_jwt_token(admin_id):
     token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
     return token
 
+import geoip2.database
+def get_location_from_ip_local(ip):
+    database_path = 'GeoLite2-City.mmdb'
+    reader = geoip2.database.Reader(database_path)
+    try:
+        response = reader.city(ip)
+        city = response.city.name
+        region = response.subdivisions.most_specific.name
+        country = response.country.name
+        latitude = response.location.latitude
+        longitude = response.location.longitude
+        location = {"city":city, "region":region, "country":country, "latitude":latitude, "longitude":longitude}
+        return location
+    except geoip2.errors.AddressNotFoundError:
+        return "IP address not found in the database"
+    finally:
+        reader.close()
+
 @app.route('/loginAdmin', methods=['POST'])
 def login_admin():
     try:
@@ -2138,6 +2156,16 @@ def login_admin():
         # Get parameters from the JSON data
         username = data.get('username')
         password = data.get('password')
+
+        client_ip = request.remote_addr
+        raw_location = get_location_from_ip_local(client_ip)
+        location = ""
+        lat = ""
+        long = ""
+        if raw_location['city']:
+            location = str(str(raw_location['city']) + " , " + str(raw_location['region'])+ " , "+ str(raw_location['country']))
+            lat = str(raw_location['latitude'])
+            long = str(raw_location['longitude'])
 
         # Check if username and password are provided
         if not username or not password:
@@ -2152,6 +2180,22 @@ def login_admin():
 
         # Generate JWT token
         token = create_jwt_token(admin['admin_id'])
+
+        logs_db = db['admin_logs']
+
+        logs_db.insert_one({})
+
+        msg = f"Hello Super Admin, \nNew Login Detected to Account - {username} \nFrom IP Address - {client_ip}\nLocation - {location}"
+        send_email(msg, "New Login Detected to Admin Panel !", "infomcfcamp@gmail.com")
+        send_email(msg, "New Login Detected to Admin Panel !", "parthbarse72@gmail.com")
+
+        logs_db.insert_one({
+            "msg" : f"New Login Detected - {username}",
+            "location" : location,
+            "lat": lat,
+            "long": long,
+            "ip": client_ip
+        })
 
         return jsonify({"message": "Login successful.", "success": True,"admin_name":username, "admin_id": admin['admin_id'], "token": token})
 
