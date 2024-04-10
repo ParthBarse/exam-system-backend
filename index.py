@@ -2214,8 +2214,8 @@ def login_admin():
 def getAllSuperLogs():
     try:
         # Retrieve all admin records from the MongoDB collection
-        admins_logs = db["admins_logs"]
-        logs = list(admins_logs.find({}, {"_id": 0}))
+        admin_logs = db["admin_logs"]
+        logs = list(admin_logs.find({}, {"_id": 0}))
 
         return jsonify({"admins": logs})
 
