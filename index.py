@@ -5544,6 +5544,21 @@ def generatePaymentLink_installments():
 
 #-----------------------------------------------------------------------------------------------------------
 
+import psutil
+@app.route('/cpu_utilization')
+def cpu_utilization():
+    return jsonify({'cpu_percent': psutil.cpu_percent(interval=1)})
+
+@app.route('/memory_utilization')
+def memory_utilization():
+    memory = psutil.virtual_memory()
+    return jsonify({
+        'total': memory.total,
+        'used': memory.used,
+        'percent': memory.percent
+    })
+
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0")
 
