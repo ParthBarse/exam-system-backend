@@ -2210,6 +2210,18 @@ def login_admin():
     except Exception as e:
         return jsonify({"error": str(e), "success": False}), 500  # Internal Server Error
 
+@app.route('/getAllSuperLogs', methods=['GET'])
+def getAllSuperLogs():
+    try:
+        # Retrieve all admin records from the MongoDB collection
+        admins_logs = db["admins_logs"]
+        logs = list(admins_logs.find({}, {"_id": 0}))
+
+        return jsonify({"admins": logs})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+
     
 @app.route('/getAllAdmin', methods=['GET'])
 def get_all_admin():
