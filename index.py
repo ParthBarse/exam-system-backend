@@ -2157,7 +2157,13 @@ def login_admin():
         username = data.get('username')
         password = data.get('password')
 
-        client_ip = request.environ['REMOTE_ADDR']
+        if request.environ.get('HTTP_X_FORWARDED_FOR') is None:
+            client_ip = request.environ['REMOTE_ADDR']
+            print(request.environ['REMOTE_ADDR'])
+        else:
+            client_ip = request.environ['HTTP_X_FORWARDED_FOR']
+            print(request.environ['HTTP_X_FORWARDED_FOR']) # if behind a proxy
+
         print(client_ip)
         raw_location = get_location_from_ip_local(client_ip)
         print(raw_location)
