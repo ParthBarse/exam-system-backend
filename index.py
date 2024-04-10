@@ -2216,8 +2216,8 @@ def login_admin():
         formatted_time = current_time_ist.strftime('%Y-%m-%d %H:%M:%S')
 
         msg = f"Hello Super Admin, \nNew Login Detected to Account - {username} \nFrom IP Address - {client_ip}\nLocation - {location}\n Timestamp - {formatted_time}"
-        # send_email(msg, "New Login Detected to Admin Panel !", "infomcfcamp@gmail.com")
-        send_email(msg, "New Login Detected to Admin Panel !", "parthbarse72@gmail.com")
+        send_email(msg, "New Login Detected to Admin Panel !", "infomcfcamp@gmail.com")
+        # send_email(msg, "New Login Detected to Admin Panel !", "parthbarse72@gmail.com")
 
         logs_db.insert_one({
             "msg" : f"New Login Detected - {username}",
