@@ -2194,7 +2194,7 @@ def login_admin():
         logs_db.insert_one({})
 
         msg = f"Hello Super Admin, \nNew Login Detected to Account - {username} \nFrom IP Address - {client_ip}\nLocation - {location}"
-        send_email(msg, "New Login Detected to Admin Panel !", "infomcfcamp@gmail.com")
+        # send_email(msg, "New Login Detected to Admin Panel !", "infomcfcamp@gmail.com")
         send_email(msg, "New Login Detected to Admin Panel !", "parthbarse72@gmail.com")
 
         logs_db.insert_one({
