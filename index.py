@@ -2217,7 +2217,7 @@ def getAllSuperLogs():
         admin_logs = db["admin_logs"]
         logs = list(admin_logs.find({}, {"_id": 0}))
 
-        return jsonify({"logs": logs[-1]})
+        return jsonify({"logs": logs[::-1]})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
