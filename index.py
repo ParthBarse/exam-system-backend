@@ -2148,10 +2148,9 @@ def get_location_from_ip_local(ip):
     finally:
         reader.close()
 
-import datetime
-import pytz
-
 def get_current_time_ist():
+    import datetime
+    import pytz
     # Get the current time in UTC
     server_time = datetime.datetime.utcnow()
 
