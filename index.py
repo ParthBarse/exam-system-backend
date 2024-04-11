@@ -74,7 +74,7 @@ host = ""
 
 def getNotfStat():
     settings_db = db['count_db']
-    data = settings_db.find_one({"found":"3"})
+    data = settings_db.find_one({"found":"2"})
     if data :
         notificationFlag=data['status']
     else:
