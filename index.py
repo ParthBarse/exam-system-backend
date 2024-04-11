@@ -79,6 +79,7 @@ def getNotfStat():
         notificationFlag=data['status']
     else:
         notificationFlag="on"
+    print("Notification - ",notificationFlag)
     return notificationFlag
 
 
