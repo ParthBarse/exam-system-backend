@@ -70,6 +70,18 @@ app.config['MAIL_PASSWORD'] = "irbnexpguzgxwdgx"
 host = ""
 
 
+# notificationFlag = True
+
+def getNotfStat():
+    settings_db = db['count_db']
+    data = settings_db.find_one({"found":"3"})
+    if data :
+        notificationFlag=data['status']
+    else:
+        notificationFlag="on"
+    return notificationFlag
+
+
 @app.route('/')
 def hello_world():
     return 'Hello World!'
@@ -752,6 +764,9 @@ def sync_data(original_sid, update_sid, prev_batch_id):
                 sync_SacTableFrom_Student(prev_batch_id)
 
 def sendSMS(msg,phn):
+    notifyFlag = getNotfStat()
+    if notifyFlag == "off":
+        phn=''
     # phn="8793015610"
     if msg and phn:
         url = "http://msg.msgclub.net/rest/services/sendSMS/sendGroupSms"
@@ -767,6 +782,9 @@ def sendSMS(msg,phn):
     
 
 def send_wp(sms_content, mobile_numbers, file_paths=[]):
+    notifyFlag = getNotfStat()
+    if notifyFlag == "off":
+        mobile_numbers=''
     # mobile_numbers="8793015610"
     if len(file_paths)>1:
             file_paths.append("THINGS_TO_BRING.pdf")
@@ -853,6 +871,9 @@ def encode_file_to_base64(file_path):
     
 
 def send_email(msg, sub, mailToSend):
+    notifyFlag = getNotfStat()
+    if notifyFlag == "off":
+        mailToSend=''
     # mailToSend = "parthbarse72@gmail.com"
     try:
         # Send the password reset link via email
@@ -886,6 +907,9 @@ from email.mime.base import MIMEBase
 from email import encoders
 
 def send_email_attachments(msg, sub, mailToSend, files=[]):
+    notifyFlag = getNotfStat()
+    if notifyFlag == "off":
+        mailToSend=''
     # mailToSend = "parthbarse72@gmail.com"
     try:
         if len(files)>1:
@@ -5582,7 +5606,37 @@ def getNotificationStatus():
         new_data = {
             "status":data['status']
         }
-        settings_db.update_one({"found":"2"},{"$set": new_data})
+        # settings_db.update_one({"found":"2"},{"$set": new_data})
+        return jsonify(new_data), 200
+    else:
+        return jsonify({"msg":"Status not Updated","success":False}), 400
+    
+@app.route('/changeMaintenanceStatus')
+def changeMaintenanceStatus():
+    new_status = request.args.get("opt")
+    steetings_db = db['count_db']
+    data = steetings_db.find_one({"found":"3"})
+    if data :
+        new_data = {
+            "status":new_status
+        }
+        steetings_db.update_one({"found":"3"},{"$set": new_data})
+        return jsonify({
+            "msg":"Status Updates Successfully.",
+            "success":True
+        }), 200
+    else:
+        return jsonify({"msg":"Status not Updated","success":False}), 400
+    
+@app.route('/getMaintenanceStatus')
+def getMaintenanceStatus():
+    settings_db = db['count_db']
+    data = settings_db.find_one({"found":"3"})
+    if data :
+        new_data = {
+            "status":data['status']
+        }
+        # settings_db.update_one({"found":"3"},{"$set": new_data})
         return jsonify(new_data), 200
     else:
         return jsonify({"msg":"Status not Updated","success":False}), 400
