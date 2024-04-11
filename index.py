@@ -5557,6 +5557,37 @@ def memory_utilization():
         'percent': memory.percent
     })
 
+@app.route('/changeNotificationStatus')
+def changeNotificationStatus():
+    new_status = request.args.get("opt")
+    steetings_db = db['count_db']
+    data = steetings_db.find_one({"found":"2"})
+    if data :
+        new_data = {
+            "status":new_status
+        }
+        steetings_db.update_one({"found":"2"},{"$set": new_data})
+        return jsonify({
+            "msg":"Status Updates Successfully.",
+            "success":True
+        }), 200
+    else:
+        return jsonify({"msg":"Status not Updated","success":False}), 400
+    
+@app.route('/getNotificationStatus')
+def getNotificationStatus():
+    settings_db = db['count_db']
+    data = settings_db.find_one({"found":"2"})
+    if data :
+        new_data = {
+            "status":data['status']
+        }
+        settings_db.update_one({"found":"2"},{"$set": new_data})
+        return jsonify(new_data), 200
+    else:
+        return jsonify({"msg":"Status not Updated","success":False}), 400
+
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0")
