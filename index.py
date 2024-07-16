@@ -485,6 +485,7 @@ def delete_exam():
 def add_question():
     try:
         data = request.form
+        data = list(data)
 
         # Generate a unique ID for the batch using UUID
         question_id = str(uuid.uuid4().hex)
@@ -495,7 +496,7 @@ def add_question():
         question_db = db["questions_db"]
         question_db.insert_one(data)
 
-        return jsonify({"message": "Batch added successfully", "batch_id": question_id})
+        return jsonify({"message": "Question added successfully", "question_id": question_id})
 
     except ValueError as ve:
         return jsonify({"error": str(ve)}), 400  # Bad Request
