@@ -481,41 +481,21 @@ def delete_exam():
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
     
-@app.route('/addBatch', methods=['POST'])
-def add_batch():
+@app.route('/addQuestion', methods=['POST'])
+def add_question():
     try:
         data = request.form
-
-        # Validate required fields
-        required_fields = ["batch_name", "start_date", "end_date", "duration", "batch_intake", "camp_id"]
-        for field in required_fields:
-            if field not in data or not data[field]:
-                raise ValueError(f"Missing or empty value for the required field: {field}")
-
-        # Parse start_date and end_date to datetime objects
-        start_date = data["start_date"]
-        end_date = data["end_date"]
 
         # Generate a unique ID for the batch using UUID
-        batch_id = str(uuid.uuid4().hex)
+        question_id = str(uuid.uuid4().hex)
 
-        batch = {
-            "batch_id": batch_id,
-            "batch_name": data["batch_name"],
-            "start_date": start_date,
-            "end_date": end_date,
-            "company": data["company"],
-            "duration": data["duration"],
-            "batch_intake": int(data["batch_intake"]),
-            "students_registered": 0,
-            "camp_id": data["camp_id"]
-        }
+        data['question_id'] = question_id
 
         # Store the batch information in the MongoDB collection
-        batches_db = db["batches_db"]
-        batches_db.insert_one(batch)
+        question_db = db["questions_db"]
+        question_db.insert_one(data)
 
-        return jsonify({"message": "Batch added successfully", "batch_id": batch_id})
+        return jsonify({"message": "Batch added successfully", "batch_id": question_id})
 
     except ValueError as ve:
         return jsonify({"error": str(ve)}), 400  # Bad Request
@@ -523,33 +503,33 @@ def add_batch():
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
 
-@app.route('/updateBatch', methods=['POST'])
-def update_batch():
+@app.route('/updateQuestion', methods=['POST'])
+def update_question():
     try:
         data = request.form
 
-        # Check if batch_id is provided
-        if 'batch_id' not in data:
-            raise ValueError("Missing 'batch_id' in the request.")
+        # Check if question_id is provided
+        if 'question_id' not in data:
+            raise ValueError("Missing 'question_id' in the request.")
 
-        # Find the batch based on batch_id
-        batches_db = db["batches_db"]
-        batch = batches_db.find_one({"batch_id": data['batch_id']})
+        # Find the question based on question_id
+        questions_db = db["questions_db"]
+        question = questions_db.find_one({"question_id": data['question_id']})
 
-        if not batch:
-            return jsonify({"error": f"No batch found with batch_id: {data['batch_id']}"}), 404  # Not Found
+        if not question:
+            return jsonify({"error": f"No question found with question_id: {data['question_id']}"}), 404  # Not Found
 
-        # Update the batch information with the received data
+        # Update the question information with the received data
         for key, value in data.items():
-            if key != 'batch_id':
+            if key != 'question_id':
                 # If the value is provided, update the field; otherwise, keep the existing value
                 if value:
-                    batch[key] = int(value) if key == 'batch_intake' else value
+                    question[key] = int(value) if key == 'question_intake' else value
 
-        # Update the batch in the database
-        batches_db.update_one({"batch_id": data['batch_id']}, {"$set": batch})
+        # Update the question in the database
+        questions_db.update_one({"question_id": data['question_id']}, {"$set": question})
 
-        return jsonify({"message": f"Batch with batch_id {data['batch_id']} updated successfully", "camp_id":batch['camp_id']})
+        return jsonify({"message": f"question with question_id {data['question_id']} updated successfully", "camp_id":question['camp_id']})
 
     except ValueError as ve:
         return jsonify({"error": str(ve)}), 400  # Bad Request
@@ -557,93 +537,69 @@ def update_batch():
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
     
-@app.route('/getBatches', methods=['GET'])
-def get_batches():
+@app.route('/getQuestions', methods=['GET'])
+def get_questions():
     try:
-        # Get the camp_id from request parameters
-        camp_id = request.args.get('camp_id')
+        # Get the exam_id from request parameters
+        exam_id = request.args.get('exam_id')
 
-        if not camp_id:
-            return jsonify({"error": "Missing 'camp_id' parameter in the request."}), 400  # Bad Request
+        if not exam_id:
+            return jsonify({"error": "Missing 'exam_id' parameter in the request."}), 400  # Bad Request
 
-        # Find batches based on camp_id
-        batches_db = db["batches_db"]
-        batches = batches_db.find({"camp_id": camp_id}, {"_id": 0})  # Exclude the _id field from the response
+        # Find Question based on exam_id
+        question_db = db["questions_db"]
+        question = question_db.find({"exam_id": exam_id}, {"_id": 0})  # Exclude the _id field from the response
 
         # Convert the cursor to a list of dictionaries for easier serialization
-        batch_list = list(batches)
+        question_list = list(question)
 
-        return jsonify({"batches": batch_list})
+        return jsonify({"question": question_list})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
 
-@app.route('/getActiveBatches', methods=['GET'])
-def get_active_batches():
+
+@app.route('/getQuestion', methods=['GET'])
+def get_question():
     try:
-        camp_id = request.args.get('camp_id')
+        # Get the question_id from request parameters
+        question_id = request.args.get('question_id')
 
-        if not camp_id:
-            return jsonify({"error": "Missing 'camp_id' parameter in the request."}), 400  # Bad Request
-        
-        batches_db = db["batches_db"]
-        batches = batches_db.find({"camp_id": camp_id}, {"_id": 0})  # Exclude the _id field from the response
+        if not question_id:
+            return jsonify({"error": "Missing 'question_id' parameter in the request."}), 400  # Bad Request
 
-        # Convert the cursor to a list of dictionaries for easier serialization
-        batch_list = list(batches)
+        # Find the question based on question_id
+        questions_db = db["questions_db"]
+        question = questions_db.find_one({"question_id": question_id}, {"_id": 0})  # Exclude the _id field from the response
 
-        new_batch_list = []
+        if not question:
+            return jsonify({"error": f"No question found with question_id: {question_id}"}), 404  # Not Found
 
-        for batch in batch_list:
-            if int(batch["batch_intake"]) > int(batch['students_registered']):
-                new_batch_list.append(batch)
-
-        return jsonify({"batches": new_batch_list})
+        return jsonify({"question": question})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
     
-@app.route('/getBatch', methods=['GET'])
-def get_batch():
+@app.route('/deleteQuestion', methods=['DELETE'])
+def delete_question():
     try:
-        # Get the batch_id from request parameters
-        batch_id = request.args.get('batch_id')
+        # Get the question_id from request parameters
+        question_id = request.args.get('question_id')
 
-        if not batch_id:
-            return jsonify({"error": "Missing 'batch_id' parameter in the request."}), 400  # Bad Request
+        if not question_id:
+            return jsonify({"error": "Missing 'question_id' parameter in the request."}), 400  # Bad Request
 
-        # Find the batch based on batch_id
-        batches_db = db["batches_db"]
-        batch = batches_db.find_one({"batch_id": batch_id}, {"_id": 0})  # Exclude the _id field from the response
+        # Find the question based on question_id
+        questions_db = db["questions_db"]
+        question = questions_db.find_one({"question_id": question_id})
 
-        if not batch:
-            return jsonify({"error": f"No batch found with batch_id: {batch_id}"}), 404  # Not Found
+        if not question:
+            return jsonify({"error": f"No question found with question_id: {question_id}"}), 404  # Not Found
 
-        return jsonify({"batch": batch})
+        # Delete the question from the database
+        questions_db.delete_one({"question_id": question_id})
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500  # Internal Server Error
-    
-@app.route('/deleteBatch', methods=['DELETE'])
-def delete_batch():
-    try:
-        # Get the batch_id from request parameters
-        batch_id = request.args.get('batch_id')
-
-        if not batch_id:
-            return jsonify({"error": "Missing 'batch_id' parameter in the request."}), 400  # Bad Request
-
-        # Find the batch based on batch_id
-        batches_db = db["batches_db"]
-        batch = batches_db.find_one({"batch_id": batch_id})
-
-        if not batch:
-            return jsonify({"error": f"No batch found with batch_id: {batch_id}"}), 404  # Not Found
-
-        # Delete the batch from the database
-        batches_db.delete_one({"batch_id": batch_id})
-
-        return jsonify({"message": f"Batch with batch_id {batch_id} deleted successfully"})
+        return jsonify({"message": f"question with question_id {question_id} deleted successfully"})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
