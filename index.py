@@ -330,15 +330,16 @@ def add_exam():
     try:
         data = request.form
         print("Data Recieved : ",data)
+        print(data.get("exam_name"))
 
         # Generate a unique ID for the camp using UUID
         exam_id = str(uuid.uuid4().hex)
 
         exam = {
-            "camp_id": exam_id,
+            "exam_id": exam_id,
             "exam_name": data["exam_name"].strip(),
             "exam_duration": data["exam_duration"],
-            "exam_date": float(data["exam_date"]),  # assuming camp_fee is a float
+            "exam_date": data["exam_date"],
             "exam_description": data["exam_description"],
             "exam_status" : data["exam_status"],
         }
