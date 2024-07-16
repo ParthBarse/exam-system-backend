@@ -485,7 +485,8 @@ def delete_exam():
 def add_question():
     try:
         data = request.form
-        data = list(data)
+        data = dict(data)
+        print(data)
 
         # Generate a unique ID for the batch using UUID
         question_id = str(uuid.uuid4().hex)
