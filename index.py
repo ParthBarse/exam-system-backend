@@ -651,8 +651,8 @@ def register_student_exam():
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
     
-@app.route('/getAllStudents', methods=['GET'])
-def get_all_exams():
+@app.route('/getAllExamStudents', methods=['GET'])
+def get_all_exam_students():
     try:
         students_db = db["exam_students_db"]
         students = students_db.find({}, {"_id": 0})  # Exclude the _id field from the response
