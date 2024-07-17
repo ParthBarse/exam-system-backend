@@ -650,6 +650,21 @@ def register_student_exam():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+@app.route('/getAllStudents', methods=['GET'])
+def get_all_exams():
+    try:
+        students_db = db["exam_students_db"]
+        students = students_db.find({}, {"_id": 0})  # Exclude the _id field from the response
+
+        # Convert the cursor to a list of dictionaries for easier serialization
+        exam_list = list(students)
+
+        return jsonify({"students": exam_list})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
 
     
 
