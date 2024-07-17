@@ -633,6 +633,26 @@ def upload_file():
         return jsonify({'error': str(e),"success":False}), 500
     
 
+@app.route('/registerStudentExam', methods=['POST'])
+def register_student_exam():
+    try:
+        data = request.form
+        data = list(data)
+        # Generate a unique ID for the student using UUID
+        seid = str(uuid.uuid4().hex)
+        data["seid"] = seid
+        exam_students_db = db["exam_students_db"]
+        exam_students_db.insert_one(data)
+        return jsonify({"message": "Student registered successfully", "seid": seid})
+
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400  # Bad Request
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+
+    
+
 
 
 if __name__ == '__main__':
