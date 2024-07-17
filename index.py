@@ -697,7 +697,7 @@ def submit_answers():
     try:
         data = request.json
         # data = dict(data)
-        students_exam_answers_db = db2[data['ueid']]
+        students_exam_answers_db = db2[data['seid']]
 
         if (students_exam_answers_db.find_one({"question_id":data['question_id']})):
             students_exam_answers_db.update_one({"question_id":data['question_id']}, {"$set": {"answers":data['answers']}})
