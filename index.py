@@ -713,7 +713,7 @@ def submit_answers():
         return jsonify({"error": str(e)}), 500  # Internal Server Error
     
 @app.route('/submitExam', methods=['POST'])
-def submit_answers():
+def submit_exam():
     try:
         data = request.json
         # data = dict(data)
