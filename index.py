@@ -666,6 +666,31 @@ def get_all_exam_students():
         return jsonify({"error": str(e)}), 500  # Internal Server Error
     
 
+@app.route('/deleteExamStudent', methods=['DELETE'])
+def delete_exam_student():
+    try:
+        # Get the seid from request parameters
+        seid = request.args.get('seid')
+
+        if not seid:
+            return jsonify({"error": "Missing 'seid' parameter in the request."}), 400  # Bad Request
+
+        # Find the seis based on seid
+        exam_students_db = db["exam_students_db"]
+        student = exam_students_db.find_one({"exam_id":  seid})
+
+        if not student:
+            return jsonify({"error": f"No student found with  seid: { seid}"}), 404  # Not Found
+
+        # Delete the exam from the database
+        exam_students_db.delete_one({"seid": seid})
+
+        return jsonify({"message": f"Student with seid {seid} deleted successfully"})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+
     
 
 
