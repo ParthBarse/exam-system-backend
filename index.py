@@ -712,6 +712,29 @@ def submit_answers():
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
     
+@app.route('/submitExam', methods=['POST'])
+def submit_answers():
+    try:
+        data = request.json
+        # data = dict(data)
+        exam_students_db = db["exam_students_db"]
+
+        student = exam_students_db.find_one({"seid":data['seid']})
+
+        if (student):
+            exams_list = student['examsSubmitted']
+            exams_list.append(data['exam_id'])
+            exam_students_db.update_one({"seid":data['seid']}, {"$set": {"examsSubmitted":exams_list}})
+            return jsonify({"message": "Exam submitted successfully", "exam_id": data['exam_id']})
+        else:
+            return jsonify({"message": "Exam Not submitted successfully"}),401
+
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400  # Bad Request
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
 
     
 
