@@ -677,7 +677,7 @@ def delete_exam_student():
 
         # Find the seis based on seid
         exam_students_db = db["exam_students_db"]
-        student = exam_students_db.find_one({"exam_id":  seid})
+        student = exam_students_db.find_one({"seid":  seid})
 
         if not student:
             return jsonify({"error": f"No student found with  seid: { seid}"}), 404  # Not Found
