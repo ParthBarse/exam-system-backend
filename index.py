@@ -556,7 +556,7 @@ def get_questions():
         # Convert the cursor to a list of dictionaries for easier serialization
         question_list = list(question)
 
-        return jsonify({"question": question_list})
+        return jsonify({"question": question_list[::-1]})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
