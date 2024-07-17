@@ -696,7 +696,7 @@ def delete_exam_student():
 def submit_answers():
     try:
         data = request.data
-        data = dict(data)
+        # data = dict(data)
         students_exam_answers_db = db2[data['ueid']]
 
         if (students_exam_answers_db.find_one({"question_id":data['question_id']})):
