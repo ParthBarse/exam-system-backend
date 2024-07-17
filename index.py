@@ -55,6 +55,7 @@ app.config['MONGO_URI'] = 'mongodb+srv://bnbdevs:feLC7m4jiT9zrmHh@cluster0.fjnp4
 
 app.config['SECRET_KEY'] = 'a6d217d048fdcd227661b755'
 db = client['exam_system']
+db2 = client['students_exam_answers']
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -686,6 +687,27 @@ def delete_exam_student():
         exam_students_db.delete_one({"seid": seid})
 
         return jsonify({"message": f"Student with seid {seid} deleted successfully"})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+
+@app.route('/submitAnswers', methods=['POST'])
+def submit_answers():
+    try:
+        data = request.data
+        data = dict(data)
+        students_exam_answers_db = db2[data['ueid']]
+
+        if (students_exam_answers_db.find_one({"question_id":data['question_id']})):
+            students_exam_answers_db.update_one({"question_id":data['question_id']}, {"$set": {"answers":data['answers']}})
+            return jsonify({"message": "Answer submitted successfully", "question_id": data['question_id']})
+        else:
+            students_exam_answers_db.insert_one(data)
+            return jsonify({"message": "Answer submitted successfully", "question_id": data['question_id']})
+
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400  # Bad Request
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
