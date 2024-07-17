@@ -667,7 +667,7 @@ def get_all_exam_students():
         return jsonify({"error": str(e)}), 500  # Internal Server Error
     
 @app.route('/getExamStudent', methods=['GET'])
-def get_all_exam_students():
+def get_exam_student():
     try:
         seid = request.args.get("seid")
         students_db = db["exam_students_db"]
