@@ -637,7 +637,7 @@ def upload_file():
 def register_student_exam():
     try:
         data = request.form
-        data = list(data)
+        data = dict(data)
         # Generate a unique ID for the student using UUID
         seid = str(uuid.uuid4().hex)
         data["seid"] = seid
