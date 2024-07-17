@@ -695,7 +695,7 @@ def delete_exam_student():
 @app.route('/submitAnswers', methods=['POST'])
 def submit_answers():
     try:
-        data = request.data
+        data = request.json()
         # data = dict(data)
         students_exam_answers_db = db2[data['ueid']]
 
