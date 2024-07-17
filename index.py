@@ -666,6 +666,18 @@ def get_all_exam_students():
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
     
+@app.route('/getExamStudent', methods=['GET'])
+def get_all_exam_students():
+    try:
+        seid = request.args.get("seid")
+        students_db = db["exam_students_db"]
+        student = students_db.find({"seid":seid}, {"_id": 0})  # Exclude the _id field from the response
+
+        return jsonify({"students": student})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
 
 @app.route('/deleteExamStudent', methods=['DELETE'])
 def delete_exam_student():
