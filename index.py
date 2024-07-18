@@ -671,9 +671,9 @@ def get_exam_student():
     try:
         seid = request.args.get("seid")
         students_db = db["exam_students_db"]
-        student = students_db.find({"seid":seid}, {"_id": 0})  # Exclude the _id field from the response
+        student = students_db.find_one({"seid":seid}, {"_id": 0})  # Exclude the _id field from the response
 
-        return jsonify({"students": student})
+        return jsonify({"student": student})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
