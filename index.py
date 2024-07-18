@@ -642,6 +642,7 @@ def register_student_exam():
         # Generate a unique ID for the student using UUID
         seid = str(uuid.uuid4().hex)
         data["seid"] = seid
+        data["status"] = "not-start"
         exam_students_db = db["exam_students_db"]
         exam_students_db.insert_one(data)
         return jsonify({"message": "Student registered successfully", "seid": seid})
@@ -734,12 +735,30 @@ def submit_exam():
         student = exam_students_db.find_one({"seid":data['seid']})
 
         if (student):
-            exams_list = student['examsSubmitted']
-            exams_list.append(data['exam_id'])
-            exam_students_db.update_one({"seid":data['seid']}, {"$set": {"examsSubmitted":exams_list}})
+            exam_students_db.update_one({"seid":data['seid']}, {"$set": {"status":"submitted"}})
             return jsonify({"message": "Exam submitted successfully", "exam_id": data['exam_id']})
         else:
             return jsonify({"message": "Exam Not submitted successfully"}),401
+
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400  # Bad Request
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+
+@app.route('/checkStudentExamStatus', methods=['GET'])
+def check_student_exam_status():
+    try:
+        data = request.args.get("seid")
+        exam_students_db = db["exam_students_db"]
+
+        student = exam_students_db.find_one({"seid":data['seid']})
+
+        if (student):
+            return jsonify({"status": student['status']})
+        else:
+            return jsonify({"message": "Student Not Found"}),401
 
     except ValueError as ve:
         return jsonify({"error": str(ve)}), 400  # Bad Request
