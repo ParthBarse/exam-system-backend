@@ -750,10 +750,10 @@ def submit_exam():
 @app.route('/checkStudentExamStatus', methods=['GET'])
 def check_student_exam_status():
     try:
-        data = request.args.get("seid")
+        seid = request.args.get("seid")
         exam_students_db = db["exam_students_db"]
 
-        student = exam_students_db.find_one({"seid":data['seid']})
+        student = exam_students_db.find_one({"seid":seid})
 
         if (student):
             return jsonify({"status": student['status']})
