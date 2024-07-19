@@ -26,6 +26,11 @@ import zipfile
 import requests
 import base64
 
+from docx import Document
+from docx.shared import Pt
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+import subprocess
+
 #--------------------------------------------------------------------------------
 
 file_dir = "/home/bnbdevelopers-files/htdocs/files.bnbdevelopers.in/exam_files/"
@@ -96,6 +101,93 @@ def generate_new_receipt_no():
     count_db.update_one({"found":"1"}, {"$set": {"sr_no":int(sr_no+1)}})
     new_receipt_no = str("2024-"+str(int(sr_no+1)))
     return new_receipt_no
+
+def set_paragraph_font(paragraph, font_name, font_size, bold):
+    for run in paragraph.runs:
+        font = run.font
+        font.name = font_name
+        font.size = Pt(font_size)
+        font.bold = bold
+
+def find_and_replace_paragraphs(paragraphs, field, replacement, specific_font=None):
+    for paragraph in paragraphs:
+        if field in paragraph.text:
+            paragraph.text = paragraph.text.replace(field, replacement)
+            if specific_font is not None:
+                set_paragraph_font(paragraph, *specific_font)
+
+def generate_certificate(doc,student_data):    
+    for key, value in student_data.items():
+        if key == 'NAME':
+            find_and_replace_paragraphs(doc.paragraphs, f'{{MERGEFIELD {key}}}', str(value), specific_font=('Times New Roman', 34, True))
+        else:
+            find_and_replace_paragraphs(doc.paragraphs, f'{{MERGEFIELD {key}}}', str(value), specific_font=('Times New Roman', 14, False))
+    docx_path = str(str(file_dir)+f"CERT_{student_data['seid']}.docx")
+    doc.save(docx_path)
+    output_path = str(str(file_dir)+f"CERT_{student_data['seid']}.pdf")
+    convert_to_pdf(docx_path,output_path)
+
+    cert_url = f"{files_base_url}CERT_{student_data['seid']}.pdf"
+
+    students_db = db["exam_students_db"]
+    students_db.update_one({"seid":student_data['seid']}, {"$set": {"cert_url":cert_url}})
+
+
+def convert_to_pdf(docx_file, pdf_file):
+    try:
+        subprocess.run(['unoconv', '--output', pdf_file, '--format', 'pdf', docx_file], check=True)
+        print(f"Conversion successful: {docx_file} -> {pdf_file}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error during conversion: {e}")
+
+def calculate_marks(correct_answers, student_answers):
+    total_marks = 0
+    for correct in correct_answers:
+        question_id = correct["question_id"]
+        correct_options = set(correct["correctOptions"])
+        marks = int(correct["marks"])
+        
+        for student in student_answers:
+            if student["question_id"] == question_id:
+                student_options = set(student["answers"])
+                if student_options == correct_options:
+                    total_marks += marks
+    return total_marks
+
+def calculate_result(exam_id,seid):
+    questions_db = db["questions_db"]
+    students_ans_db = db2[seid]
+
+    correct_answers_raw = questions_db.find({"exam_id":exam_id},{"_id":0})
+    student_answers = students_ans_db.find({},{"_id":0})
+
+    correct_answers = [
+    {
+        **item,
+        'correctOptions': json.loads(item['correctOptions']) if 'correctOptions' in item else item['correctOptions']
+    }
+    for item in correct_answers_raw]
+
+    correct_answers = list(correct_answers)
+    student_answers = list(student_answers)
+
+    total_marks = calculate_marks(correct_answers, student_answers)
+    print(f"Total Marks: {total_marks}")
+
+    student_db = db["exam_students_db"]
+    student_data = student_db.find_one({"seid":seid},{"_id":0})
+
+    doc = Document('result.docx')
+    student_data = {
+        'EXAM_NO': exam_id,
+        'NAME': str(student_data['first_name']+" "+student_data['last_name']),
+        'EXAM_NAME': student_data['exam_name'],
+        'MARKS':total_marks,
+        'seid':seid,
+    }
+    generate_certificate(doc,student_data)
+
+
 
 
 #-----------------------------------------------------------------------------------------
@@ -736,6 +828,7 @@ def submit_exam():
 
         if (student):
             exam_students_db.update_one({"seid":data['seid']}, {"$set": {"status":"submitted"}})
+            calculate_result(data['exam_id'],data['seid'])
             return jsonify({"message": "Exam submitted successfully", "exam_id": data['exam_id']})
         else:
             return jsonify({"message": "Exam Not submitted successfully"}),401
