@@ -25,6 +25,7 @@ import time
 import zipfile
 import requests
 import base64
+import threading
 
 from docx import Document
 from docx.shared import Pt
@@ -185,7 +186,9 @@ def calculate_result(exam_id,seid):
         'MARKS':total_marks,
         'seid':seid,
     }
-    generate_certificate(doc,student_data)
+    thread = threading.Thread(target=generate_certificate, args=(doc,student_data,))
+    # generate_certificate(doc,student_data)
+    thread.start()
 
 
 
