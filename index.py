@@ -934,6 +934,30 @@ def start_exam():
         return jsonify({"error": str(e)}), 500  # Internal Server Error
     
 
+@app.route('/updateTimer', methods=['GET'])
+def update_timer():
+    try:
+
+        seid = request.args.get("seid")
+        remaining_duration = request.args.get("remaining_duration")
+
+        exam_students_db = db["exam_students_db"]
+
+        student = exam_students_db.find_one({"seid":seid})
+
+        if (student):
+            exam_students_db.update_one({"seid":seid}, {"$set": {"remaining_duration":remaining_duration}})
+            return jsonify({"status": "started", "success":True})
+        else:
+            return jsonify({"message": "Student Not Found"}),401
+
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400  # Bad Request
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+
     
 
 
