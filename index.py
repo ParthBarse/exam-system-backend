@@ -978,6 +978,32 @@ def update_timer():
         return jsonify({"error": str(e)}), 500  # Internal Server Error
     
 
+@app.route('/loginStudent', methods=['POST'])
+def login_student():
+    try:
+        data = request.get_json()
+        seid = data["username"]
+        password = data["password"]
+
+        exam_students_db = db["exam_students_db"]
+
+        student = exam_students_db.find_one({"seid":seid})
+
+        if (student):
+            if(str(student['phn']) == str(password)):
+                return jsonify({"message": "Authenticated", "success":True, "token":seid, "seid":seid, "exam_id":student['exam_id']})
+            else:
+                return jsonify({"message": "Not Authenticated", "success":False}), 401
+        else:
+            return jsonify({"message": "Student Not Found"}),404
+
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400  # Bad Request
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
+
     
 
 
