@@ -131,7 +131,7 @@ def generate_certificate(doc,student_data):
     cert_url = f"{files_base_url}CERT_{student_data['seid']}.pdf"
 
     students_db = db["exam_students_db"]
-    students_db.update_one({"seid":student_data['seid']}, {"$set": {"cert_url":cert_url}})
+    students_db.update_one({"seid":student_data['seid']}, {"$set": {"cert_url":cert_url,"marks_obtained":student_data['obtained_marks'], "total_marks":student_data['total_marks']}})
 
 
 def convert_to_pdf(docx_file, pdf_file):
@@ -142,8 +142,10 @@ def convert_to_pdf(docx_file, pdf_file):
         print(f"Error during conversion: {e}")
 
 def calculate_marks(correct_answers, student_answers):
+    obtained_marks = 0
     total_marks = 0
     for correct in correct_answers:
+        total_marks += int(correct["marks"])
         question_id = correct["question_id"]
         correct_options = set(correct["correctOptions"])
         marks = int(correct["marks"])
@@ -152,8 +154,8 @@ def calculate_marks(correct_answers, student_answers):
             if student["question_id"] == question_id:
                 student_options = set(student["answers"])
                 if student_options == correct_options:
-                    total_marks += marks
-    return total_marks
+                    obtained_marks += marks
+    return obtained_marks, total_marks
 
 def calculate_result(exam_id,seid):
     questions_db = db["questions_db"]
@@ -172,8 +174,8 @@ def calculate_result(exam_id,seid):
     correct_answers = list(correct_answers)
     student_answers = list(student_answers)
 
-    total_marks = calculate_marks(correct_answers, student_answers)
-    print(f"Total Marks: {total_marks}")
+    obtained_marks,total_marks = calculate_marks(correct_answers, student_answers)
+    print(f"Total Marks: {obtained_marks}")
 
     student_db = db["exam_students_db"]
     student_data = student_db.find_one({"seid":seid},{"_id":0})
@@ -183,8 +185,9 @@ def calculate_result(exam_id,seid):
         'EXAM_NO': exam_id,
         'NAME': str(student_data['first_name']+" "+student_data['last_name']),
         'EXAM_NAME': student_data['exam_name'],
-        'MARKS':total_marks,
+        'MARKS':obtained_marks,
         'seid':seid,
+        'total_marks': total_marks,
     }
     thread = threading.Thread(target=generate_certificate, args=(doc,student_data,))
     # generate_certificate(doc,student_data)
