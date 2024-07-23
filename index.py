@@ -784,6 +784,13 @@ def register_student_exam():
         data["status"] = "not-start"
         exam_students_db = db["exam_students_db"]
         exam_students_db.insert_one(data)
+        exam_link = f"https://exam-view.bnbdevelopers.in/screening?id={data['exam_id']}&seid={seid}"
+        msg = f"""You have successfully registered for {data['exam_name']}.\n\nYou can use below link to directly access the Exam :\n{exam_link}\n\nThank You."""
+        sub = "Registration Successful and Exam Link."
+        # send_email(msg, sub, data['email'])
+        thread = threading.Thread(target=send_email, args=(msg, sub, data['email'],))
+        # generate_certificate(doc,student_data)
+        thread.start()
         return jsonify({"message": "Student registered successfully", "seid": seid})
 
     except ValueError as ve:
@@ -934,7 +941,7 @@ def start_exam():
         return jsonify({"error": str(e)}), 500  # Internal Server Error
     
 
-@app.route('/updateTimer', methods=['GET'])
+@app.route('/updateTime', methods=['GET'])
 def update_timer():
     try:
 
