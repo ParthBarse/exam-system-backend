@@ -132,6 +132,12 @@ def generate_certificate(doc,student_data):
 
     students_db = db["exam_students_db"]
     students_db.update_one({"seid":student_data['seid']}, {"$set": {"cert_url":cert_url,"marks_obtained":student_data['MARKS'], "total_marks":student_data['total_marks']}})
+    msg = f"""You have successfully Completed Exam : {student_data['EXAM_NAME']}.\n\nYou have scored {student_data['MARKS']} in above Exam.\nYour Exam Certificate is Attached below.\n\nThank You."""
+    sub = f"Result of Exam : {student_data['EXAM_NAME']}"
+    # send_email(msg, sub, data['email'])
+    thread = threading.Thread(target=send_email_attachments, args=(msg, sub, student_data['email'],[output_path],))
+    # generate_certificate(doc,student_data)
+    thread.start()
 
 
 def convert_to_pdf(docx_file, pdf_file):
@@ -188,6 +194,7 @@ def calculate_result(exam_id,seid):
         'MARKS':obtained_marks,
         'seid':seid,
         'total_marks': total_marks,
+        'email':student_data['email'],
     }
     thread = threading.Thread(target=generate_certificate, args=(doc,student_data,))
     # generate_certificate(doc,student_data)
