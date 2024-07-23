@@ -218,6 +218,20 @@ def save_file(file, uid):
         return f'{files_base_url}{uid}/{filename}'
     except Exception as e:
         raise e
+    
+def save_file2(file_data, sid, filename):
+    # Create a subdirectory for the specific session id if it doesn't exist
+    session_path = os.path.join(file_directory, sid)
+    if not os.path.exists(session_path):
+        os.makedirs(session_path)
+    
+    # Save the file
+    file_path = os.path.join(session_path, filename)
+    with open(file_path, "wb") as f:
+        f.write(file_data)
+    
+    # Return the URL to access the file (for simplicity, we return the file path here)
+    return f'{files_base_url}{sid}/{filename}'
 
 #-------------- Supporting Functions Start ----------------
 
@@ -730,6 +744,33 @@ def upload_file():
 
     except Exception as e:
         return jsonify({'error': str(e),"success":False}), 500
+
+
+@app.route('/uploadFile2', methods=['POST'])
+def upload_file2():
+    try:
+        # Check if 'file' is in the request
+        if 'file' not in request.form:
+            return jsonify({'error': 'Missing parameters: file', "success": False}), 400
+
+        file_data = request.form['file']
+        seid = request.form['seid']
+        sid = "All_Files"  # Replace this with dynamic session ID if available
+
+        # Decode the base64 file data
+        if file_data.startswith('data:image/jpeg;base64,'):
+            file_data = base64.b64decode(file_data.split(',')[1])
+            filename = str(seid)+".jpg"
+        else:
+            return jsonify({'error': 'Invalid file format.', "success": False}), 400
+
+        # Save the file and get the URL
+        file_url = save_file2(file_data, sid, filename)
+
+        return jsonify({'message': 'File stored successfully.', 'file_url': file_url, "success": True}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e), "success": False}), 500
     
 
 @app.route('/registerStudentExam', methods=['POST'])
