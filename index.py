@@ -954,7 +954,7 @@ def start_exam():
         return jsonify({"error": str(e)}), 500  # Internal Server Error
     
 
-@app.route('/updateTime', methods=['GET'])
+@app.route('/updateTimer', methods=['GET'])
 def update_timer():
     try:
 
