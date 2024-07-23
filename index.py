@@ -131,7 +131,7 @@ def generate_certificate(doc,student_data):
     cert_url = f"{files_base_url}CERT_{student_data['seid']}.pdf"
 
     students_db = db["exam_students_db"]
-    students_db.update_one({"seid":student_data['seid']}, {"$set": {"cert_url":cert_url,"marks_obtained":student_data['obtained_marks'], "total_marks":student_data['total_marks']}})
+    students_db.update_one({"seid":student_data['seid']}, {"$set": {"cert_url":cert_url,"marks_obtained":student_data['MARKS'], "total_marks":student_data['total_marks']}})
 
 
 def convert_to_pdf(docx_file, pdf_file):
