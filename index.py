@@ -906,6 +906,33 @@ def check_student_exam_status():
     except Exception as e:
         return jsonify({"error": str(e)}), 500  # Internal Server Error
     
+@app.route('/startExam', methods=['POST'])
+def start_exam():
+    try:
+        data = request.form
+        seid = data['seid']
+        captured_image = data['captured_image']
+
+        exam_students_db = db["exam_students_db"]
+        exams_db = db["exams_db"]
+
+        student = exam_students_db.find_one({"seid":seid})
+
+        if (student):
+            exam = exams_db.find_one({"exam_id":student['exam_id']})
+            minutes_int = int(exam['exam_duration'])
+            seconds = minutes_int * 60  # 1 minute = 60 seconds
+            exam_students_db.update_one({"seid":seid}, {"$set": {"captured_image":captured_image, "status" : "started", "remaining_duration":seconds}})
+            return jsonify({"status": "started", "success":True})
+        else:
+            return jsonify({"message": "Student Not Found"}),401
+
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400  # Bad Request
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500  # Internal Server Error
+    
 
     
 
