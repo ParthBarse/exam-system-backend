@@ -797,8 +797,8 @@ def register_student_exam():
         data["status"] = "not-start"
         exam_students_db = db["exam_students_db"]
         exam_students_db.insert_one(data)
-        exam_link = f"https://exam-view.bnbdevelopers.in/screening?id={data['exam_id']}&seid={seid}"
-        msg = f"""You have successfully registered for {data['exam_name']}.\n\nYou can use below link to directly access the Exam :\n{exam_link}\n\nIf you face any Problem with Above link then You can use https://exam-view.bnbdevelopers.in/login \nUserID : {seid}\nPassword : {data['phn']}\n\nPlease Don't Share any of the Above Links or Credentials with Anyone.\n\n Thank You."""
+        exam_link = f"https://test-view-exam.bnbdevelopers.in/screening?id={data['exam_id']}&seid={seid}"
+        msg = f"""You have successfully registered for {data['exam_name']}.\n\nYou can use below link to directly access the Exam :\n{exam_link}\n\nIf you face any Problem with Above link then You can use https://test-view-exam.bnbdevelopers.in/login \nUserID : {seid}\nPassword : {data['phn']}\n\nPlease Don't Share any of the Above Links or Credentials with Anyone.\n\n Thank You."""
         sub = "Registration Successful and Exam Link."
         # send_email(msg, sub, data['email'])
         thread = threading.Thread(target=send_email, args=(msg, sub, data['email'],))
